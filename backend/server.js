@@ -23,6 +23,8 @@ import bodyParser  from "body-parser";
 import cors        from "cors";
 import multer      from "multer";
 import mysql       from "mysql2/promise";
+import { createPostgresAdapter } from "./postgres-adapter.js";
+import { initializePostgresSchema } from "./postgres-schema.js";
 import bcrypt      from "bcrypt";
 import os          from "os";
 import crypto      from "crypto";
@@ -45,6 +47,7 @@ const ALLOWED_ORIGINS = [
   "https://agroscan-dev.netlify.app",
   "https://agroscan-lumitech.netlify.app",
   "https://2026.agroscan.dpdns.org",
+  "https://v1.agroscan.dpdns.org",
   "http://localhost:3000",
   "http://localhost:5500",
   "http://127.0.0.1:5500",
@@ -89,23 +92,26 @@ function rateLimit(max, windowMs) {
 }
 setInterval(() => { const now = Date.now(); for (const [k,v] of rlStore) if (now>v.resetAt) rlStore.delete(k); }, 300000);
 
-// ── DATABASE ────────────────────────────────────────────────
-// ✅ DB_PORT added — hosted providers (Aiven, etc.) rarely use the 3306 default.
-// ✅ SSL added — Aiven requires ssl-mode=REQUIRED; DB_CA_CERT holds the full PEM
-//    certificate contents as a single env var (works fine as a multi-line
-//    Render/Netlify env var — paste the whole ca.pem including BEGIN/END lines).
-//    Leave DB_CA_CERT unset for a local MySQL dev database with no SSL.
+// ── DATABASE — MySQL default; PostgreSQL enabled explicitly for testing ──
+const DB_DIALECT = (process.env.DB_DIALECT || "mysql").toLowerCase();
+const usePostgres = DB_DIALECT === "postgres";
+
 const dbSsl = process.env.DB_CA_CERT
   ? { ca: process.env.DB_CA_CERT, rejectUnauthorized: true }
   : undefined;
 
-const db = mysql.createPool({
-  host: process.env.DB_HOST, user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD, database: process.env.DB_NAME,
-  port: process.env.DB_PORT ? Number(process.env.DB_PORT) : 3306,
-  ssl: dbSsl,
-  waitForConnections: true, connectionLimit: 10
-});
+const db = usePostgres
+  ? createPostgresAdapter()
+  : mysql.createPool({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
+      port: process.env.DB_PORT ? Number(process.env.DB_PORT) : 3306,
+      ssl: dbSsl,
+      waitForConnections: true,
+      connectionLimit: 10
+    });
 
 // ── DEV TOKEN MIDDLEWARE ────────────────────────────────────
 async function requireDevToken(req, res, next) {
@@ -837,7 +843,19 @@ app.use((err, req, res, next) => {
 // ══════════════════════════════════════════════════════════════
 // START
 // ══════════════════════════════════════════════════════════════
-app.listen(PORT, () => {
-  console.log(`✅ AgroScan server → http://localhost:${PORT}`);
-  console.log(`🔒 bcrypt | rate-limit | dev-token-auth | login-logging`);
+async function startServer() {
+  if (usePostgres) {
+    await initializePostgresSchema(db.pool);
+    console.log("✅ PostgreSQL connection verified and AgroScan schema is ready");
+  }
+  app.listen(PORT, () => {
+    console.log(`✅ AgroScan server → http://localhost:${PORT}`);
+    console.log(`🔒 bcrypt | rate-limit | dev-token-auth | login-logging`);
+    console.log(`🗄️ Database dialect: ${DB_DIALECT}`);
+  });
+}
+
+startServer().catch((err) => {
+  console.error("❌ AgroScan startup failed:", err);
+  process.exit(1);
 });
