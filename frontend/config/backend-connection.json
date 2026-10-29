@@ -1,0 +1,19 @@
+{
+  "appName": "AgroScan",
+  "version": "1.0.0",
+  "backendDomain": "https://backend.v1.agroscan.dpdns.org",
+  "endpoints": {
+    "cookieExpiryDays": "/api/controls/cookie_expiry_days",
+    "login": "/api/login",
+    "signup": "/api/signup",
+    "user": "/api/users/{userId}",
+    "changePassword": "/api/users/{userId}/change-password",
+    "userLands": "/api/users/{userId}/lands",
+    "land": "/api/users/{userId}/lands/{landId}",
+    "recommend": "/recommend",
+    "chatHistory": "/api/chat/history/{userId}",
+    "clearChat": "/api/chat/clear/{userId}",
+    "chat": "/chat",
+    "userOrders": "/api/users/{userId}/orders"
+  }
+}

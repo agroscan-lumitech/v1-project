@@ -1,56 +1,53 @@
-// ============================================================
-// AgroScan — config.js  (FRONTEND)
-// ============================================================
-// ✅ ONLY EDIT THIS FILE to change the backend domain.
-//    Every frontend page reads BACKEND_URL from here.
-//    Include FIRST before any other scripts.
-//
-//  <script src="/config.js"></script>
-//  Then: AGRO.api('/api/login')
-// ============================================================
-
-const AGRO = {
-
-  // ── 🔗 CHANGE ONLY THIS LINE TO SWITCH BACKEND ───────────
-  // Replace with your actual Render service URL after deploying
-  // the backend, e.g. "https://agroscan-backend.onrender.com"
-  BACKEND_URL: "https://agroscan-backend.onrender.com",
-  // ─────────────────────────────────────────────────────────
-
-  APP_NAME:    "AgroScan",
-  VERSION:     "1.0.0",
-  COMPANY:     "AgroScan AI Solutions",
-
-  // Session keys
-  SESSION_USER_KEY: "user",
-
-  // ── Helpers ──────────────────────────────────────────────
-  api(path)      { return `${this.BACKEND_URL}${path}`; },
-
-  getUser()      {
-    try { return JSON.parse(sessionStorage.getItem(this.SESSION_USER_KEY)); }
-    catch { return null; }
-  },
-  setUser(u)     { sessionStorage.setItem(this.SESSION_USER_KEY, JSON.stringify(u)); },
-  clearUser()    { sessionStorage.removeItem(this.SESSION_USER_KEY); },
-
-  getUserId()    { const u = this.getUser(); return u?.userId || u?.user_id || null; },
-
-  isLoggedIn()   { return !!this.getUser(); },
-
-  // Redirect to login if not authenticated
-  requireLogin(loginPath = "/frontend/login-form.html") {
-    if (!this.isLoggedIn()) { window.location.href = loginPath; return null; }
-    return this.getUser();
-  },
-
-  // Authenticated fetch wrapper
-  async fetch(path, options = {}) {
-    return fetch(this.api(path), {
-      ...options,
-      headers: { "Content-Type": "application/json", ...(options.headers || {}) }
-    });
+// AgroScan frontend connection bootstrap.
+// Keep backend domain and route definitions in ./config/backend-connection.json.
+(function () {
+  const configUrl = new URL("./config/backend-connection.json", document.currentScript.src);
+  const request = new XMLHttpRequest();
+  request.open("GET", configUrl.href, false);
+  request.send();
+  if (request.status < 200 || request.status >= 300) {
+    throw new Error("Unable to load AgroScan backend connection config: HTTP " + request.status);
   }
-};
-
-window.AGRO = AGRO;
+  const connection = JSON.parse(request.responseText);
+  const endpoints = connection.endpoints || {};
+  const AGRO = {
+    APP_NAME: connection.appName || "AgroScan",
+    VERSION: connection.version || "1.0.0",
+    COMPANY: connection.company || "AgroScan AI Solutions",
+    BACKEND_URL: String(connection.backendDomain || "").replace(/\/$/, ""),
+    ENDPOINTS: endpoints,
+    SESSION_USER_KEY: "user",
+    endpoint(name, params = {}) {
+      const template = endpoints[name];
+      if (!template) throw new Error("Unknown AgroScan API endpoint: " + name);
+      return template.replace(/\{([A-Za-z0-9_]+)\}/g, (_, key) => {
+        if (params[key] === undefined || params[key] === null) {
+          throw new Error("Missing parameter '" + key + "' for endpoint '" + name + "'");
+        }
+        return encodeURIComponent(String(params[key]));
+      });
+    },
+    api(name, params = {}) {
+      return this.BACKEND_URL + this.endpoint(name, params);
+    },
+    getUser() {
+      try { return JSON.parse(sessionStorage.getItem(this.SESSION_USER_KEY)); }
+      catch { return null; }
+    },
+    setUser(user) { sessionStorage.setItem(this.SESSION_USER_KEY, JSON.stringify(user)); },
+    clearUser() { sessionStorage.removeItem(this.SESSION_USER_KEY); },
+    getUserId() { const user = this.getUser(); return user?.userId || user?.user_id || null; },
+    isLoggedIn() { return !!this.getUser(); },
+    requireLogin(loginPath = "/login-form.html") {
+      if (!this.isLoggedIn()) { window.location.href = loginPath; return null; }
+      return this.getUser();
+    },
+    async fetch(name, params = {}, options = {}) {
+      return fetch(this.api(name, params), {
+        ...options,
+        headers: { "Content-Type": "application/json", ...(options.headers || {}) }
+      });
+    }
+  };
+  window.AGRO = AGRO;
+})();

@@ -7,6 +7,7 @@
 <link rel="icon" href="img/agroscan-icon.png" type="image/png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css.files/sign.css">
+  <script src="/config.js"></script>
 </head>
 <body>
 <div class="stage">
@@ -199,7 +200,7 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
   }
 
   try {
-    const res = await fetch("https://agroscan-backend.onrender.com/api/signup", {
+    const res = await fetch(AGRO.api('signup'), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, username, email, phone, password })

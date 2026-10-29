@@ -299,6 +299,7 @@ header .dropbtn {
 
 
 </style>
+  <script src="/config.js"></script>
 </head>
 <body>
 
@@ -678,7 +679,7 @@ window.addEventListener('click', e => {
 async function loadLands() {
   if (!userId) return;
   try {
-    const res = await fetch(`https://agroscan-backend.onrender.com/api/users/${userId}/lands`);
+    const res = await fetch(AGRO.api('userLands', { userId }));
     if (!res.ok) throw new Error('Failed to fetch lands');
     const data = await res.json();
 
@@ -735,7 +736,7 @@ async function openLandModal(landId = null, isEdit = false) {
 
   if (isEdit && landId) {
     try {
-      const res = await fetch(`https://agroscan-backend.onrender.com/api/users/${userId}/lands/${landId}`);
+      const res = await fetch(AGRO.api('land', { userId, landId }));
       if (!res.ok) throw new Error('Failed to fetch land');
       const land = await res.json();
 
@@ -809,7 +810,7 @@ addLandForm.addEventListener('submit', async (e) => {
   }
 
   try {
-    let url = `https://agroscan-backend.onrender.com/api/users/${userId}/lands`;
+    let url = AGRO.api('userLands', { userId });
     let method = 'POST';
     if (currentEditLandId) {
       url += `/${currentEditLandId}`;
@@ -841,7 +842,7 @@ addLandForm.addEventListener('submit', async (e) => {
 
 async function deleteLand(landId) {
   try {
-    const res = await fetch(`https://agroscan-backend.onrender.com/api/users/${userId}/lands/${landId}`, { method: 'DELETE' });
+    const res = await fetch(AGRO.api('land', { userId, landId }), { method: 'DELETE' });
     if (res.ok) {
       await loadLands();
       // if details modal open for same id, close it
@@ -864,7 +865,7 @@ async function deleteLand(landId) {
 
 async function showLandDetails(landId) {
   try {
-    const res = await fetch(`https://agroscan-backend.onrender.com/api/users/${userId}/lands/${landId}`);
+    const res = await fetch(AGRO.api('land', { userId, landId }));
     if (!res.ok) throw new Error('Failed to fetch land details');
     const land = await res.json();
 
@@ -937,7 +938,7 @@ loadLands();
     profileMsg.textContent = '';
 
     try {
-      let url = `https://agroscan-backend.onrender.com/api/users/${userId}`;
+      let url = AGRO.api('user', { userId });
       let body = {};
 
       if(section==='primary'){

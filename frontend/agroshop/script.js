@@ -200,7 +200,7 @@ if (storedUser) {
     checkoutBtn.addEventListener('click', async () => {
       if (!cart.length) return alert('Cart is empty');
       try {
-        const res = await fetch(`https://agroscan-backend.onrender.com/api/users/${USER_ID}`);
+        const res = await fetch(AGRO.api('user', { userId: USER_ID }));
         let user = {};
         if (res.ok) user = await res.json();
         orderNameInput.value = user.name || localStorage.getItem('fullName') || '';
@@ -230,7 +230,7 @@ if (storedUser) {
       const orderItems = cart.map(it => ({ name: it.name, qty: it.qty, price: it.price }));
 
       try {
-        const response = await fetch(`https://agroscan-backend.onrender.com/api/users/${USER_ID}/orders`, {
+        const response = await fetch(AGRO.api('userOrders', { userId: USER_ID }), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -264,7 +264,7 @@ async function loadOrders() {
   ordersTableBody.innerHTML = '';
 
   try {
-    const res = await fetch(`https://agroscan-backend.onrender.com/api/users/${USER_ID}/orders`);
+    const res = await fetch(AGRO.api('userOrders', { userId: USER_ID }));
     if (!res.ok) throw new Error('Failed to fetch orders');
     const orders = await res.json();
 

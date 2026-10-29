@@ -196,6 +196,7 @@ button[type="submit"]:hover {
 }
 
 </style>
+  <script src="/config.js"></script>
 </head>
 
 <body>
@@ -365,7 +366,7 @@ async function loadAllChats(){
   if(currentUser.username === "Guest") return;
 
   try {
-    const res = await fetch(`https://agroscan-backend.onrender.com/api/chat/history/${currentUser.userId}?limit=10000&offset=0`);
+    const res = await fetch(AGRO.api('chatHistory', { userId: currentUser.userId }) + '?limit=10000&offset=0');
     if(!res.ok) throw new Error("Failed to fetch chat history");
 
     const data = await res.json();
@@ -399,7 +400,7 @@ clearChatsBtn.addEventListener('click', async () => {
   if(!confirm("Are you sure you want to clear all chats?")) return;
 
   try {
-    const res = await fetch(`https://agroscan-backend.onrender.com/api/chat/clear/${currentUser.userId}`, {
+    const res = await fetch(AGRO.api('clearChat', { userId: currentUser.userId }), {
       method: 'DELETE'
     });
 
@@ -434,7 +435,7 @@ chatForm.addEventListener('submit', async (e)=>{
   }
 
   try {
-    const res = await fetch('https://agroscan-backend.onrender.com/chat', {
+    const res = await fetch(AGRO.api('chat'), {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ message, userId: currentUser.userId })
