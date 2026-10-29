@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgroScan Developer Profile</title>
+
+<!-- Fonts & Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="icon" href="title.png" type="image/png">
+<style>
+:root{
+  --accent:#ffd700;
+  --bg-dark:#0b0b0b;
+  --text-light:#f4f7f4;
+  --card-bg:#1b1b1b;
+  --border-radius:12px;
+  --shadow-dark:0 8px 20px rgba(0,0,0,0.6);
+  --transition:.3s;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Roboto',sans-serif;}
+body{background:var(--bg-dark);color:var(--text-light);line-height:1.6;}
+
+/* Header */
+header {
+  background:#000;
+  padding:1rem 1.5rem;
+  font-size:1.8rem;
+  font-weight:bold;
+  border-bottom:2px solid var(--accent);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.hamburger{font-size:1.5rem;cursor:pointer;color:var(--accent);}
+
+/* Layout */
+.container{display:flex;min-height:calc(100vh - 68px);}
+
+/* Sidebar */
+.nav-panel{
+  width:250px;background:var(--card-bg);padding:20px;
+  display:flex;flex-direction:column;transition:transform var(--transition);
+  flex-shrink:0;
+}
+.nav-panel h2{color:var(--accent);margin-bottom:20px;font-size:1.4rem;text-align:center;}
+.nav-panel a{
+  color:var(--text-light);text-decoration:none;
+  padding:12px 10px;margin-bottom:10px;border-radius:var(--border-radius);
+  display:block;transition:var(--transition);
+}
+.nav-panel a:hover{background:var(--accent);color:#000;}
+.nav-profile{margin-top:auto;border-top:1px solid #444;padding-top:15px;text-align:center;}
+.nav-profile span{display:block;color:#ccc;font-size:0.9rem;margin-bottom:3px;}
+.nav-profile:hover span{color:var(--accent);}
+#logout-btn{background:#8b780d;padding:10px;border-radius:6px;text-align:center;}
+
+/* Main Content */
+.main-content{flex:1;padding:30px 40px;display:flex;flex-direction:column;gap:20px;}
+
+/* ✅ Responsive Sidebar Toggle + Media Queries */
+@media(max-width:992px){
+  header{text-align:left; padding-left:1rem;}
+  .hamburger{display:block;}
+  .container{flex-direction:column;}
+  .nav-panel{
+    position:fixed;
+    top:0; left:-260px;
+    height:100%; width:250px;
+    flex-direction:column;
+    z-index:1000;
+  }
+  .nav-panel.show{transform:translateX(260px);}
+}
+@media(max-width:768px){
+  .profile-card{padding:20px;}
+}
+@media(max-width:480px){
+  .profile-card{padding:15px;}
+  .profile-card i{font-size:3rem;}
+  .profile-card h2{font-size:1.3rem;}
+}
+/* Main inner navigation */
+.inner-nav {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.tab-btn {
+  padding: 8px 16px;
+  background: #222;
+  color: #ffd700;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.tab-btn.active {
+  background: #ffd700;
+  color: #000;
+}
+.tab-btn:hover:not(.active) {
+  background: #444;
+}
+
+/* Tab sections */
+.tab-section {
+  display: none;
+  background: #111;
+  padding: 20px;
+  border-radius: 8px;
+}
+.tab-section.active {
+  display: block;
+}
+
+/* User Info Card */
+.user-info-card p {
+  margin-bottom: 10px;
+}
+.user-info-card button {
+  margin-right: 10px;
+  padding: 6px 12px;
+  background: #ffd700;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.user-info-card input {
+  padding: 4px 6px;
+  border-radius: 4px;
+  border: 1px solid #555;
+  background: #222;
+  color: #fff;
+}
+
+/* Cards container for private space and password manager */
+.cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+.cards-container .card {
+  background: #222;
+  padding: 15px;
+  border-radius: 8px;
+  flex: 1 1 200px;
+}
+
+/* Modal */
+.modal {
+  display: none; 
+  position: fixed;
+  z-index: 2000;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.7);
+}
+.modal-content {
+  background: #111;
+  color: #fff;
+  margin: 10% auto;
+  padding: 20px;
+  border-radius: 8px;
+  width: 300px;
+  position: relative;
+}
+.modal .close {
+  position: absolute;
+  top: 8px; right: 12px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #ffd700;
+}
+.modal input {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 6px;
+  border-radius: 4px;
+  border: 1px solid #555;
+  background: #222;
+  color: #fff;
+}
+.modal button {
+  width: 100%;
+  padding: 8px;
+  background: #ffd700;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+</style>
+</head>
+<body>
+
+<header>
+  🌱 AgroScan<br>Dev-Profile
+  <div class="hamburger"><i class="fas fa-bars"></i></div>
+</header>
+
+<div class="container">
+  <!-- Sidebar -->
+  <nav class="nav-panel" id="sidebar">
+    <h2>Menu</h2>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="sqlconsole.html">Console</a>
+    <a href="database.html">Database</a>
+    <a href="control-panel.html">Control Panel</a>
+    <a href="logs.html">Logs</a>
+    <a href="settings.html">Settings</a>
+
+    <!-- Profile info at bottom -->
+    <div class="nav-profile" id="profile-link">
+      <span id="profile-name"></span>
+      <span id="profile-id"></span>
+    </div>
+    <a href="#" id="logout-btn">Logout</a>
+  </nav>
+<main class="main-content">
+
+  <!-- ----------------- Inner Navigation Tabs ----------------- -->
+  <div class="inner-nav">
+    <button class="tab-btn active" data-tab="user-info">User Info</button>
+    <button class="tab-btn" data-tab="private-space">Private Space</button>
+    <button class="tab-btn" data-tab="password-manager">Password Manager</button>
+  </div>
+
+  <!-- ----------------- Section 1: User Info ----------------- -->
+  <section id="user-info" class="tab-section active">
+    <h2>User Info</h2>
+    <div class="user-info-card">
+      <p><strong>Name:</strong> <span id="ui-name"></span></p>
+      <p><strong>Email:</strong> <span id="ui-email"></span></p>
+      <p><strong>Phone:</strong> <span id="ui-phone"></span></p>
+      <button id="edit-user-btn" class="btn btn-primary">Edit Info</button>
+      <button id="change-pass-btn" class="btn btn-outline">Change Password</button>
+    </div>
+  </section>
+
+  <!-- ----------------- Section 2: Private Space ----------------- -->
+  <section id="private-space" class="tab-section">
+    <h2>Private Space</h2>
+    <div id="private-cards" class="cards-container">
+      <!-- Example dynamic cards -->
+    </div>
+  </section>
+
+  <!-- ----------------- Section 3: Password Manager ----------------- -->
+  <section id="password-manager" class="tab-section">
+    <h2>Password Manager</h2>
+    <div id="password-cards" class="cards-container">
+      <!-- Example password manager cards -->
+    </div>
+  </section>
+
+  <!-- ----------------- Modal: Password Change ----------------- -->
+  <div id="pass-modal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h3>Change Password</h3>
+      <p>Old Password: <input type="password" id="old-pass"></p>
+      <p>New Password: <input type="password" id="new-pass"></p>
+      <p>Confirm Password: <input type="password" id="confirm-pass"></p>
+      <button id="save-pass-btn" class="btn btn-primary">Save Password</button>
+    </div>
+  </div>
+
+</main>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+
+  // ---------------- Tab Navigation ----------------
+  const tabs = document.querySelectorAll(".tab-btn");
+  const sections = document.querySelectorAll(".tab-section");
+  tabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+      tabs.forEach(t => t.classList.remove("active"));
+      sections.forEach(s => s.classList.remove("active"));
+      tab.classList.add("active");
+      document.getElementById(tab.dataset.tab).classList.add("active");
+    });
+  });
+
+  // ---------------- User Info ----------------
+  const uiName = document.getElementById("ui-name");
+  const uiEmail = document.getElementById("ui-email");
+  const uiPhone = document.getElementById("ui-phone");
+  const editBtn = document.getElementById("edit-user-btn");
+  const changePassBtn = document.getElementById("change-pass-btn");
+
+  let userData = JSON.parse(sessionStorage.getItem("devUser")) || {};
+
+  function loadUserInfo() {
+    uiName.textContent = userData.name || "";
+    uiEmail.textContent = userData.email || "";
+    uiPhone.textContent = userData.phone || "";
+  }
+  loadUserInfo();
+
+  // ---------------- Edit Info ----------------
+  function enableEdit() {
+    uiName.innerHTML = `<input type="text" id="edit-name" value="${userData.name || ""}">`;
+    uiEmail.innerHTML = `<input type="email" id="edit-email" value="${userData.email || ""}">`;
+    uiPhone.innerHTML = `<input type="text" id="edit-phone" value="${userData.phone || ""}">`;
+    editBtn.textContent = "Save";
+
+    editBtn.removeEventListener("click", enableEdit);
+    editBtn.addEventListener("click", saveEdit);
+  }
+
+  async function saveEdit() {
+    const updated = {
+      name: document.getElementById("edit-name").value,
+      email: document.getElementById("edit-email").value,
+      phone: document.getElementById("edit-phone").value
+    };
+
+    try {
+      const res = await fetch(`https://agroscan-backend.onrender.com/api/devusers/${userData.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updated)
+      });
+
+      if(res.ok){
+        userData = { ...userData, ...updated };
+        sessionStorage.setItem("devUser", JSON.stringify(userData));
+        loadUserInfo();
+        editBtn.textContent = "Edit Info";
+
+        editBtn.removeEventListener("click", saveEdit);
+        editBtn.addEventListener("click", enableEdit);
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to update profile");
+      }
+    } catch(err){
+      console.error(err);
+      alert("Error updating profile");
+    }
+  }
+
+  editBtn.addEventListener("click", enableEdit);
+
+  // ---------------- Password Modal ----------------
+  const modal = document.getElementById("pass-modal");
+  const closeModal = modal.querySelector(".close");
+  const savePassBtn = document.getElementById("save-pass-btn");
+
+  changePassBtn.addEventListener("click", () => modal.style.display = "flex");
+  closeModal.addEventListener("click", () => modal.style.display = "none");
+  window.addEventListener("click", e => { if(e.target == modal) modal.style.display = "none"; });
+
+  savePassBtn.addEventListener("click", async () => {
+    const oldPass = document.getElementById("old-pass").value;
+    const newPass = document.getElementById("new-pass").value;
+    const confirmPass = document.getElementById("confirm-pass").value;
+
+    if(newPass !== confirmPass){ 
+      alert("Passwords do not match!"); 
+      return; 
+    }
+
+    try {
+      const res = await fetch(`https://agroscan-backend.onrender.com/api/devusers/${userData.id}/change-password`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ oldPassword: oldPass, newPassword: newPass })
+      });
+
+      if(res.ok){
+        alert("Password updated successfully!");
+        modal.style.display = "none";
+        document.getElementById("old-pass").value = "";
+        document.getElementById("new-pass").value = "";
+        document.getElementById("confirm-pass").value = "";
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to update password");
+      }
+    } catch(err){
+      console.error(err);
+      alert("Error updating password");
+    }
+  });
+
+  // ---------------- Private Space Cards ----------------
+  const privateCards = document.getElementById("private-cards");
+  const privateLinks = [
+    { title: "API Keys", href: "./restricted-entry-only/api.html" }
+  ];
+  privateLinks.forEach(l => {
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerHTML = `<a href="${l.href}" style="color:#ffd700;">${l.title}</a>`;
+    privateCards.appendChild(div);
+  });
+
+  // ---------------- Password Manager Cards ----------------
+  const passwordCards = document.getElementById("password-cards");
+  const passwords = [
+    { app:"Gmail", user:"agroscan.lumitech@gmail.com", pass:"••••••" },
+    { app:"Instagram", user:"agroscan.lumitech", pass:"••••••" }
+  ];
+  passwords.forEach(p => {
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerHTML = `<strong>${p.app}</strong><br>User: ${p.user}<br>Password: <span>${p.pass}</span>`;
+    passwordCards.appendChild(div);
+  });
+
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const devUser = JSON.parse(sessionStorage.getItem("devUser"));
+  if(!devUser){
+    window.location.href = "../login-form.html";
+  } else {
+    document.getElementById("profile-name").textContent = devUser.name || devUser.email;
+    document.getElementById("profile-id").textContent = "ID: " + (devUser.id || "N/A");
+  }
+
+  // ✅ Sidebar toggle for mobile
+  document.querySelector(".hamburger").addEventListener("click", ()=>{
+    document.getElementById("sidebar").classList.toggle("show");
+  });
+
+  // Logout
+  document.getElementById("logout-btn").addEventListener("click", e=>{
+    e.preventDefault();
+    sessionStorage.clear();
+    window.location.href = "../login-form.html";
+  });
+});
+</script>
+
+</body>
+</html>

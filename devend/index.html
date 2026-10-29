@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="google-site-verification" content="lWdBX-wwlL8K6WOAaKOwRg0OV_kT5-vVMHRWEIhQC1Q" />
+<title>AgroDev</title>
+
+<!-- Fonts & Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="icon" href="private-desk/claim.png" type="image/png">
+<style>
+:root{
+  --accent:#ffd700;
+  --bg-dark:#0b0b0b;
+  --text-light:#f4f7f4;
+  --card-bg:#1b1b1b;
+  --border-radius:20px;
+  --shadow-dark:0 10px 30px rgba(0,0,0,0.6);
+  --transition:.3s;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Roboto',sans-serif;}
+
+body{
+  background:var(--bg-dark);
+  color:var(--text-light);
+  line-height:1.6;
+}
+
+header{
+  background:#000;
+  padding:1rem;
+  text-align:center;
+  font-size:1.8rem;
+  font-weight:bold;
+  border-bottom:2px solid var(--accent);
+}
+
+/* Responsive site container with equal side margins */
+.site{
+  max-width:1200px;
+  margin:0 auto;
+  padding:40px 20px;
+  display:flex;
+  flex-direction:column;
+  gap:40px;
+  align-items:center;
+  width:100%;
+  box-sizing:border-box;
+}
+
+/* Info card */
+.info-card{
+  background:var(--card-bg);
+  padding:24px;
+  border-radius:var(--border-radius);
+  box-shadow:var(--shadow-dark);
+  max-width:100%;
+  text-align:center;
+}
+
+.info-card h2{
+  font-size:2rem;
+  color:var(--accent);
+  margin-bottom:16px;
+}
+
+.info-card p{
+  font-size:1.1rem;
+  line-height:1.6;
+  color:#ccc;
+  margin-bottom:20px;
+}
+
+/* Button group */
+.btn-group{
+  display:flex;
+  gap:20px;
+  justify-content:center;
+  flex-wrap:wrap;
+}
+
+.btn{
+  display:inline-block;
+  text-align:center;
+  padding:14px 32px;
+  border-radius:50px;
+  font-weight:700;
+  font-size:1rem;
+  min-width:140px;
+  transition:var(--transition);
+  text-decoration:none;
+}
+
+.btn-accent{
+  background:var(--accent);
+  color:#000;
+}
+
+.btn-accent:hover{
+  background:#e6c200;
+}
+
+.btn-outline{
+  background:transparent;
+  color:var(--accent);
+  border:2px solid var(--accent);
+}
+
+.btn-outline:hover{
+  background:var(--accent);
+  color:#000;
+}
+
+/* Cards section */
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:24px;
+  width:100%;
+}
+
+.card{
+  background:var(--card-bg);
+  border-radius:var(--border-radius);
+  padding:24px;
+  text-align:center;
+  box-shadow:var(--shadow-dark);
+  transition:var(--transition);
+  cursor:pointer;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+}
+
+.card i{
+  font-size:2.5rem;
+  color:var(--accent);
+  margin-bottom:12px;
+}
+
+.card h3{
+  font-size:1.3rem;
+  color:var(--accent);
+  margin-bottom:8px;
+}
+
+.card p{
+  font-size:0.95rem;
+  color:#ccc;
+}
+
+.card:hover{
+  transform:translateY(-8px);
+  box-shadow:0 15px 40px rgba(255,215,0,0.5);
+}
+
+/* Responsive adjustments for tablets and mobiles */
+@media(max-width:992px){
+  .info-card h2{font-size:1.8rem;}
+  .info-card p{font-size:1rem;}
+  .site{padding:30px 20px;} /* equal margins */
+}
+
+@media(max-width:768px){
+  .cards{
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  }
+  .card h3{font-size:1.1rem;}
+  .card p{font-size:0.85rem;}
+  .site{padding:20px 20px;} /* equal margins */
+}
+
+@media(max-width:480px){
+  .btn{padding:12px 24px;font-size:.95rem;}
+  .site{padding:15px 15px;} /* equal margins */
+}
+/* ================= Responsive adjustments for tablets and mobiles ================= */
+@media(max-width:1200px){
+  .site{
+    padding:30px 20px;
+  }
+}
+
+@media(max-width:992px){
+  .info-card h2{font-size:1.7rem;}
+  .info-card p{font-size:1rem;}
+  .cards{
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:20px;
+  }
+  .card h3{font-size:1.2rem;}
+  .card p{font-size:0.9rem;}
+}
+
+@media(max-width:768px){
+  .cards{
+    grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+    gap:16px;
+  }
+  .card i{font-size:2rem;}
+  .card h3{font-size:1.1rem;}
+  .card p{font-size:0.85rem;}
+  .btn-group{
+    flex-direction:column;
+    gap:12px;
+  }
+  .btn{padding:12px 24px;font-size:.95rem;}
+  .site{padding:20px 15px;}
+}
+
+@media(max-width:480px){
+  .cards{
+    grid-template-columns:1fr;
+    gap:12px;
+  }
+  .card i{font-size:1.8rem;}
+  .card h3{font-size:1rem;}
+  .card p{font-size:0.8rem;}
+  .btn{padding:10px 20px;font-size:.9rem;}
+  .site{padding:15px 10px;}
+}
+header {
+  background:#000;
+  padding:1rem;
+  text-align:center;
+  font-size:1.8rem;
+  font-weight:bold;
+  border-bottom:2px solid var(--accent);
+  white-space: nowrap; /* prevent wrapping */
+  overflow: hidden;    /* hide overflow if text is too long */
+  text-overflow: ellipsis; /* show ... if text exceeds container */
+}
+
+/* Responsive font size for header */
+@media(max-width:1200px){
+  header{font-size:1.6rem;}
+}
+@media(max-width:992px){
+  header{font-size:1.4rem;}
+}
+@media(max-width:768px){
+  header{font-size:1.2rem;}
+}
+@media(max-width:480px){
+  header{font-size:1rem;}
+}
+
+</style>
+</head>
+<body>
+
+<header>🌱 AgroScan Developer Control Panel</header>
+
+<div class="site">
+  <!-- Info Section -->
+  <div class="info-card">
+    <h2>⚠️ Developer Access Only</h2>
+    <p>This panel is strictly for authorized developers. Unauthorized access is prohibited. Any action here can affect production systems.</p>
+    <p>Only proceed if you are a verified developer.</p>
+    <div class="btn-group">
+      <a href="login-form.html" class="btn btn-accent">Sign In</a>
+      <a href="./private-desk/dashboard.html" class="btn btn-outline">Start Now</a>
+    </div>
+  </div>
+
+  <!-- Developer Cards Section -->
+  <div class="cards">
+    <div class="card">
+      <i class="fas fa-terminal"></i>
+      <h3>Console</h3>
+      <p>Access debug console for system logs and command testing.</p>
+    </div>
+    <div class="card">
+      <i class="fas fa-database"></i>
+      <h3>Private Data</h3>
+      <p>Manage sensitive datasets and perform database operations.</p>
+    </div>
+    <div class="card">
+      <i class="fas fa-cogs"></i>
+      <h3>Control Panel</h3>
+      <p>General system controls, feature toggles, and configurations.</p>
+    </div>
+    <div class="card">
+      <i class="fas fa-info-circle"></i>
+      <h3>System Info</h3>
+      <p>View system metrics, status, and active processes.</p>
+    </div>
+    <div class="card">
+      <i class="fas fa-sliders-h"></i>
+      <h3>Settings</h3>
+      <p>Adjust application parameters, environment variables, and preferences.</p>
+    </div>
+    <div class="card">
+      <i class="fas fa-file-alt"></i>
+      <h3>Logs</h3>
+      <p>Review activity logs and error reports for debugging purposes.</p>
+    </div>
+        <div class="card">
+      <i class="fas fa-database"></i>
+      <h3>Order Management</h3>
+      <p>Manage sensitive datasets and perform order management operations.</p>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

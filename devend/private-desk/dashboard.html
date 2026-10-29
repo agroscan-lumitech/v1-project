@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgroScan Developer Control Panel</title>
+
+<!-- Fonts & Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="icon" href="title.png" type="image/png">
+<style>
+:root{
+  --accent:#ffd700;
+  --bg-dark:#0b0b0b;
+  --text-light:#f4f7f4;
+  --card-bg:#1b1b1b;
+  --border-radius:12px;
+  --shadow-dark:0 8px 20px rgba(0,0,0,0.6);
+  --transition:.3s;
+}
+
+/* Reset */
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Roboto',sans-serif;}
+
+body{
+  background:var(--bg-dark);
+  color:var(--text-light);
+  line-height:1.6;
+}
+
+/* Header */
+header {
+  background: #000;
+  padding: 1rem 1.5rem;
+  font-size: 1.8rem;
+  font-weight: bold;
+  border-bottom: 2px solid var(--accent);
+  position: relative;
+  display: flex;
+  align-items: center;      /* vertically center content */
+  justify-content: space-between; /* space between text and hamburger */
+}
+
+header .header-text {
+  flex: 0 0 65%;           /* left-aligned text takes 65% width */
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Hamburger */
+.hamburger {
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--accent);
+  z-index: 1001;
+}
+
+
+
+/* Layout */
+.container{
+  display:flex;
+  min-height:calc(100vh - 68px);
+}
+
+/* Side Navigation */
+.nav-panel{
+  width:250px;
+  background:var(--card-bg);
+  display:flex;
+  flex-direction:column;
+  padding:20px;
+  transition:transform var(--transition);
+  position:relative;
+  flex-shrink:0;
+}
+
+.nav-panel h2{
+  color:var(--accent);
+  margin-bottom:20px;
+  font-size:1.4rem;
+  text-align:center;
+}
+
+.nav-panel a{
+  color:var(--text-light);
+  text-decoration:none;
+  padding:12px 10px;
+  margin-bottom:10px;
+  border-radius:var(--border-radius);
+  display:block;
+  transition:var(--transition);
+}
+
+.nav-panel a:hover{
+  background:var(--accent);
+  color:#000;
+}
+
+/* Profile at bottom of sidebar */
+.nav-profile {
+  margin-top: auto;
+  border-top: 1px solid #444;
+  padding-top: 15px;
+  cursor: pointer;
+  text-align: center; /* center all content */
+}
+
+.nav-profile span {
+  display: block;
+  color: #ccc;
+  font-size: 0.9rem;
+  margin-bottom: 3px;
+  text-align: center; /* ensure span content is centered */
+}
+
+.nav-profile:hover span {
+  color: var(--accent);
+}
+
+/* Main Content */
+.main-content{
+  flex:1;
+  padding:30px 40px;
+  display:flex;
+  flex-direction:column;
+  gap:30px;
+}
+
+/* Info Card */
+.info-card{
+  background:var(--card-bg);
+  padding:24px;
+  border-radius:var(--border-radius);
+  box-shadow:var(--shadow-dark);
+  text-align:center;
+}
+
+.info-card h2{
+  font-size:2rem;
+  color:var(--accent);
+  margin-bottom:16px;
+}
+
+.info-card p{
+  font-size:1.1rem;
+  color:#ccc;
+  margin-bottom:20px;
+}
+
+/* Cards Section */
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:24px;
+}
+
+.operation-card{
+  background:var(--card-bg);
+  border-radius:var(--border-radius);
+  padding:24px;
+  text-align:center;
+  box-shadow:var(--shadow-dark);
+  transition:var(--transition);
+  cursor:pointer;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-decoration:none;
+}
+
+.operation-card i{
+  font-size:2.5rem;
+  color:var(--accent);
+  margin-bottom:12px;
+}
+
+.operation-card h3{
+  font-size:1.3rem;
+  color:var(--accent);
+  margin-bottom:8px;
+}
+
+.operation-card p{
+  font-size:0.95rem;
+  color:#ccc;
+}
+
+.operation-card:hover{
+  transform:translateY(-8px);
+  box-shadow:0 15px 40px rgba(255,215,0,0.5);
+}
+
+/* Responsive adjustments */
+@media(max-width:992px){
+  header{text-align:left; padding-left:1rem;}
+  .hamburger{display:block;}
+
+  .container{
+    flex-direction:column;
+  }
+  .nav-panel{
+    position:fixed;
+    top:0;
+    left:-260px;
+    height:100%;
+    width:250px;
+    flex-direction:column;
+    z-index:1000;
+  }
+@media(max-width:992px){
+  .nav-panel{
+    position:fixed;
+    top:0;
+    left:-260px;
+    height:100%;
+    width:250px;
+    flex-direction:column;
+    z-index:1000;
+  }
+  .nav-panel.show{
+    transform: translateX(260px); /* only mobile */
+  }
+}
+}
+@media(max-width:768px){
+  .cards{grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;}
+  .operation-card i{font-size:2rem;}
+  .operation-card h3{font-size:1.1rem;}
+  .operation-card p{font-size:0.85rem;}
+}
+@media(max-width:480px){
+  .cards{grid-template-columns:1fr;gap:12px;}
+  .operation-card i{font-size:1.8rem;}
+  .operation-card h3{font-size:1rem;}
+  .operation-card p{font-size:0.8rem;}
+}
+#logout-btn
+{
+    justify-self: content;
+    background-color:#8b780d;
+}
+</style>
+</head>
+<body>
+
+<header>
+  🌱 AgroScan<br>Dev-Control-Dashboard
+  <div class="hamburger"><i class="fas fa-bars"></i></div>
+</header>
+
+<div class="container">
+  <!-- Side Navigation -->
+  <nav class="nav-panel" id="sidebar">
+    <h2>Menu</h2>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="sqlconsole.html">Console</a>
+    <a href="database.html">Database</a>
+    <a href="control-panel.html">Control Panel</a>
+    <a href="logs.html">Logs</a>
+    <a href="settings.html">Settings</a>
+
+    <!-- Profile info at bottom -->
+    <div class="nav-profile" id="profile-link">
+      <span id="profile-name"></span>
+      <span id="profile-id"></span>
+    </div>
+    <a href="#" id="logout-btn">Logout</a>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="info-card">
+      <h2>⚠️ Developer Access Only</h2>
+      <p>Welcome,<br> <span id="dev-name"></span> (ID: <span id="dev-id"></span>)</p>
+      <p>Changes are irreversible. Be cautious while editing.</p>
+    </div>
+
+    <div class="cards">
+      <a href="./sqlconsole.html" class="operation-card">
+        <i class="fas fa-terminal"></i>
+        <h3>SQL Console</h3>
+        <p>Access MySQL console and schema logs.</p>
+      </a>
+      <a href="./database.html" class="operation-card">
+        <i class="fas fa-database"></i>
+        <h3>Database</h3>
+        <p>Manage sensitive datasets and database operations.</p>
+      </a>
+      <a href="./control-panel.html" class="operation-card">
+        <i class="fas fa-cogs"></i>
+        <h3>Control Panel</h3>
+        <p>Feature toggles and system configurations.</p>
+      </a>
+      <a href="./settings.html" class="operation-card">
+        <i class="fas fa-sliders-h"></i>
+        <h3>Settings</h3>
+        <p>Adjust application parameters and preferences.</p>
+      </a>
+      <a href="./logs.html" class="operation-card">
+        <i class="fas fa-file-alt"></i>
+        <h3>Logs</h3>
+        <p>Review activity logs and error reports.</p>
+      </a>
+       <a href="./order.html" class="operation-card">
+        <i class="fas fa-database"></i>
+        <h3>Order Management</h3>
+        <p>Manage sensitive datasets and order based operations.</p>
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---------------- Session Check ----------------
+const devUser = JSON.parse(sessionStorage.getItem('devUser'));
+if(!devUser){
+  window.location.href = '../login-form.html';
+} else {
+  document.getElementById('dev-name').textContent = devUser.name || devUser.email;
+  document.getElementById('dev-id').textContent = devUser.id;
+  document.getElementById('profile-name').textContent = devUser.name || devUser.email;
+  document.getElementById('profile-id').textContent = "ID: " + devUser.id;
+}
+
+// ---------------- Hamburger Toggle ----------------
+const hamburger = document.querySelector('.hamburger');
+const sidebar = document.getElementById('sidebar');
+hamburger.addEventListener('click', ()=>{
+  sidebar.classList.toggle('show');
+});
+
+// ---------------- Profile Click ----------------
+document.getElementById('profile-link').addEventListener('click', ()=>{
+  window.location.href = './profile.html';
+});
+
+// ---------------- Logout ----------------
+document.getElementById('logout-btn').addEventListener('click', e=>{
+  e.preventDefault();
+  sessionStorage.clear();
+  window.location.href = '../login-form.html';
+});
+
+</script>
+
+</body>
+</html>

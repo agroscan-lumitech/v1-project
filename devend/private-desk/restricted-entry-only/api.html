@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Developer API Keys</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="../title.png" type="image/png">
+</head>
+<body>
+
+  <!-- Overlay -->
+  <div id="overlay">🔒 Secure Access Required...</div>
+
+  <!-- Main Content -->
+  <div id="mainContent">
+    <h1>Developers Data</h1>
+    <p style="color:#aaa; text-align:center;">
+      Configuration status for each AI provider. Actual key values live only in the backend's environment variables and are never sent to this page — view or rotate them from your Render dashboard.
+    </p>
+
+    <!-- Dashboard container for JS-generated cards -->
+    <div class="dashboard"></div>
+
+  </div>
+
+  <!-- External JS -->
+  <script src="../../config.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

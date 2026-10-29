@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgroScan Developer Login</title>
+<!-- QR Scanner -->
+<script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
+<!-- QR Decode from Image -->
+<script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
+<link rel="icon" href="private-desk/title.png" type="image/png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --accent:#ffd700;
+  --bg-dark:#0b0b0b;
+  --text-light:#f4f7f4;
+  --card-bg:#1b1b1b;
+  --border-radius:16px;
+  --shadow:0 8px 25px rgba(0,0,0,0.6);
+  --transition:.3s;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Roboto',sans-serif;}
+
+body{
+  background:var(--bg-dark);
+  color:var(--text-light);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  min-height:100vh;
+  padding:20px;
+}
+
+header{
+  text-align:center;
+  font-size:1.6rem;
+  font-weight:bold;
+  margin-bottom:30px;
+  color:var(--accent);
+}
+
+/* Card */
+.card{
+  background:var(--card-bg);
+  padding:30px 25px;
+  border-radius:var(--border-radius);
+  box-shadow:var(--shadow);
+  width:100%;
+  max-width:400px;
+  margin-bottom:30px;
+  text-align:center;
+}
+
+.card h2{
+  color:var(--accent);
+  margin-bottom:20px;
+}
+
+/* Inputs */
+input, .file-input{
+  width:100%;
+  padding:14px;
+  margin-bottom:15px;
+  border-radius:10px;
+  border:1px solid #444;
+  background:#111;
+  color:var(--text-light);
+  font-size:1rem;
+  outline:none;
+  transition:var(--transition);
+}
+
+input:focus{
+  border-color:var(--accent);
+  background:#151515;
+}
+
+.file-input{
+  color:#aaa;
+  cursor:pointer;
+}
+
+/* Buttons */
+.btn{
+  display:inline-block;
+  padding:12px 20px;
+  margin:6px;
+  border-radius:8px;
+  border:none;
+  font-weight:600;
+  cursor:pointer;
+  transition:var(--transition);
+}
+
+.btn-primary{
+  background:var(--accent);
+  color:#000;
+}
+
+.btn-primary:hover{
+  background:#e6c200;
+}
+
+.btn-outline{
+  background:transparent;
+  color:var(--accent);
+  border:2px solid var(--accent);
+}
+
+.btn-outline:hover{
+  background:var(--accent);
+  color:#000;
+}
+
+/* Modal */
+.modal{
+  position:fixed;
+  top:0;left:0;
+  width:100%;height:100%;
+  background:rgba(0,0,0,0.8);
+  display:none;
+  justify-content:center;
+  align-items:center;
+}
+
+.modal-content{
+  background:var(--card-bg);
+  padding:25px;
+  border-radius:var(--border-radius);
+  width:90%;
+  max-width:350px;
+  text-align:center;
+  position:relative;
+  padding-top:30px;
+}
+
+.modal-content h3{
+  margin-bottom:15px;
+  color:var(--accent);
+}
+
+.close{
+  position:absolute;
+  top:25px;
+  right:15px;
+  font-size:1.5rem;
+  cursor:pointer;
+  color:#fff;
+}
+
+#message, #login-msg{
+  margin-top:10px;
+  font-size:0.95rem;
+}
+.error-msg{ color:#ff4d4d; }
+.success-msg{ color:#4dff88; }
+</style>
+</head>
+<body>
+
+<header>🌱 AgroScan Developer Login</header>
+
+<!-- Email + Password Login -->
+<div class="card">
+  <h2>Login with Email</h2>
+  <input type="email" id="email" placeholder="Email">
+  <input type="password" id="password" placeholder="Password">
+  <button class="btn btn-primary" onclick="devLogin()">Sign In</button>
+  <div id="login-msg"></div>
+</div>
+
+<!-- UIC Login -->
+<div class="card">
+  <h2>Login with Unique Integration Code</h2>
+  <button class="btn btn-outline" onclick="openModal()">Enter UIC</button>
+</div>
+
+<!-- UIC Modal -->
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <h3 id="modal-title">Enter UIC</h3>
+
+    <!-- Manual Input -->
+    <input type="text" id="uic-input" placeholder="Enter UIC code here">
+    <button class="btn btn-primary" onclick="submitUICManual()">Submit</button>
+
+    <hr style="margin:15px 0; border-color:#444;">
+
+    <!-- QR Options -->
+    <button class="btn btn-outline" onclick="openCameraCapture()">Scan QR</button>
+    <button class="btn btn-outline" onclick="uploadQRCode()">Upload QR</button>
+
+    <div id="message"></div>
+  </div>
+</div>
+
+<!-- Hidden inputs for camera & file -->
+<input type="file" id="qr-camera" accept="image/*" capture="environment" style="display:none;">
+<input type="file" id="qr-file" accept="image/*" style="display:none;">
+
+<script>
+const modal = document.getElementById("modal");
+const message = document.getElementById("message");
+
+const qrCameraInput = document.getElementById("qr-camera");
+const qrFileInput = document.getElementById("qr-file");
+
+// -------- Modal Functions --------
+function openModal() { modal.style.display = "flex"; message.textContent = ""; }
+function closeModal() { modal.style.display = "none"; }
+
+// -------- Camera Capture (forces rear camera) --------
+function openCameraCapture() {
+  qrCameraInput.click(); // triggers native camera directly
+}
+
+// -------- File Upload --------
+function uploadQRCode() {
+  qrFileInput.click();
+}
+
+// -------- Handle image files (camera or upload) --------
+qrCameraInput.addEventListener("change", handleImageFile);
+qrFileInput.addEventListener("change", handleImageFile);
+
+function handleImageFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const img = document.createElement("img");
+  img.src = URL.createObjectURL(file);
+
+  img.onload = () => {
+    const size = Math.min(img.naturalWidth, img.naturalHeight);
+    const sx = (img.naturalWidth - size) / 2;
+    const sy = (img.naturalHeight - size) / 2;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = 500;
+    canvas.height = 500;
+    const ctx = canvas.getContext("2d");
+
+    // Crop square and resize
+    ctx.drawImage(img, sx, sy, size, size, 0, 0, 500, 500);
+
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+    if (code && code.data && code.data.trim() !== "") {
+      submitUICManual(code.data.trim());
+    } else {
+      message.innerHTML = `<p class="error-msg">⚠️ QR code not detected. Make sure it’s clear and upright.</p>`;
+    }
+  };
+
+  img.onerror = () => {
+    message.innerHTML = `<p class="error-msg">⚠️ Failed to load image</p>`;
+  };
+
+  // Reset input so same camera can be used again
+  e.target.value = "";
+}
+
+// -------- UIC Login (manual or QR) --------
+async function submitUICManual(uicValue = null) {
+  const uic = uicValue || document.getElementById("uic-input").value.trim();
+  message.innerHTML = "";
+
+  if (!uic) {
+    message.innerHTML = `<p class="error-msg">⚠️ Please enter UIC</p>`;
+    return;
+  }
+
+  try {
+    const res = await fetch("https://agroscan-backend.onrender.com/api/dev-login-udc", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ uic })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      sessionStorage.setItem("devUser", JSON.stringify({
+        id: data.user.id,
+        name: data.user.name,
+        email: data.user.email,
+        phone: data.user.phone
+      }));
+      message.innerHTML = `<p class="success-msg">✅ UIC valid! Redirecting...</p>`;
+      setTimeout(() => window.location.href = "./private-desk/dashboard.html", 1200);
+    } else {
+      message.innerHTML = `<p class="error-msg">❌ ${data.message}</p>`;
+    }
+  } catch (err) {
+    console.error("UIC login error:", err);
+    message.innerHTML = `<p class="error-msg">🚨 Server unreachable</p>`;
+  }
+}
+</script>
+
+
+
+
+
+<script>
+// -------- Email + Password Login --------
+async function devLogin() {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const msgBox = document.getElementById("login-msg");
+
+  msgBox.innerHTML = "";
+  
+  if (!email || !password) {
+    msgBox.innerHTML = `<p class="error-msg">⚠️ Please enter both email and password</p>`;
+    return;
+  }
+
+  try {
+    const res = await fetch("https://agroscan-backend.onrender.com/api/dev-login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      // Store full dev info in sessionStorage
+      sessionStorage.setItem("devUser", JSON.stringify({
+        id: data.user.id,
+        name: data.user.name,
+        email: data.user.email,
+        phone: data.user.phone
+      }));
+      message.innerHTML = `<p class="success-msg">✅ Login successful! Redirecting...</p>`;
+      setTimeout(() => window.location.href = "./private-desk/dashboard.html", 1500);
+    } else {
+      msgBox.innerHTML = `<p class="error-msg">❌ ${data.message}</p>`;
+    }
+  } catch (err) {
+    console.error("Login error:", err);
+    msgBox.innerHTML = `<p class="error-msg">🚨 Server unreachable</p>`;
+  }
+}
+
+// -------- Modal --------
+function openModal(){
+  modal.style.display = "flex";
+  message.textContent = "";
+}
+
+function closeModal(){
+  modal.style.display = "none";
+}
+
+// -------- UIC Login --------
+async function submitUIC(){
+  const uic = document.getElementById("uic-input").value.trim();
+  message.innerHTML = "";
+
+  if(!uic){
+    message.innerHTML = `<p class="error-msg">⚠️ Please enter UIC</p>`;
+    return;
+  }
+
+  try {
+    const res = await fetch("https://agroscan-backend.onrender.com/api/dev-login-udc", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ uic })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      sessionStorage.setItem("devUser", JSON.stringify({
+        id: data.user.id,
+        name: data.user.name,
+        email: data.user.email,
+        phone: data.user.phone
+      }));
+      message.innerHTML = `<p class="success-msg">✅ UIC valid! Redirecting...</p>`;
+      setTimeout(() => window.location.href = "./private-desk/dashboard.html", 1200);
+    } else {
+      message.innerHTML = `<p class="error-msg">❌ ${data.message}</p>`;
+    }
+  } catch (err) {
+    console.error("UIC login error:", err);
+    message.innerHTML = `<p class="error-msg">🚨 Server unreachable</p>`;
+  }
+}
+</script>
+
+</body>
+</html>
