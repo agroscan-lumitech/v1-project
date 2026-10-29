@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌱 AgroScan - Analytics</title>
+<link rel="icon" href="img/agroscan-icon.png" type="image/png">
+<link rel="stylesheet" href="./css.files/header-footer.css">
+<style>
+/* ================= Active Top Button ================= */
+#active {
+  background: #66bb6a;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+
+/* ================= Cards Styling ================= */
+.cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 25px;
+  padding: 30px;
+  justify-content: center;
+  background: #f5f5f5;
+}
+
+.card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  padding: 25px;
+  width: 270px;
+  text-align: center;
+  transition: transform 0.25s, box-shadow 0.25s;
+  cursor: pointer;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.card h3 {
+  margin-bottom: 12px;
+  color: #2e7d32;
+  font-size: 1.2rem;
+}
+
+.card p {
+  font-size: 0.95rem;
+  margin-bottom: 18px;
+  color: #555;
+  min-height: 50px;
+}
+
+.card-btn {
+  display: inline-block;
+  text-decoration: none;
+  padding: 10px 18px;
+  background-color: #66bb6a;
+  color: #fff;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: background 0.25s;
+}
+
+.card-btn:hover {
+  background-color: #57a05a;
+}
+
+/* ================= Popup Modal ================= */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 25px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  position: relative;
+}
+
+.modal-content h3 {
+  margin-bottom: 15px;
+}
+
+.modal-content label {
+  display: block;
+  margin: 10px 0 5px;
+}
+
+.modal-content input {
+  width: 100%;
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.modal-content button {
+  margin-top: 15px;
+  padding: 10px 18px;
+  background: #66bb6a;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.modal-content button:hover {
+  background: #57a05a;
+}
+
+.close-btn {
+  position: absolute;
+  top: 10px; right: 15px;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+/* ================= Result Box ================= */
+.result-box {
+  margin-top: 15px;
+  padding: 10px;
+  background: #f0f0f0;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.side-menu
+{
+    margin-top:60px;
+}
+</style>
+</head>
+<body>
+
+<!-- ================= Header ================= -->
+<header>
+  <a href="home.html" class="logo-area">
+    <img src="img/agroscan-logo.png" alt="AgroScan Logo" class="logo">
+  </a>
+
+  <div class="nav-options">
+    <!-- Courses Dropdown -->
+    <div class="dropdown">
+      <button class="dropbtn">Organs</button>
+      <div class="dropdown-content">
+        <a href="./agropedia/index.agropedia.html">AgroPedia</a>
+        <a href="./agroshop/index.agroshop.html">AgroShop</a>
+        <a href="./agroawareness/index.agroawareness.html">AgroAwareness</a>
+        <a href="./agroscheme/index.agroscheme.html">AgroScheme</a>
+      </div>
+    </div>
+
+    <!-- Profile Dropdown -->
+    <div class="dropdown profile-dropdown">
+      <div class="profile-area">
+        <img src="img/profile-logo.jpg" class="profile-logo" alt="Profile">
+        <div class="profile-info">
+          <span id="full-name">Guest User</span>
+          <small id="username-display">@guest</small>
+        </div>
+      </div>
+      <div class="dropdown-content profile-content">
+        <a href="profile.html">Profile</a>
+        <a href="login-form.html">Login</a>
+        <a href="#" id="logoutLink" style="display:none;">Logout</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hamburger for mobile -->
+  <div class="hamburger" onclick="toggleSidePanel()">
+    <span class="bar"></span>
+    <span class="bar"></span>
+    <span class="bar"></span>
+  </div>
+</header>
+
+<!-- ================= Top Navigation Bar ================= -->
+<div class="top-bar">
+  <a href="home.html" class="top-btn" id="n-active">Home</a>
+  <a href="soil-test.html" class="top-btn" id="n-active">Soil Test</a>
+  <a href="chat.html" class="top-btn" id="n-active">AI Chat</a>
+  <a href="analytics.html" class="top-btn" id="active">Analytics</a>
+</div>
+
+<!-- ================= Side Panel ================= -->
+<div class="side-panel">
+  <div class="close-btn" onclick="toggleSidePanel()">×</div>
+  <ul class="side-menu">
+    <li><a href="home.html">Home</a></li>
+    <li>
+      <button class="side-toggle">Organs</button>
+      <ul class="side-submenu">
+        <a href="./agropedia/index.agropedia.html">AgroPedia</a>
+        <a href="./agroshop/index.agroshop.html">AgroShop</a>
+        <a href="./agroawareness/index.agroawareness.html">AgroAwareness</a>
+        <a href="./agroscheme/index.agroscheme.html">AgroScheme</a>
+      </ul>
+    </li>
+    <li>
+      <button class="side-toggle">Account</button>
+      <ul class="side-submenu">
+        <li><a href="profile.html">Profile</a></li>
+        <li><a href="login-form.html">Login</a></li>
+        <li><a href="#" id="logoutLinkMobile" style="display:none;">Logout</a></li>
+      </ul>
+    </li>
+  </ul>
+
+  <div class="panel-user-info">
+    <img src="img/profile-logo.jpg" class="profile-logo-slide" alt="Profile">
+    <p><strong>Name:</strong> Guest User</p>
+    <p><strong>Username:</strong> @guest</p>
+  </div>
+</div>
+
+<!-- ================= Main Content (Cards) ================= -->
+<main class="cards-container">
+  <div class="card" onclick="openModal('soilModal')">
+    <h3>Soil Calculator</h3>
+    <p>Analyze soil composition and pH for optimal crop growth.</p>
+  </div>
+
+  <div class="card" onclick="openModal('fertilizerModal')">
+    <h3>Fertilizer Calculator</h3>
+    <p>Determine the right amount of fertilizer for your crops.</p>
+  </div>
+
+  <div class="card" onclick="openModal('waterModal')">
+    <h3>Water Requirement Calculator</h3>
+    <p>Calculate water needs for different crops based on soil & climate.</p>
+  </div>
+
+  <div class="card" onclick="openModal('yieldModal')">
+    <h3>Crop Yield Calculator</h3>
+    <p>Estimate crop yield based on area, seed, and growth conditions.</p>
+  </div>
+
+  <div class="card" onclick="openModal('pesticideModal')">
+    <h3>Pesticide Calculator</h3>
+    <p>Find the correct dosage of pesticides for your farm area.</p>
+  </div>
+
+  <div class="card" onclick="openModal('profitModal')">
+    <h3>Cost & Profit Calculator</h3>
+    <p>Estimate production cost and expected profit for your crops.</p>
+  </div>
+</main>
+
+<!-- ================= Popup Modals ================= -->
+<div id="soilModal" class="modal">
+  <div class="modal-content">
+    <span class="close-btn" onclick="closeModal('soilModal')">&times;</span>
+    <h3>Soil Calculator</h3>
+    <label>pH Level:</label>
+    <input type="number" id="soilPH" placeholder="Enter soil pH">
+    <label>Nitrogen %:</label>
+    <input type="number" id="soilN" placeholder="Enter Nitrogen content">
+    <label>Phosphorus %:</label>
+    <input type="number" id="soilP" placeholder="Enter Phosphorus content">
+    <button onclick="calculateSoil()">Calculate</button>
+    <div class="result-box" id="soilResult"></div>
+  </div>
+</div>
+
+<div id="fertilizerModal" class="modal">
+  <div class="modal-content">
+    <span class="close-btn" onclick="closeModal('fertilizerModal')">&times;</span>
+    <h3>Fertilizer Calculator</h3>
+    <label>Field Area (in acres):</label>
+    <input type="number" id="fertArea" placeholder="Enter area">
+    <label>Crop Type Factor (1-5):</label>
+    <input type="number" id="cropFactor" placeholder="Enter crop factor">
+    <button onclick="calculateFertilizer()">Calculate</button>
+    <div class="result-box" id="fertResult"></div>
+  </div>
+</div>
+
+<div id="waterModal" class="modal">
+  <div class="modal-content">
+    <span class="close-btn" onclick="closeModal('waterModal')">&times;</span>
+    <h3>Water Requirement Calculator</h3>
+    <label>Field Area (in acres):</label>
+    <input type="number" id="waterArea" placeholder="Enter area">
+    <label>Crop Water Factor (1-5):</label>
+    <input type="number" id="waterFactor" placeholder="Enter factor">
+    <button onclick="calculateWater()">Calculate</button>
+    <div class="result-box" id="waterResult"></div>
+  </div>
+</div>
+
+<div id="yieldModal" class="modal">
+  <div class="modal-content">
+    <span class="close-btn" onclick="closeModal('yieldModal')">&times;</span>
+    <h3>Crop Yield Calculator</h3>
+    <label>Field Area (acres):</label>
+    <input type="number" id="yieldArea" placeholder="Enter area">
+    <label>Expected Yield per acre (kg):</label>
+    <input type="number" id="yieldPerAcre" placeholder="Enter yield per acre">
+    <button onclick="calculateYield()">Calculate</button>
+    <div class="result-box" id="yieldResult"></div>
+  </div>
+</div>
+
+<div id="pesticideModal" class="modal">
+  <div class="modal-content">
+    <span class="close-btn" onclick="closeModal('pesticideModal')">&times;</span>
+    <h3>Pesticide Calculator</h3>
+    <label>Field Area (acres):</label>
+    <input type="number" id="pestArea" placeholder="Enter area">
+    <label>Pesticide per acre (kg):</label>
+    <input type="number" id="pestRate" placeholder="Enter rate">
+    <button onclick="calculatePesticide()">Calculate</button>
+    <div class="result-box" id="pestResult"></div>
+  </div>
+</div>
+
+<div id="profitModal" class="modal">
+  <div class="modal-content">
+    <span class="close-btn" onclick="closeModal('profitModal')">&times;</span>
+    <h3>Cost & Profit Calculator</h3>
+    <label>Total Cost ($):</label>
+    <input type="number" id="totalCost" placeholder="Enter cost">
+    <label>Expected Revenue ($):</label>
+    <input type="number" id="totalRevenue" placeholder="Enter revenue">
+    <button onclick="calculateProfit()">Calculate</button>
+    <div class="result-box" id="profitResult"></div>
+  </div>
+</div>
+
+<!-- ================= Scripts ================= -->
+<script>
+/* Toggle side panel for mobile */
+function toggleSidePanel(){
+  document.querySelector('.side-panel').classList.toggle('open');
+}
+
+/* Close panel if clicking outside */
+window.addEventListener('click', function(e){
+  const panel = document.querySelector('.side-panel');
+  const hamburger = document.querySelector('.hamburger');
+  if(!panel.contains(e.target) && !hamburger.contains(e.target)){
+    panel.classList.remove('open');
+  }
+});
+
+/* Accordion submenu for side panel */
+const toggles = document.querySelectorAll('.side-toggle');
+toggles.forEach(toggle => {
+  toggle.addEventListener('click', function(){
+    const submenu = this.nextElementSibling;
+    document.querySelectorAll('.side-submenu').forEach(sm => {
+      if(sm !== submenu){ sm.style.maxHeight = null; }
+    });
+    if(submenu.style.maxHeight){
+      submenu.style.maxHeight = null;
+    } else { submenu.style.maxHeight = submenu.scrollHeight + "px"; }
+  });
+});
+
+/* Top buttons active state */
+document.querySelectorAll('.top-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.top-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+/* User info display */
+const user = JSON.parse(sessionStorage.getItem('user')) || null;
+const userId = user?.userId;
+if (!userId) {
+  alert("No user found. Please login again.");
+  window.location.href = "login-form.html";
+}
+function showUserInfo(user){
+  const fullName = user?.fullName || `${user?.name || 'Guest User'}`;
+  const username = user?.username ? `@${user.username}` : "@guest";
+  document.getElementById('full-name').innerText = fullName;
+  document.getElementById('username-display').innerText = username;
+  document.getElementById('logoutLink').style.display = user ? 'block' : 'none';
+  document.getElementById('logoutLinkMobile').style.display = user ? 'block' : 'none';
+  const panelInfo = document.querySelector('.panel-user-info');
+  panelInfo.innerHTML = `
+    <img src="img/profile-logo.jpg" class="profile-logo-slide" alt="Profile">
+    <p><strong>Name:</strong> ${fullName}</p>
+    <p><strong>Username:</strong> ${username}</p>
+  `;
+}
+showUserInfo(user);
+
+/* Logout functionality */
+/* Logout functionality */
+function deleteCookie(name) {
+  document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+}
+
+document.querySelectorAll('#logoutLink, #logoutLinkMobile').forEach(link => {
+  link.addEventListener('click', function(e) {
+    e.preventDefault();
+    
+    // Clear sessionStorage
+    sessionStorage.removeItem('user');
+
+    // Clear cookie
+    deleteCookie('user');
+
+    // Optional: clear user info UI
+    showUserInfo(null);
+
+    alert("Logged out successfully");
+    window.location.href = "index.html"; // redirect to login page
+  });
+});
+
+
+/* ================= Modal Functions ================= */
+function openModal(id){
+  document.getElementById(id).style.display = 'flex';
+}
+function closeModal(id){
+  document.getElementById(id).style.display = 'none';
+}
+
+/* ================= Calculator Functions ================= */
+function calculateSoil(){
+  const ph = parseFloat(document.getElementById('soilPH').value);
+  const n = parseFloat(document.getElementById('soilN').value);
+  const p = parseFloat(document.getElementById('soilP').value);
+  let result = `Soil Analysis: `;
+  result += (ph >=6 && ph<=7) ? 'Ideal pH. ' : 'Adjust pH. ';
+  result += `Nitrogen: ${n}%, Phosphorus: ${p}%`;
+  document.getElementById('soilResult').innerText = result;
+}
+
+function calculateFertilizer(){
+  const area = parseFloat(document.getElementById('fertArea').value);
+  const factor = parseFloat(document.getElementById('cropFactor').value);
+  const amount = area * factor * 50; // simple formula
+  document.getElementById('fertResult').innerText = `Fertilizer needed: ${amount} kg`;
+}
+
+function calculateWater(){
+  const area = parseFloat(document.getElementById('waterArea').value);
+  const factor = parseFloat(document.getElementById('waterFactor').value);
+  const water = area * factor * 500; // liters
+  document.getElementById('waterResult').innerText = `Water required: ${water} liters`;
+}
+
+function calculateYield(){
+  const area = parseFloat(document.getElementById('yieldArea').value);
+  const yieldPer = parseFloat(document.getElementById('yieldPerAcre').value);
+  const totalYield = area * yieldPer;
+  document.getElementById('yieldResult').innerText = `Estimated Yield: ${totalYield} kg`;
+}
+
+function calculatePesticide(){
+  const area = parseFloat(document.getElementById('pestArea').value);
+  const rate = parseFloat(document.getElementById('pestRate').value);
+  const total = area * rate;
+  document.getElementById('pestResult').innerText = `Pesticide required: ${total} kg`;
+}
+
+function calculateProfit(){
+  const cost = parseFloat(document.getElementById('totalCost').value);
+  const revenue = parseFloat(document.getElementById('totalRevenue').value);
+  const profit = revenue - cost;
+  document.getElementById('profitResult').innerText = `Estimated Profit: $${profit}`;
+}
+</script>
+</body>
+</html>

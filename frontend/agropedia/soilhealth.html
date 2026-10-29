@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌱 AgroScan - Blog</title>
+<link rel="icon" href="../img/agroscan-icon.png" type="image/png">
+<link rel="stylesheet" href="../css.files/header-footer.css">
+<style>
+  /* ================= Active Top Button ================= */
+  #active {
+    background: #66bb6a;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  }
+
+  /* ================= Blog Template Styles ================= */
+  .blog-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px;
+    background: #f5f5f5;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  /* Responsive Paragraph/Content Section */
+  .blog-content {
+    flex: 1;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    padding: 25px;
+  }
+
+  .blog-content h1 {
+    color: #388e3c;
+    margin-bottom: 20px;
+    font-size: 2.5rem;
+    text-align: center;
+  }
+
+  .blog-content p {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #555;
+    margin-bottom: 20px;
+    text-align: justify;
+  }
+
+  /* Responsive Side Photo Section */
+  .side-photo {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    padding: 20px;
+    text-align: center;
+  }
+
+  .side-photo img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  .side-photo caption {
+    font-size: 0.95rem;
+    color: #666;
+    margin-top: 10px;
+    display: block;
+  }
+
+  /* Author Details Section */
+  .author-details {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .author-details img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .author-info h3 {
+    color: #388e3c;
+    margin: 0 0 5px 0;
+  }
+
+  .author-info p {
+    margin: 0;
+    color: #666;
+    font-size: 0.95rem;
+  }
+
+  /* ================= Reusable Responsive Images Class ================= */
+  /* Add this class to any <img> tag for responsive behavior */
+  .responsive-img {
+    width: 100px;
+    height: 100px;
+    display: block;
+    border-radius: 10px; /* optional, for rounded corners */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1); /* optional, for subtle shadow */
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .blog-container {
+      padding: 15px;
+      gap: 20px;
+    }
+
+    .blog-content h1 {
+      font-size: 2rem;
+    }
+
+    .blog-content p {
+      font-size: 1rem;
+    }
+
+    .author-details {
+      flex-direction: column;
+      text-align: center;
+      gap: 10px;
+    }
+  }
+
+/* ================= Author Details Section ================= */
+.author-details {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  padding: 30px;
+  display: flex;
+  align-items: center;
+  gap: 25px;
+}
+
+/* Specific class for author photo */
+.author-details .author-img {
+  width: 200px;      /* bigger photo */
+  height: 200px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.author-info h3 {
+  color: #388e3c;
+  margin: 0 0 10px 0;
+  font-size: 1.8rem;
+}
+
+.author-info p {
+  margin: 0;
+  color: #555;
+  font-size: 1.1rem;
+  line-height: 1.8;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .author-details {
+    flex-direction: column;
+    text-align: center;
+    gap: 15px;
+  }
+
+  .author-details .author-img {
+    width: 150px;   /* smaller on mobile */
+    height: 150px;
+  }
+
+  .author-info h3 {
+    font-size: 1.5rem;
+  }
+
+  .author-info p {
+    font-size: 1rem;
+  }
+}
+.author-details img{
+    width:200px;
+    height:200px;
+}
+</style>
+</head>
+<body>
+
+<!-- ================= Header ================= -->
+<header>
+  <a href="../home.html" class="logo-area">
+    <img src="../img/agroscan-logo.png" alt="AgroScan Logo" class="logo">
+  </a>
+
+  <div class="nav-options">
+    <!-- Courses Dropdown -->
+    <div class="dropdown">
+      <button class="dropbtn">Organs</button>
+      <div class="dropdown-content">
+        <a href="../agropedia/index.agropedia.html">AgroPedia</a>
+        <a href="../agroshop/index.agroshop.html">AgroShop</a>
+        <a href="../agroawareness/index.agroawareness.html">AgroAwareness</a>
+        <a href="../agroscheme/index.agroscheme.html">AgroScheme</a>
+      </div>
+    </div>
+
+    <!-- Profile Dropdown -->
+    <div class="dropdown profile-dropdown">
+      <div class="profile-area">
+        <img src="../img/profile-logo.jpg" class="profile-logo" alt="Profile">
+        <div class="profile-info">
+          <span id="full-name">Guest User</span>
+          <small id="username-display">@guest</small>
+        </div>
+      </div>
+      <div class="dropdown-content profile-content">
+        <a href="../profile.html">Profile</a>
+        <a href="../login-form.html">Login</a>
+        <a href="#" id="logoutLink" style="display:none;">Logout</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hamburger for mobile -->
+  <div class="hamburger" onclick="toggleSidePanel()">
+    <span class="bar"></span>
+    <span class="bar"></span>
+    <span class="bar"></span>
+  </div>
+</header>
+
+<!-- ================= Top Navigation Bar ================= -->
+<div class="top-bar">
+  <a href="../home.html" class="top-btn" id="n-active">Home</a>
+  <a href="#" class="top-btn" id="searchBtn">Search</a>
+  <a href="../chat.html" class="top-btn" id="translateBtn">Script</a>
+  <a href="./index.agropedia.html" class="top-btn" id="active">Blog</a>
+</div>
+
+<script>
+  // Function to highlight only the exact word
+  function highlightWord(container, word) {
+    if (!word) return;
+
+    // Remove previous highlights
+    container.querySelectorAll('mark').forEach(mark => {
+      const parent = mark.parentNode;
+      parent.replaceChild(document.createTextNode(mark.textContent), mark);
+      parent.normalize();
+    });
+
+    // Recursive function to traverse text nodes
+    function traverse(node) {
+      if (node.nodeType === 3) { // Text node
+        const regex = new RegExp(`\\b(${word})\\b`, 'gi'); // whole word match
+        if (regex.test(node.nodeValue)) {
+          const span = document.createElement('span');
+          span.innerHTML = node.nodeValue.replace(regex, '<mark>$1</mark>');
+          node.parentNode.replaceChild(span, node);
+        }
+      } else if (node.nodeType === 1 && node.childNodes && !['SCRIPT','STYLE'].includes(node.tagName)) {
+        node.childNodes.forEach(child => traverse(child));
+      }
+    }
+
+    traverse(container);
+  }
+
+  // Search button click
+  document.getElementById('searchBtn').addEventListener('click', function(e){
+    e.preventDefault();
+    const query = prompt("Enter word to search in blog:");
+    if(query){
+      const blogContent = document.querySelector('.blog-content');
+      highlightWord(blogContent, query);
+    }
+  });
+
+  // Next button: browser translation alert
+  document.getElementById('translateBtn').addEventListener('click', function(e){
+    e.preventDefault();
+    alert("Use your browser's translate feature (Right-click → Translate).");
+  });
+</script>
+
+
+
+
+
+
+<!-- ================= Side Panel ================= -->
+<div class="side-panel">
+  <div class="close-btn" onclick="toggleSidePanel()">×</div>
+  <ul class="side-menu">
+    <li><a href="../home.html">Home</a></li>
+    <li>
+      <button class="side-toggle">Organs</button>
+      <ul class="side-submenu">
+        <a href="../agropedia/index.agropedia.html">AgroPedia</a>
+        <a href="../agroshop/index.agroshop.html">AgroShop</a>
+        <a href="../agroawareness/index.agroawareness.html">AgroAwareness</a>
+        <a href="../agroscheme/index.agroscheme.html">AgroScheme</a>
+      </ul>
+    </li>
+    <li>
+      <button class="side-toggle">Account</button>
+      <ul class="side-submenu">
+        <li><a href="../profile.html">Profile</a></li>
+        <li><a href="../login-form.html">Login</a></li>
+        <li><a href="#" id="logoutLinkMobile" style="display:none;">Logout</a></li>
+      </ul>
+    </li>
+  </ul>
+
+  <div class="panel-user-info">
+    <img src="../img/profile-logo.jpg" class="profile-logo-slide" alt="Profile">
+    <p><strong>Name:</strong> Guest User</p>
+    <p><strong>Username:</strong> @guest</p>
+  </div>
+</div>
+
+<!-- ================= Main Content (Blog Template) ================= -->
+<main class="blog-container">
+  <main class="blog-container">
+  <section class="blog-content">
+  <h1>The Importance of Soil Health</h1>
+
+  <p>Healthy soil is the backbone of sustainable agriculture. It provides essential nutrients, water retention, and structural support for plants. Farmers who invest in maintaining soil health often see improved crop yields and reduced dependency on chemical inputs.</p>
+
+  <p>Key aspects of soil health include proper pH balance, nutrient availability, and organic matter content. Testing soil regularly helps determine deficiencies and guides the right amendments, such as lime for acidic soils or compost to boost fertility.</p>
+
+  <h1>Techniques to Improve Soil Quality</h1>
+
+  <p>Practices such as crop rotation, cover cropping, reduced tillage, and adding organic matter enhance soil structure and microbial activity. Cover crops protect soil from erosion, improve nutrient cycling, and suppress weeds naturally.</p>
+
+  <p>Integrating organic matter, like compost or green manure, increases water retention, promotes beneficial microorganisms, and strengthens soil resilience against pests and diseases.</p>
+
+  <h1>Monitoring and Sustainable Practices</h1>
+
+  <p>Using soil testing kits or pH meters, farmers can track the effectiveness of interventions. Combining scientific approaches with traditional farming knowledge ensures long-term soil fertility and sustainable food production.</p>
+</section>
+
+</main>
+
+
+
+  <section class="author-details">
+    <img src="../img/abhinav.jpg" alt="Author Photo" class="responsive-img">
+    <div class="author-info">
+      <h3>Abhinav Ranjan</h3>
+      <p>Minor Farmer and Researcher experimenting with sustainable farming techniques. Contributes practical insights and local knowledge to improve crop yield and soil health.</p>
+    </div>
+  </section>
+</main>
+
+
+<!-- ================= Scripts (Extracted: Toggle, User Info, Logout Only) ================= -->
+<script>
+/* Toggle side panel for mobile */
+function toggleSidePanel(){
+  document.querySelector('.side-panel').classList.toggle('open');
+}
+
+/* Close panel if clicking outside */
+window.addEventListener('click', function(e){
+  const panel = document.querySelector('.side-panel');
+  const hamburger = document.querySelector('.hamburger');
+  if(!panel.contains(e.target) && !hamburger.contains(e.target)){
+    panel.classList.remove('open');
+  }
+});
+
+/* Accordion submenu for side panel */
+const toggles = document.querySelectorAll('.side-toggle');
+toggles.forEach(toggle => {
+  toggle.addEventListener('click', function(){
+    const submenu = this.nextElementSibling;
+
+    // Close other submenus
+    document.querySelectorAll('.side-submenu').forEach(sm => {
+      if(sm !== submenu){
+        sm.style.maxHeight = null;
+      }
+    });
+
+    // Toggle current submenu
+    if(submenu.style.maxHeight){
+      submenu.style.maxHeight = null;
+    } else {
+      submenu.style.maxHeight = submenu.scrollHeight + "px";
+    }
+  });
+});
+
+/* Top buttons active state */
+document.querySelectorAll('.top-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.top-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+/* User info display */
+const user = JSON.parse(sessionStorage.getItem('user')) || null;
+const userId = user?.userId;
+
+if (!userId) {
+  alert("No user found. Please login again.");
+  window.location.href = "../login-form.html";
+}
+
+function showUserInfo(user){
+  const fullName = user?.fullName || `${user?.name || 'Guest User'}`;
+  const username = user?.username ? `@${user.username}` : "@guest";
+  document.getElementById('full-name').innerText = fullName;
+  document.getElementById('username-display').innerText = username;
+  document.getElementById('logoutLink').style.display = user ? 'block' : 'none';
+  document.getElementById('logoutLinkMobile').style.display = user ? 'block' : 'none';
+  const panelInfo = document.querySelector('.panel-user-info');
+  panelInfo.innerHTML = `
+    <img src="../img/profile-logo.jpg" class="profile-logo-slide" alt="Profile">
+    <p><strong>Name:</strong> ${fullName}</p>
+    <p><strong>Username:</strong> ${username}</p>
+  `;
+}
+showUserInfo(user);
+
+/* Logout functionality */
+function deleteCookie(name) {
+  document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+}
+
+document.querySelectorAll('#logoutLink, #logoutLinkMobile').forEach(link => {
+  link.addEventListener('click', function(e) {
+    e.preventDefault();
+    
+    // Clear sessionStorage
+    sessionStorage.removeItem('user');
+
+    // Clear cookie
+    deleteCookie('user');
+
+    // Optional: clear user info UI
+    showUserInfo(null);
+
+    alert("Logged out successfully");
+    window.location.href = "../index.html"; // redirect to login page
+  });
+});
+</script>
+</body>
+</html>

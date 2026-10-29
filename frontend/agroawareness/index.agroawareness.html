@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌱 AgroScan - AgroKnowMore</title>
+<link rel="icon" href="../img/agroscan-icon.png" type="image/png">
+<link rel="stylesheet" href="../css.files/header-footer.css">
+<style>
+/* ================= ACTIVE TOP BUTTON ================= */
+#active {
+  background: #66bb6a;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+
+/* ================= BLOG GRID ================= */
+.shop-container {
+  max-width: 1300px;
+  margin: 40px auto;
+  padding: 20px;
+}
+
+.shop-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.shop-header h1 {
+  font-size: 2.6rem;
+  color: #2e7d32;
+  margin-bottom: 10px;
+}
+
+.shop-header p {
+  font-size: 1.1rem;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+/* Blog Grid */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+}
+
+/* Blog Card Styling */
+.product-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+  display: flex;
+  flex-direction: column;
+  transition: 0.3s;
+}
+
+.product-card:hover {
+  transform: translateY(-6px);
+}
+
+.product-card img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 14px 14px 0 0;
+}
+
+.product-info {
+  padding: 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.product-info h3 {
+  font-size: 1.3rem;
+  color: #333;
+  margin-bottom: 6px;
+}
+
+.product-info p {
+  font-size: 0.95rem;
+  color: #666;
+  margin-bottom: 8px;
+  flex-grow: 1;
+}
+
+.author-name {
+  font-size: 0.85rem;
+  color: #2e7d32;
+  margin-bottom: 12px;
+}
+
+.card-btn {
+  display: inline-block;
+  text-decoration: none;
+  padding: 10px 15px;
+  background-color: #66bb6a;
+  color: #fff;
+  border-radius: 5px;
+  font-weight: 600;
+  transition: 0.2s;
+  text-align: center;
+  cursor: pointer;
+}
+
+.card-btn:hover {
+  background-color: #57a05a;
+}
+
+/* ================= MODALS ================= */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  justify-content: center;
+  align-items: center;
+  z-index: 3000;
+}
+
+.modal.open {
+  display: flex;
+}
+
+.modal-content {
+  background: #fff;
+  width: 90%;
+  max-width: 600px;
+  border-radius: 14px;
+  padding: 20px;
+  position: relative;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-content h3 {
+  color: #2e7d32;
+  margin-bottom: 5px;
+}
+
+.modal-content p.author, .modal-content p.desc {
+  font-size: 0.95rem;
+  color: #555;
+  margin-bottom: 10px;
+}
+
+.modal-content pre {
+  background: #f3f3f3;
+  padding: 10px;
+  border-radius: 8px;
+  white-space: pre-wrap;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  overflow-x: auto;
+}
+
+.close-modal {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 1.8rem;
+  color: #555;
+  cursor: pointer;
+}
+
+/* SEARCH & SORT MODALS */
+.search-sort-modal .modal-content {
+  max-width: 450px;
+}
+
+.search-sort-modal input[type="text"] {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-bottom: 15px;
+  font-size: 1rem;
+}
+
+.search-sort-modal .radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.search-sort-modal label {
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.search-sort-modal button {
+  padding: 10px 15px;
+  background-color: #66bb6a;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  width: 100%;
+}
+
+.search-sort-modal button:hover { opacity: 0.9; }
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .shop-header h1 { font-size: 2rem; }
+  .product-card img { height: 150px; }
+}
+
+@media(max-width:500px){
+  .shop-header h1 { font-size: 1.6rem; }
+  .shop-header p { font-size: 0.95rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ================= HEADER ================= -->
+<header>
+  <a href="../home.html" class="logo-area">
+    <img src="../img/agroscan-logo.png" alt="AgroScan Logo" class="logo">
+  </a>
+  <div class="nav-options">
+    <div class="dropdown">
+      <button class="dropbtn">Organs</button>
+      <div class="dropdown-content">
+        <a href="../agropedia/index.agropedia.html">AgroPedia</a>
+        <a href="../agroshop/index.agroshop.html">AgroShop</a>
+        <a href="../agroawareness/index.agroawareness.html">AgroAwareness</a>
+        <a href="../agroscheme/index.agroscheme.html">AgroScheme</a>
+      </div>
+    </div>
+    <div class="dropdown profile-dropdown">
+      <div class="profile-area">
+        <img src="../img/profile-logo.jpg" class="profile-logo" alt="Profile">
+        <div class="profile-info">
+          <span id="full-name">Guest User</span>
+          <small id="username-display">@guest</small>
+        </div>
+      </div>
+      <div class="dropdown-content profile-content">
+        <a href="../profile.html">Profile</a>
+        <a href="../login-form.html">Login</a>
+        <a href="#" id="logoutLink" style="display:none;">Logout</a>
+      </div>
+    </div>
+  </div>
+  <div class="hamburger" onclick="toggleSidePanel()">
+    <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+  </div>
+</header>
+
+<!-- ================= TOP NAV ================= -->
+<div class="top-bar">
+  <a href="../home.html" class="top-btn">Home</a>
+  <a href="#" class="top-btn" id="search-btn">Search</a>
+  <a href="#" class="top-btn" id="sort-btn">Sort</a>
+  <a href="../agroawareness/index.agroawareness.html" class="top-btn" id="active">Aware</a>
+</div>
+
+<!-- ================= SIDE PANEL ================= -->
+<div class="side-panel">
+  <div class="close-btn" onclick="toggleSidePanel()">×</div>
+  <ul class="side-menu">
+    <li><a href="../home.html">Home</a></li>
+    <li>
+      <button class="side-toggle">Organs</button>
+      <ul class="side-submenu">
+        <a href="../agropedia/index.agropedia.html">AgroPedia</a>
+        <a href="../agroshop/index.agroshop.html">AgroShop</a>
+        <a href="../agroawareness/index.agroawareness.html">AgroAwareness</a>
+        <a href="../agroscheme/index.agroscheme.html">AgroScheme</a>
+      </ul>
+    </li>
+    <li>
+      <button class="side-toggle">Account</button>
+      <ul class="side-submenu">
+        <li><a href="../profile.html">Profile</a></li>
+        <li><a href="../login-form.html">Login</a></li>
+        <li><a href="#" id="logoutLinkMobile" style="display:none;">Logout</a></li>
+      </ul>
+    </li>
+  </ul>
+  <div class="panel-user-info">
+    <img src="../img/profile-logo.jpg" class="profile-logo-slide" alt="Profile">
+    <p><strong>Name:</strong> Guest User</p>
+    <p><strong>Username:</strong> @guest</p>
+  </div>
+</div>
+
+<!-- ================= CONTENT ================= -->
+<main class="shop-container">
+  <div class="shop-header">
+    <h1>AgroKnowMore by AgroAwareness</h1>
+    <p>Explore insightful articles, tips, and guides about sustainable farming and agro-awareness.</p>
+  </div>
+
+  <!-- Blog Grid -->
+  <div class="product-grid" id="productGrid"></div>
+</main>
+
+<!-- ================= ARTICLE MODAL ================= -->
+<div class="modal" id="articleModal">
+  <div class="modal-content">
+    <span class="close-modal" id="closeArticle">&times;</span>
+    <h3 id="modalTitle"></h3>
+    <p class="author" id="modalAuthor"></p>
+    <p class="desc" id="modalDesc"></p>
+    <pre id="modalContent"></pre>
+  </div>
+</div>
+
+<!-- ================= SEARCH MODAL ================= -->
+<div class="modal search-sort-modal" id="searchModal">
+  <div class="modal-content">
+    <span class="close-modal" id="closeSearch">&times;</span>
+    <h3>Search Blogs</h3>
+    <input type="text" id="blogSearchInput" placeholder="Search by title or author">
+    <button id="performSearch">Search</button>
+  </div>
+</div>
+
+<!-- ================= SORT MODAL ================= -->
+<div class="modal search-sort-modal" id="sortModal">
+  <div class="modal-content">
+    <span class="close-modal" id="closeSort">&times;</span>
+    <h3>Sort Blogs</h3>
+    <div class="radio-group">
+      <label><input type="radio" name="sort" value="title"> By Title</label>
+      <label><input type="radio" name="sort" value="author"> By Author</label>
+      <label><input type="radio" name="sort" value="date"> By Date</label>
+    </div>
+    <button id="applySort">Apply</button>
+  </div>
+</div>
+
+<!-- ================= JS ================= -->
+<script>
+// ======= SIDE PANEL =======
+const sidePanel = document.querySelector(".side-panel");
+function toggleSidePanel(){ sidePanel.classList.toggle("open"); }
+document.querySelectorAll(".side-toggle").forEach(btn => {
+  btn.addEventListener("click", () => btn.nextElementSibling.classList.toggle("open"));
+});
+
+const blogs = [
+  {title:"Sustainable Farming Practices", desc:"Ways to farm without harming the environment", author:"Abhinav Ranjan", date:"2025-10-04", content:"Rotate crops to maintain soil fertility. Avoid excessive chemical fertilizers. Adopt cover crops to prevent soil erosion.", img:"https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=900&q=80"},
+  {title:"Soil Health Awareness", desc:"Maintain fertile and productive soil", author:"Abhinav Ranjan", date:"2025-10-04", content:"Test your soil regularly for nutrients. Use organic compost and manure. Avoid over-tilling which can degrade soil structure.", img:"https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80"},
+  {title:"Efficient Water Usage", desc:"Save water while maximizing yield", author:"Abhinav Ranjan", date:"2025-10-04", content:"Install drip or sprinkler irrigation systems. Collect and use rainwater. Monitor soil moisture to avoid overwatering.", img:"https://images.unsplash.com/photo-1564849444446-f876dcef378e?auto=format&fit=crop&w=900&q=80"},
+  {title:"Integrated Pest Management", desc:"Control pests naturally", author:"Abhinav Ranjan", date:"2025-10-04", content:"Use beneficial insects to reduce pests. Plant pest-repelling companion crops. Minimize chemical pesticide usage.", img:"https://images.unsplash.com/photo-1581090466611-7e0cdfbb6799?auto=format&fit=crop&w=900&q=80"},
+  {title:"Organic Fertilization", desc:"Boost crop growth naturally", author:"Abhinav Ranjan", date:"2025-10-04", content:"Use compost and vermicompost regularly. Avoid synthetic fertilizers. Incorporate green manure crops.", img:"https://images.unsplash.com/photo-1589927986089-35812388d1f4?auto=format&fit=crop&w=900&q=80"},
+  {title:"Crop Rotation Benefits", desc:"Enhance soil and prevent diseases", author:"Abhinav Ranjan", date:"2025-10-04", content:"Rotate crops every season. Prevents soil nutrient depletion. Reduces pest and disease buildup.", img:"https://images.unsplash.com/photo-1598514982831-9f5b7f2a3b1a?auto=format&fit=crop&w=900&q=80"},
+  {title:"Rainwater Harvesting", desc:"Collect and store rainwater for irrigation", author:"Abhinav Ranjan", date:"2025-10-04", content:"Install rainwater collection systems. Use stored water during dry periods. Reduces dependence on groundwater.", img:"https://images.unsplash.com/photo-1625246333195-c4b9b7e8e682?auto=format&fit=crop&w=900&q=80"},
+  {title:"Mulching Techniques", desc:"Protect soil and retain moisture", author:"Abhinav Ranjan", date:"2025-10-04", content:"Apply organic mulch around plants. Reduces evaporation. Prevents weed growth and soil erosion.", img:"https://images.unsplash.com/photo-1622901843942-34bba3dfb5d7?auto=format&fit=crop&w=900&q=80"},
+  {title:"Pollinator Protection", desc:"Support bees and other pollinators", author:"Abhinav Ranjan", date:"2025-10-04", content:"Plant flowering crops. Avoid harmful pesticides. Provide habitats for pollinators.", img:"https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=900&q=80"},
+  {title:"Climate-Smart Agriculture", desc:"Adapt to changing climate", author:"Abhinav Ranjan", date:"2025-10-04", content:"Use drought-resistant crop varieties. Implement water-saving techniques. Monitor weather forecasts for better planning.", img:"https://images.unsplash.com/photo-1591089861922-c49c16a97a7a?auto=format&fit=crop&w=900&q=80"},
+  {title:"Agroforestry Practices", desc:"Combine trees and crops for sustainability", author:"Abhinav Ranjan", date:"2025-10-04", content:"Plant trees along fields. Improve soil fertility and reduce erosion. Provide shade and extra income.", img:"https://images.unsplash.com/photo-1599058917212-d750089bc07c?auto=format&fit=crop&w=900&q=80"},
+  {title:"Weed Management Tips", desc:"Reduce competition for nutrients", author:"Abhinav Ranjan", date:"2025-10-04", content:"Regularly remove weeds manually. Use cover crops to suppress weeds. Avoid over-reliance on herbicides.", img:"https://images.unsplash.com/photo-1577985051167-d1bdbdfd59c7?auto=format&fit=crop&w=900&q=80"},
+  {title:"Organic Seed Usage", desc:"Promote natural growth and biodiversity", author:"Abhinav Ranjan", date:"2025-10-04", content:"Use certified organic seeds. Avoid genetically modified seeds. Supports healthy ecosystems.", img:"https://images.unsplash.com/photo-1598030151267-cbbf918af7d3?auto=format&fit=crop&w=900&q=80"},
+  {title:"Fertilizer Scheduling", desc:"Apply nutrients at the right time", author:"Abhinav Ranjan", date:"2025-10-04", content:"Test soil nutrient levels. Apply fertilizers based on crop needs. Prevents over-fertilization and pollution.", img:"https://images.unsplash.com/photo-1589927986089-35812388d1f4?auto=format&fit=crop&w=900&q=80"},
+  {title:"Post-Harvest Handling", desc:"Reduce losses and maintain quality", author:"Abhinav Ranjan", date:"2025-10-04", content:"Properly clean and store crops. Avoid exposure to moisture and pests. Extend shelf-life and market value.", img:"https://images.unsplash.com/photo-1600783243997-80b4a2fda772?auto=format&fit=crop&w=900&q=80"},
+  {title:"Farm Safety Awareness", desc:"Protect yourself and your workers", author:"Abhinav Ranjan", date:"2025-10-04", content:"Wear protective gear. Maintain farm equipment. Train workers for emergency response.", img:"https://images.unsplash.com/photo-1598511725714-58dfaed58e24?auto=format&fit=crop&w=900&q=80"},
+  {title:"Digital Farming", desc:"Use technology to improve efficiency", author:"Abhinav Ranjan", date:"2025-10-04", content:"Use mobile apps to monitor soil and weather. Implement smart irrigation. Adopt precision agriculture tools.", img:"https://images.unsplash.com/photo-1604079622567-3f4f8d9e0b35?auto=format&fit=crop&w=900&q=80"},
+  {title:"Livestock Management", desc:"Ensure animal health and productivity", author:"Abhinav Ranjan", date:"2025-10-04", content:"Provide clean water and balanced feed. Vaccinate regularly. Keep shelters hygienic.", img:"https://images.unsplash.com/photo-1516528387618-afa90b13e000?auto=format&fit=crop&w=900&q=80"},
+  {title:"Renewable Energy on Farms", desc:"Adopt eco-friendly energy solutions", author:"Abhinav Ranjan", date:"2025-10-04", content:"Install solar panels for irrigation. Use biogas for cooking and heating. Reduce carbon emissions.", img:"https://images.unsplash.com/photo-1566053534511-01d3d6a1b07b?auto=format&fit=crop&w=900&q=80"},
+  {title:"Farm Waste Recycling", desc:"Turn waste into useful resources", author:"Abhinav Ranjan", date:"2025-10-04", content:"Compost organic waste. Reuse water where possible. Convert animal waste into biogas.", img:"https://images.unsplash.com/photo-1617183034904-163f5f9b1784?auto=format&fit=crop&w=900&q=80"}
+];
+
+
+
+// ======= RENDER BLOGS =======
+function renderBlogs(filtered=[]){
+  const grid = document.getElementById("productGrid");
+  grid.innerHTML = "";
+  const display = filtered.length? filtered : blogs;
+
+  display.forEach((blog,index)=>{
+    const card = document.createElement("div");
+    card.className = "product-card";
+    card.innerHTML=`
+      <div class="product-info">
+        <h3>${blog.title}</h3>
+        <p>${blog.desc}</p>
+        <div class="author-name">By ${blog.author}</div>
+        <button class="card-btn" data-index="${index}">Read More</button>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+
+  // Open modal on click
+  document.querySelectorAll(".card-btn").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      const idx = btn.dataset.index;
+      openArticleModal(display[idx]);
+    });
+  });
+}
+
+// ======= ARTICLE MODAL =======
+const articleModal = document.getElementById("articleModal");
+const modalTitle = document.getElementById("modalTitle");
+const modalAuthor = document.getElementById("modalAuthor");
+const modalDesc = document.getElementById("modalDesc");
+const modalContent = document.getElementById("modalContent");
+document.getElementById("closeArticle").addEventListener("click",()=> articleModal.classList.remove("open"));
+
+function openArticleModal(blog){
+  modalTitle.innerText = blog.title;
+  modalAuthor.innerText = `By ${blog.author}`;
+  modalDesc.innerText = blog.desc;
+  modalContent.innerText = blog.content;
+  articleModal.classList.add("open");
+}
+
+// ======= SEARCH & SORT MODALS =======
+const searchModal = document.getElementById("searchModal");
+const sortModal = document.getElementById("sortModal");
+document.getElementById("search-btn").addEventListener("click",()=>searchModal.classList.add("open"));
+document.getElementById("sort-btn").addEventListener("click",()=>sortModal.classList.add("open"));
+document.getElementById("closeSearch").addEventListener("click",()=>searchModal.classList.remove("open"));
+document.getElementById("closeSort").addEventListener("click",()=>sortModal.classList.remove("open"));
+
+// Search
+document.getElementById("performSearch").addEventListener("click",()=>{
+  const query = document.getElementById("blogSearchInput").value.toLowerCase();
+  const result = blogs.filter(b=> b.title.toLowerCase().includes(query) || b.author.toLowerCase().includes(query));
+  renderBlogs(result);
+  searchModal.classList.remove("open");
+});
+
+// Sort
+document.getElementById("applySort").addEventListener("click",()=>{
+  const sortVal = document.querySelector('input[name="sort"]:checked')?.value;
+  if(!sortVal) return;
+  const sorted = [...blogs].sort((a,b)=>{
+    if(sortVal==='date') return new Date(a.date)-new Date(b.date);
+    return a[sortVal].localeCompare(b[sortVal]);
+  });
+  renderBlogs(sorted);
+  sortModal.classList.remove("open");
+});
+
+// ======= ACCORDION =======
+document.querySelectorAll('.side-toggle').forEach(toggle=>{
+  toggle.addEventListener('click',function(){
+    const submenu = this.nextElementSibling;
+    document.querySelectorAll('.side-submenu').forEach(sm=>{
+      if(sm!==submenu) sm.style.maxHeight = null;
+    });
+    submenu.style.maxHeight ? submenu.style.maxHeight=null : submenu.style.maxHeight=submenu.scrollHeight+"px";
+  });
+});
+
+// ======= PROFILE & LOGOUT =======
+const defaultProfile = "../img/profile-logo.jpg";
+function populateHeaderSide(){
+  const user = JSON.parse(sessionStorage.getItem("user"));
+  const fullName = user?.name || "Guest User";
+  const username = user?.username ? `@${user.username}` : "@guest";
+  const profileImg = user?.profileUrl || defaultProfile;
+
+  document.getElementById("full-name").innerText = fullName;
+  document.getElementById("username-display").innerText = username;
+
+  const logoutLinks = [document.getElementById("logoutLink"), document.getElementById("logoutLinkMobile")];
+  logoutLinks.forEach(link=> link.style.display = user ? "block" : "none");
+
+  const panelInfo = document.querySelector(".panel-user-info");
+  if(panelInfo){
+    panelInfo.innerHTML=`
+      <img src="${profileImg}" onerror="this.src='${defaultProfile}'" class="profile-logo-slide" alt="Profile">
+      <p><strong>Name:</strong> ${fullName}</p>
+      <p><strong>Username:</strong> ${username}</p>
+    `;
+  }
+
+  const profileDropdownImg = document.querySelector(".profile-area img");
+  if(profileDropdownImg){
+    profileDropdownImg.src = profileImg;
+    profileDropdownImg.onerror=function(){ this.src=defaultProfile; };
+  }
+}
+
+// ============================
+// Logout
+// ============================
+function deleteCookie(name) {
+  document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+}
+document.querySelectorAll('#logoutLink, #logoutLinkMobile').forEach(link => {
+  link.addEventListener('click', function(e) {
+    e.preventDefault();
+
+    // Clear sessionStorage and cookies
+    sessionStorage.removeItem('user');
+    document.cookie = 'user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+
+    // Redirect to login page with auto-refresh
+    window.location.href = "../login-form.html";
+    window.location.reload(); // Forces reload of login page
+  });
+});
+// ====== Call on page load ======
+populateHeaderSide();
+
+
+// ================== LOGOUT ==================
+const user = JSON.parse(sessionStorage.getItem('user')) || null;
+const userId = user?.userId;
+
+if (!userId) {
+  alert("No user found. Please login again.");
+  window.location.href = "../login-form.html";
+}
+
+
+// ======= INITIALIZE =======
+window.addEventListener("DOMContentLoaded",()=>{
+  populateHeaderSide();
+  renderBlogs();
+});
+</script>
+</body>
+</html>

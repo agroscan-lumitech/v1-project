@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌱 AgroScan Chat</title>
+<link rel="icon" href="img/agroscan-icon.png" type="image/png">
+<link rel="stylesheet" href="css.files/header-footer.css">
+
+<style>
+/* ================= Reset ================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Arial, sans-serif;
+}
+html, body {
+  height: 100%;
+  background: #f4f7f4;
+  color: #222;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+#active {
+  background: #66bb6a;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+/* ================= Main Chat Container ================= */
+main {
+  display: flex;
+  flex-direction: column;
+  margin: 15px 5px 10px 5px; 
+  padding: 10px;
+  gap: 10px;
+  height: calc(88vh - 130px);
+}
+
+/* ================= Chat Window ================= */
+#chatWindow {
+  flex: 1;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+/* Chat content container keeps Load button at top */
+#chatContent {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  gap: 8px;
+}
+
+/* ================= Chats Button ================= */
+#loadChatsBtn {
+  align-self: center;
+  background-color: #388e3c;
+  border: none;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 15px;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+#loadChatsBtn:hover { background-color: #1b5e20; }
+
+/* ================= Clear Chats Button ================= */
+#clearChatsBtn {
+  align-self: center;
+  background-color: #d32f2f; /* red for danger */
+  border: none;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 15px;
+  cursor: pointer;
+  margin-bottom: 10px;
+  margin-left: 5px;
+}
+
+#clearChatsBtn:hover {
+  background-color: #b71c1c;
+}
+
+/* Separation between buttons and chat messages */
+#chatContent .button-group {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;             /* space between buttons */
+  margin-bottom: 12px;  /* space below buttons */
+  margin-top: 10px;
+  padding-bottom: 8px;  /* space inside bottom of the group */
+  border-bottom: 1px solid #ccc; /* subtle dividing line */
+}
+
+
+
+/* ================= Messages ================= */
+.message {
+  padding: 8px 12px;
+  border-radius: 20px;
+  max-width: 75%;
+  word-wrap: break-word;
+}
+
+.user {
+  background-color: #2e7d32;
+  color: white;
+  align-self: flex-end;
+}
+
+.ai {
+  background-color: #dcedc1;
+  color: #2e7d32;
+  align-self: flex-start;
+}
+
+/* ================= Chat Form ================= */
+form#chatForm {
+  display: flex;
+  gap: 5px;
+}
+
+input[type="text"] {
+  flex: 1;
+  padding: 10px;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  outline: none;
+}
+
+button[type="submit"] {
+  padding: 10px 20px;
+  border-radius: 20px;
+  border: none;
+  background-color: #2e7d32;
+  color: white;
+  cursor: pointer;
+}
+
+button[type="submit"]:hover {
+  background-color: #1b5e20;
+}
+
+/* ================= Scrollbar ================= */
+#chatWindow::-webkit-scrollbar {
+  width: 8px;
+}
+#chatWindow::-webkit-scrollbar-thumb {
+  background-color: #2e7d32;
+  border-radius: 4px;
+}
+#chatWindow::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* ================= Responsive ================= */
+@media(max-width:1024px){
+  main { margin-top: 15px; height: calc(88vh - 130px); }
+}
+@media(max-width:768px){
+  main { margin-top: 15px; height: calc(88vh - 130px); }
+}
+@media(max-width:480px){
+  main { margin-top: 15px; height: calc(88vh - 130px); }
+}
+
+/* Chat adjustments for tablets */
+@media(max-width:1024px){
+  main { margin: 10px; height: calc(85vh - 120px); }
+  #chatWindow { font-size: 14px; }
+  main {height: calc(91vh - 130px);}
+}
+
+/* Chat adjustments for mobile */
+@media(max-width:768px){
+  main { margin: 5px; height: calc(80vh - 100px); }
+  #chatContent { gap: 6px; }
+  .message { max-width: 90%; padding: 6px 10px; font-size: 14px; }
+  form#chatForm { flex-direction: column; gap: 5px; }
+  input[type="text"] { width: 100%; border-radius: 15px; }
+  button[type="submit"] { width: 100%; border-radius: 15px; }
+  #loadChatsBtn, #clearChatsBtn { width: 100%; margin: 5px 0; }
+   main {height: calc(94vh - 130px);}
+}
+@media(max-width:480px){
+  .message { font-size: 13px; padding: 5px 8px; }
+  #chatWindow { height: calc(75vh - 90px); }
+  button[type="submit"] { padding: 8px 0; }
+   main {height: calc(95vh - 130px);}
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- ================= Header ================= -->
+<div class="no-adjust">
+<header>
+  <a href="home.html" class="logo-area">
+    <img src="img/agroscan-logo.png" alt="AgroScan Logo" class="logo">
+  </a>
+
+  <div class="nav-options">
+    <!-- Courses Dropdown -->
+    <div class="dropdown">
+      <button class="dropbtn">Organs</button>
+      <div class="dropdown-content">
+        <a href="./agropedia/index.agropedia.html">AgroPedia</a>
+        <a href="./agroshop/index.agroshop.html">AgroShop</a>
+        <a href="./agroawareness/index.agroawareness.html">AgroAwareness</a>
+        <a href="./agroscheme/index.agroscheme.html">AgroScheme</a>
+      </div>
+    </div>
+
+    <div class="dropdown profile-dropdown">
+      <div class="profile-area">
+        <img src="img/profile-logo.jpg" class="profile-logo" alt="Profile">
+        <div class="profile-info">
+          <span id="full-name">Guest User</span>
+          <small id="username-display">@guest</small>
+        </div>
+      </div>
+      <div class="dropdown-content profile-content">
+        <a href="profile.html">Profile</a>
+        <a href="login-form.html">Login</a>
+        <a href="#" id="logoutLink" style="display:none;">Logout</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="hamburger" onclick="toggleSidePanel()">
+    <span class="bar"></span>
+    <span class="bar"></span>
+    <span class="bar"></span>
+  </div>
+</header>
+
+<div class="top-bar">
+  <a href="home.html" class="top-btn" id="n-active">Home</a>
+  <a href="soil-test.html" class="top-btn" id="n-active">Soil Test</a>
+  <a href="chat.html" class="top-btn" id="active">AI Chat</a>
+  <a href="other.html" class="top-btn" id="n-active">Other</a>
+</div>
+
+
+<!-- ================= Side Panel ================= -->
+<div class="side-panel">
+  <div class="close-btn" onclick="toggleSidePanel()">×</div>
+  <ul class="side-menu">
+    <li><a href="home.html">Home</a></li>
+    <li>
+      <button class="side-toggle">Organs</button>
+      <ul class="side-submenu">
+        <a href="./agropedia/index.agropedia.html">AgroPedia</a>
+        <a href="./agroshop/index.agroshop.html">AgroShop</a>
+        <a href="./agroawareness/index.agroawareness.html">AgroAwareness</a>
+        <a href="./agroscheme/index.agroscheme.html">AgroScheme</a>
+      </ul>
+    </li>
+    <li>
+      <button class="side-toggle">Account</button>
+      <ul class="side-submenu">
+        <li><a href="profile.html">Profile</a></li>
+        <li><a href="login-form.html">Login</a></li>
+        <li><a href="#" id="logoutLinkMobile" style="display:none;">Logout</a></li>
+      </ul>
+    </li>
+  </ul>
+
+
+  <div class="panel-user-info">
+    <img src="img/profile-logo.jpg" class="profile-logo-slide" alt="Profile">
+    <p><strong>Name:</strong> Guest User</p>
+    <p><strong>Username:</strong> @guest</p>
+  </div>
+</div>
+</div>
+
+<!-- ================= Main Content ================= -->
+<main>
+  <div id="chatWindow">
+  <div id="chatContent">
+   <div class="button-group">
+    <button id="loadChatsBtn">Load Previous Chats</button>
+    <button id="clearChatsBtn">Clear All Chats</button>
+   </div>
+  <!-- Messages inserted here -->
+ </div>
+ </div>
+
+  <form id="chatForm">
+    <input type="text" id="userMessage" placeholder="Type your message..." required>
+    <button type="submit">Send</button>
+  </form>
+</main>
+
+
+
+<script>
+/* ================= Side Panel ================= */
+function toggleSidePanel(){
+  document.querySelector('.side-panel').classList.toggle('open');
+}
+window.addEventListener('click', function(e){
+  const panel = document.querySelector('.side-panel');
+  const hamburger = document.querySelector('.hamburger');
+  if(!panel.contains(e.target) && !hamburger.contains(e.target)){
+    panel.classList.remove('open');
+  }
+});
+document.querySelectorAll('.side-toggle').forEach(toggle => {
+  toggle.addEventListener('click', function(){
+    const submenu = this.nextElementSibling;
+    document.querySelectorAll('.side-submenu').forEach(sm => {
+      if(sm !== submenu) sm.style.maxHeight = null;
+    });
+    submenu.style.maxHeight = submenu.style.maxHeight ? null : submenu.scrollHeight + "px";
+  });
+});
+
+/* ================= User Info ================= */
+let currentUser = JSON.parse(sessionStorage.getItem('user')) || { username: 'Guest' };
+function showUserInfo(user){
+  const fullName = user?.fullName || user?.name || 'Guest User';
+  const username = user?.username ? `@${user.username}` : '@guest';
+  document.getElementById('full-name').innerText = fullName;
+  document.getElementById('username-display').innerText = username;
+  const panelInfo = document.querySelector('.panel-user-info');
+  panelInfo.innerHTML = `<img src="img/profile-logo.jpg" class="profile-logo-slide" alt="Profile">
+    <p><strong>Name:</strong> ${fullName}</p>
+    <p><strong>Username:</strong> ${username}</p>`;
+  const showLogout = !!user && user.username !== 'Guest';
+  document.getElementById('logoutLink').style.display = showLogout ? 'block' : 'none';
+  document.getElementById('logoutLinkMobile').style.display = showLogout ? 'block' : 'none';
+}
+showUserInfo(currentUser);
+
+/* ================= Chat ================= */
+const chatWindow = document.getElementById('chatWindow');
+const chatContent = document.getElementById('chatContent');
+const chatForm = document.getElementById('chatForm');
+const userMessageInput = document.getElementById('userMessage');
+
+const loadedMessageIds = new Set(); // track message IDs to prevent duplicates
+
+function addMessage(msgObj){
+  if(loadedMessageIds.has(msgObj.id)) return; // skip duplicates
+  const msgDiv = document.createElement('div');
+  msgDiv.className = `message ${msgObj.sender}`;
+  msgDiv.textContent = msgObj.message;
+  chatContent.appendChild(msgDiv);
+  loadedMessageIds.add(msgObj.id);
+  chatWindow.scrollTop = chatWindow.scrollHeight; // scroll to bottom
+}
+
+/* ================= Load Entire Chat ================= */
+async function loadAllChats(){
+  if(currentUser.username === "Guest") return;
+
+  try {
+    const res = await fetch(`https://agroscan-backend.onrender.com/api/chat/history/${currentUser.userId}?limit=10000&offset=0`);
+    if(!res.ok) throw new Error("Failed to fetch chat history");
+
+    const data = await res.json();
+    if(data.history && data.history.length > 0){
+      // Append in natural order: oldest at top, newest at bottom
+      data.history.forEach(msg => {
+        addMessage({
+          id: msg.chat_id || 'msg-' + Date.now() + Math.random(),
+          message: msg.message,
+          sender: msg.sender
+        });
+      });
+    }
+  } catch(err){
+    console.error(err);
+    addMessage({id: 'fail-'+Date.now(), message: "Failed to load chat history.", sender: 'ai'});
+  }
+}
+loadAllChats();
+
+
+/* ================= Delete Entire Chat ================= */
+const clearChatsBtn = document.getElementById('clearChatsBtn');
+
+clearChatsBtn.addEventListener('click', async () => {
+  if(currentUser.username === "Guest") {
+    alert("Please log in to clear chats.");
+    return;
+  }
+
+  if(!confirm("Are you sure you want to clear all chats?")) return;
+
+  try {
+    const res = await fetch(`https://agroscan-backend.onrender.com/api/chat/clear/${currentUser.userId}`, {
+      method: 'DELETE'
+    });
+
+    const data = await res.json();
+    if(data.success){
+      // Remove all chat messages from UI
+      chatContent.querySelectorAll('.message').forEach(msg => msg.remove());
+      alert("All chats cleared successfully.");
+    } else {
+      alert("Failed to clear chats.");
+    }
+  } catch(err){
+    console.error(err);
+    alert("Error clearing chats.");
+  }
+});
+
+
+/* ================= Send New Message ================= */
+chatForm.addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const message = userMessageInput.value.trim();
+  if(!message) return;
+
+  const userMsgId = 'user-' + Date.now();
+  addMessage({id: userMsgId, message, sender: 'user'});
+  userMessageInput.value = '';
+
+  if(currentUser.username === "Guest"){
+    addMessage({id: 'ai-'+Date.now(), message: "Please log in to chat with AI.", sender: 'ai'});
+    return;
+  }
+
+  try {
+    const res = await fetch('https://agroscan-backend.onrender.com/chat', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ message, userId: currentUser.userId })
+    });
+    const data = await res.json();
+    addMessage({id: 'ai-'+Date.now(), message: data.aiResponse, sender: 'ai'});
+  } catch(err){
+    console.error(err);
+    addMessage({id: 'ai-'+Date.now(), message: "Error communicating with server.", sender: 'ai'});
+  }
+});
+
+/* Logout functionality */
+/* Logout functionality */
+function deleteCookie(name) {
+  document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+}
+
+document.querySelectorAll('#logoutLink, #logoutLinkMobile').forEach(link => {
+  link.addEventListener('click', function(e) {
+    e.preventDefault();
+    
+    // Clear sessionStorage
+    sessionStorage.removeItem('user');
+
+    // Clear cookie
+    deleteCookie('user');
+
+    // Optional: clear user info UI
+    showUserInfo(null);
+
+    alert("Logged out successfully");
+    window.location.href = "index.html"; // redirect to login page
+  });
+});
+
+
+</script>
+
+
+</body>
+</html>

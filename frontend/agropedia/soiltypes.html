@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌱 AgroScan - Blog</title>
+<link rel="icon" href="../img/agroscan-icon.png" type="image/png">
+<link rel="stylesheet" href="../css.files/header-footer.css">
+<style>
+  /* ================= Active Top Button ================= */
+  #active {
+    background: #66bb6a;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  }
+
+  /* ================= Blog Template Styles ================= */
+  .blog-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px;
+    background: #f5f5f5;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  /* Responsive Paragraph/Content Section */
+  .blog-content {
+    flex: 1;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    padding: 25px;
+  }
+
+  .blog-content h1 {
+    color: #388e3c;
+    margin-bottom: 20px;
+    font-size: 2.5rem;
+    text-align: center;
+  }
+
+  .blog-content p {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #555;
+    margin-bottom: 20px;
+    text-align: justify;
+  }
+
+  /* Responsive Side Photo Section */
+  .side-photo {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    padding: 20px;
+    text-align: center;
+  }
+
+  .side-photo img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  .side-photo caption {
+    font-size: 0.95rem;
+    color: #666;
+    margin-top: 10px;
+    display: block;
+  }
+
+  /* Author Details Section */
+  .author-details {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .author-details img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .author-info h3 {
+    color: #388e3c;
+    margin: 0 0 5px 0;
+  }
+
+  .author-info p {
+    margin: 0;
+    color: #666;
+    font-size: 0.95rem;
+  }
+
+  /* ================= Reusable Responsive Images Class ================= */
+  /* Add this class to any <img> tag for responsive behavior */
+  .responsive-img {
+    width: 100px;
+    height: 100px;
+    display: block;
+    border-radius: 10px; /* optional, for rounded corners */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1); /* optional, for subtle shadow */
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .blog-container {
+      padding: 15px;
+      gap: 20px;
+    }
+
+    .blog-content h1 {
+      font-size: 2rem;
+    }
+
+    .blog-content p {
+      font-size: 1rem;
+    }
+
+    .author-details {
+      flex-direction: column;
+      text-align: center;
+      gap: 10px;
+    }
+  }
+
+/* ================= Author Details Section ================= */
+.author-details {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  padding: 30px;
+  display: flex;
+  align-items: center;
+  gap: 25px;
+}
+
+/* Specific class for author photo */
+.author-details .author-img {
+  width: 200px;      /* bigger photo */
+  height: 200px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.author-info h3 {
+  color: #388e3c;
+  margin: 0 0 10px 0;
+  font-size: 1.8rem;
+}
+
+.author-info p {
+  margin: 0;
+  color: #555;
+  font-size: 1.1rem;
+  line-height: 1.8;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .author-details {
+    flex-direction: column;
+    text-align: center;
+    gap: 15px;
+  }
+
+  .author-details .author-img {
+    width: 150px;   /* smaller on mobile */
+    height: 150px;
+  }
+
+  .author-info h3 {
+    font-size: 1.5rem;
+  }
+
+  .author-info p {
+    font-size: 1rem;
+  }
+}
+.author-details img{
+    width:200px;
+    height:200px;
+}
+</style>
+</head>
+<body>
+
+<!-- ================= Header ================= -->
+<header>
+  <a href="../home.html" class="logo-area">
+    <img src="../img/agroscan-logo.png" alt="AgroScan Logo" class="logo">
+  </a>
+
+  <div class="nav-options">
+    <!-- Courses Dropdown -->
+    <div class="dropdown">
+      <button class="dropbtn">Organs</button>
+      <div class="dropdown-content">
+        <a href="../agropedia/index.agropedia.html">AgroPedia</a>
+        <a href="../agroshop/index.agroshop.html">AgroShop</a>
+        <a href="../agroawareness/index.agroawareness.html">AgroAwareness</a>
+        <a href="../agroscheme/index.agroscheme.html">AgroScheme</a>
+      </div>
+    </div>
+
+    <!-- Profile Dropdown -->
+    <div class="dropdown profile-dropdown">
+      <div class="profile-area">
+        <img src="../img/profile-logo.jpg" class="profile-logo" alt="Profile">
+        <div class="profile-info">
+          <span id="full-name">Guest User</span>
+          <small id="username-display">@guest</small>
+        </div>
+      </div>
+      <div class="dropdown-content profile-content">
+        <a href="../profile.html">Profile</a>
+        <a href="../login-form.html">Login</a>
+        <a href="#" id="logoutLink" style="display:none;">Logout</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hamburger for mobile -->
+  <div class="hamburger" onclick="toggleSidePanel()">
+    <span class="bar"></span>
+    <span class="bar"></span>
+    <span class="bar"></span>
+  </div>
+</header>
+
+<!-- ================= Top Navigation Bar ================= -->
+<div class="top-bar">
+  <a href="../home.html" class="top-btn" id="n-active">Home</a>
+  <a href="#" class="top-btn" id="searchBtn">Search</a>
+  <a href="../chat.html" class="top-btn" id="translateBtn">Script</a>
+  <a href="./index.agropedia.html" class="top-btn" id="active">Blog</a>
+</div>
+
+<script>
+  // Function to highlight only the exact word
+  function highlightWord(container, word) {
+    if (!word) return;
+
+    // Remove previous highlights
+    container.querySelectorAll('mark').forEach(mark => {
+      const parent = mark.parentNode;
+      parent.replaceChild(document.createTextNode(mark.textContent), mark);
+      parent.normalize();
+    });
+
+    // Recursive function to traverse text nodes
+    function traverse(node) {
+      if (node.nodeType === 3) { // Text node
+        const regex = new RegExp(`\\b(${word})\\b`, 'gi'); // whole word match
+        if (regex.test(node.nodeValue)) {
+          const span = document.createElement('span');
+          span.innerHTML = node.nodeValue.replace(regex, '<mark>$1</mark>');
+          node.parentNode.replaceChild(span, node);
+        }
+      } else if (node.nodeType === 1 && node.childNodes && !['SCRIPT','STYLE'].includes(node.tagName)) {
+        node.childNodes.forEach(child => traverse(child));
+      }
+    }
+
+    traverse(container);
+  }
+
+  // Search button click
+  document.getElementById('searchBtn').addEventListener('click', function(e){
+    e.preventDefault();
+    const query = prompt("Enter word to search in blog:");
+    if(query){
+      const blogContent = document.querySelector('.blog-content');
+      highlightWord(blogContent, query);
+    }
+  });
+
+  // Next button: browser translation alert
+  document.getElementById('translateBtn').addEventListener('click', function(e){
+    e.preventDefault();
+    alert("Use your browser's translate feature (Right-click → Translate).");
+  });
+</script>
+
+
+
+
+
+
+<!-- ================= Side Panel ================= -->
+<div class="side-panel">
+  <div class="close-btn" onclick="toggleSidePanel()">×</div>
+  <ul class="side-menu">
+    <li><a href="../home.html">Home</a></li>
+    <li>
+      <button class="side-toggle">Organs</button>
+      <ul class="side-submenu">
+        <a href="../agropedia/index.agropedia.html">AgroPedia</a>
+        <a href="../agroshop/index.agroshop.html">AgroShop</a>
+        <a href="../agroawareness/index.agroawareness.html">AgroAwareness</a>
+        <a href="../agroscheme/index.agroscheme.html">AgroScheme</a>
+      </ul>
+    </li>
+    <li>
+      <button class="side-toggle">Account</button>
+      <ul class="side-submenu">
+        <li><a href="../profile.html">Profile</a></li>
+        <li><a href="../login-form.html">Login</a></li>
+        <li><a href="#" id="logoutLinkMobile" style="display:none;">Logout</a></li>
+      </ul>
+    </li>
+  </ul>
+
+  <div class="panel-user-info">
+    <img src="../img/profile-logo.jpg" class="profile-logo-slide" alt="Profile">
+    <p><strong>Name:</strong> Guest User</p>
+    <p><strong>Username:</strong> @guest</p>
+  </div>
+</div>
+<!-- ================= Main Content (Blog Template) ================= -->
+<main class="blog-container">
+  <section class="blog-content">
+    <h1>Types of Soil and Importance</h1>
+    
+    <p>Asia is home to a diverse range of soils influenced by its vast geography, climate zones, and geological processes. These soils play a crucial role in determining the types of crops grown and the overall productivity of agriculture across the continent.</p>
+
+<p>Alluvial soil is the most widespread and fertile soil type found in the river plains of northern and eastern India, Bangladesh, Pakistan, and parts of Southeast Asia. Formed by river deposits, this soil is rich in potash but deficient in nitrogen and phosphorus. It retains moisture well and supports the cultivation of rice, wheat, sugarcane, jute, and various pulses. The texture ranges from sandy loam to clayey loam, making it highly adaptable for multiple crops.</p>
+
+<p>Black soil, often referred to as Regur soil or cotton soil, is prominent in the Deccan Plateau of India and in parts of Central Asia. Known for its dark color and fine texture, this soil has excellent moisture retention due to its high clay content. It is rich in calcium carbonate, magnesium, and potash but low in nitrogen. Black soil is ideal for crops like cotton, millet, sorghum, and pulses, thriving especially in semi-arid regions with moderate rainfall.</p>
+
+<p>Red soil is found mainly in southern and eastern India, parts of China, Sri Lanka, and Southeast Asia. Its characteristic reddish color comes from iron oxide content. Red soil is typically poor in nitrogen, phosphorus, and humus but rich in potash. It is well-drained but may suffer from low moisture retention, making it suitable for crops like millets, pulses, tobacco, groundnut, and cotton when supplemented with fertilizers and irrigation.</p>
+
+<p>Laterite soils, derived from intense weathering in tropical regions with heavy rainfall, cover parts of the Western Ghats in India, Sri Lanka, Indonesia, and the Philippines. These soils are acidic, low in fertility, and rich in iron and aluminum oxides giving them a reddish hue. Despite their poor natural fertility, they support plantation crops such as tea, coffee, rubber, and coconut, where organic matter and fertilizers are carefully managed.</p>
+
+<p>Desert soil is found across the arid regions of Central Asia, including parts of the Middle East and western India’s Thar Desert. These soils are sandy, alkaline, and have low organic matter and moisture content. They support drought-resistant crops such as barley, millet, and dates with the help of irrigation. Protective agricultural practices are needed to prevent wind erosion and maintain soil productivity.</p>
+
+<p>Silty soils, rich in fine particles deposited by rivers, are found along fertile floodplains in Bangladesh, eastern India, and Southeast Asia. These soils have high moisture retention and nutrient content, promoting the growth of rice, sugarcane, jute, and vegetables. The fine texture ensures good water-holding capacity but may require drainage management to avoid waterlogging.</p>
+
+<p>Mountain soils, occurring in the Himalayan region and other high-altitude areas in Asia, are shallow and often acidic with rocky fragments. These soils vary in fertility and support terrace farming. Crops typical of these soils include barley, buckwheat, millets, apples, and tea, adapted to cooler temperatures and sloping land conditions.</p>
+
+<p>Peaty and Marshy soils are found in the swampy and coastal areas of Asia including parts of eastern India, Bangladesh, and Southeast Asia. Rich in organic matter but often waterlogged and acidic, these soils require drainage improvements and liming. With proper management, they are used for rice cultivation and some vegetables.</p>
+
+<p>Lateritic soils in Indonesia and Malaysia are often acidic and leached due to heavy rainfall but support plantations like tea, coffee, and oil palm when managed properly with fertilizers. The soil's tendency to harden when dry can challenge cultivation but can be overcome with good agronomy.</p>
+
+<p>Mountainous regions of Central Asia have cold desert soils and alpine meadow soils, supporting hardy crops like barley and oats as well as grazing lands for sheep and goats, vital for local pastoral economies.</p>
+
+<p>The alluvial soil of the Yangtze River basin in China is extremely fertile, favoring intensive rice cultivation supported by irrigation networks that feed millions across the region. This soil's high nutrient content supports multiple crop cycles per year.</p>
+
+<p>Sandy soils found in parts of West and Southwest Asia pose challenges due to their low water and nutrient retention but are used to cultivate drought-tolerant crops like dates and certain grains when coupled with irrigation.</p>
+
+<p>The nutrient-poor red soils of southern China have been improved through fertilizer use to grow rice, sweet potatoes, and tea, allowing farmers to adapt to these naturally less fertile conditions.</p>
+
+<p>In summary, Asia’s soil diversity requires targeted agricultural practices. While alluvial soils dominate cereal and cash crop production, black and red soils support cotton, millet, and pulses with specific fertilizer needs. Lateritic and peaty soils sustain plantations and rice when well managed, while arid and mountainous regions grow drought-resistant or cold-tolerant crops supported by irrigation or terrace farming. Understanding these soils and their crop compatibilities is essential for maximizing yield, sustainability, and food security in Asia.</p></section>
+
+
+  <section class="author-details">
+    <img src="../img/abhinav.jpg" alt="Author Photo" class="responsive-img">
+    <div class="author-info">
+      <h3>Abhinav Ranjan</h3>
+      <p>Minor Farmer and Researcher experimenting with sustainable farming techniques. Contributes practical insights and local knowledge to improve crop yield and soil health.</p>
+    </div>
+  </section>
+</main>
+
+
+<!-- ================= Scripts (Extracted: Toggle, User Info, Logout Only) ================= -->
+<script>
+/* Toggle side panel for mobile */
+function toggleSidePanel(){
+  document.querySelector('.side-panel').classList.toggle('open');
+}
+
+/* Close panel if clicking outside */
+window.addEventListener('click', function(e){
+  const panel = document.querySelector('.side-panel');
+  const hamburger = document.querySelector('.hamburger');
+  if(!panel.contains(e.target) && !hamburger.contains(e.target)){
+    panel.classList.remove('open');
+  }
+});
+
+/* Accordion submenu for side panel */
+const toggles = document.querySelectorAll('.side-toggle');
+toggles.forEach(toggle => {
+  toggle.addEventListener('click', function(){
+    const submenu = this.nextElementSibling;
+
+    // Close other submenus
+    document.querySelectorAll('.side-submenu').forEach(sm => {
+      if(sm !== submenu){
+        sm.style.maxHeight = null;
+      }
+    });
+
+    // Toggle current submenu
+    if(submenu.style.maxHeight){
+      submenu.style.maxHeight = null;
+    } else {
+      submenu.style.maxHeight = submenu.scrollHeight + "px";
+    }
+  });
+});
+
+/* Top buttons active state */
+document.querySelectorAll('.top-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.top-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+/* User info display */
+const user = JSON.parse(sessionStorage.getItem('user')) || null;
+const userId = user?.userId;
+
+if (!userId) {
+  alert("No user found. Please login again.");
+  window.location.href = "../login-form.html";
+}
+
+function showUserInfo(user){
+  const fullName = user?.fullName || `${user?.name || 'Guest User'}`;
+  const username = user?.username ? `@${user.username}` : "@guest";
+  document.getElementById('full-name').innerText = fullName;
+  document.getElementById('username-display').innerText = username;
+  document.getElementById('logoutLink').style.display = user ? 'block' : 'none';
+  document.getElementById('logoutLinkMobile').style.display = user ? 'block' : 'none';
+  const panelInfo = document.querySelector('.panel-user-info');
+  panelInfo.innerHTML = `
+    <img src="../img/profile-logo.jpg" class="profile-logo-slide" alt="Profile">
+    <p><strong>Name:</strong> ${fullName}</p>
+    <p><strong>Username:</strong> ${username}</p>
+  `;
+}
+showUserInfo(user);
+
+/* Logout functionality */
+function deleteCookie(name) {
+  document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+}
+
+document.querySelectorAll('#logoutLink, #logoutLinkMobile').forEach(link => {
+  link.addEventListener('click', function(e) {
+    e.preventDefault();
+    
+    // Clear sessionStorage
+    sessionStorage.removeItem('user');
+
+    // Clear cookie
+    deleteCookie('user');
+
+    // Optional: clear user info UI
+    showUserInfo(null);
+
+    alert("Logged out successfully");
+    window.location.href = "../index.html"; // redirect to login page
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="google-site-verification" content="lWdBX-wwlL8K6WOAaKOwRg0OV_kT5-vVMHRWEIhQC1Q" />
+<title>AgroScan</title>
+
+<!-- Fonts & Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="icon" href="img/agroscan-icon.png" type="image/png">
+<style>
+/* ===========================================================
+   ROOT VARIABLES
+=========================================================== */
+:root{
+  --green:#2e7d32;
+  --accent:#ffb74d;
+  --bg-dark:#0b0b0b;
+  --text-light:#f4f7f4;
+  --card-bg:#1b1b1b;
+  --maxw:1400px;
+  --transition:.3s;
+  --shadow-dark:0 10px 30px rgba(0,0,0,0.6);
+  --shadow-light:0 5px 15px rgba(0,0,0,0.3);
+  --border-radius:20px;
+}
+
+/* ===========================================================
+   RESET
+=========================================================== */
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Roboto',sans-serif;}
+body{
+  background:var(--bg-dark);
+  color:var(--text-light);
+  overflow-x:hidden;
+  line-height:1.6;
+  scroll-behavior:smooth;
+}
+a{text-decoration:none;color:inherit;}
+button{cursor:pointer;transition:var(--transition);border:none;font-family:'Roboto',sans-serif;}
+
+/* ===========================================================
+   HERO SECTION
+=========================================================== */
+.hero{
+  position:relative;
+  width:100%;
+  height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  overflow:hidden;
+  padding:0 20px;
+}
+.hero video{
+  position:absolute;
+  top:0; left:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  z-index:0;
+}
+.hero .overlay{
+  position:absolute;
+  top:0; left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.65);
+  z-index:1;
+}
+.hero .content{
+  position:relative;
+  z-index:2;
+  display:flex;
+  flex-direction:column;
+  gap:24px;
+  max-width:900px;
+  padding:20px;
+  animation:fadeIn 1.2s ease-in-out;
+}
+.hero h1{font-size:3.2rem;color:var(--text-light);}
+.hero p{font-size:1.4rem;color:var(--text-light);}
+.hero .btn-group{
+  display:flex;
+  gap:20px;
+  justify-content:center;
+  flex-wrap:wrap;
+  margin-top:16px;
+}
+.hero a{
+  display:inline-block;
+  text-align:center;
+  padding:16px 36px;
+  border-radius:50px;
+  font-weight:700;
+  font-size:1.05rem;
+  min-width:140px;
+  transition:var(--transition);
+}
+.btn-primary{background:linear-gradient(90deg,#66bb6a,#ffa726);color:#fff;}
+.btn-primary:hover{transform:translateY(-3px);}
+.btn-outline{background:transparent;color:#fff;border:2px solid #fff;}
+.btn-outline:hover{transform:translateY(-3px);}
+
+/* ===========================================================
+   SITE CONTAINER
+=========================================================== */
+.site{max-width:var(--maxw);margin:0 auto;padding:60px 20px;}
+
+/* ===========================================================
+   INFO SECTION
+=========================================================== */
+.info{
+  min-height:70vh;
+  padding:80px 20px;
+  background:#121212;
+  color:#ddd;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  text-align:center;
+  animation:fadeIn 1s ease-in;
+}
+.info h2{font-size:2.8rem;margin-bottom:32px;}
+.info p{
+  max-width:850px;
+  margin-bottom:28px;
+  font-size:1.15rem;
+  line-height:1.8;
+}
+.info a{
+  padding:16px 36px;
+  border-radius:50px;
+  font-weight:700;
+  font-size:1rem;
+  background:var(--accent);
+  border:none;
+  color:#000;
+  transition:var(--transition);
+}
+.info a:hover{transform:translateY(-3px);}
+
+/* ===========================================================
+   FEATURES SECTION
+=========================================================== */
+.features{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:32px;
+  margin:60px 0;
+}
+.feature-card{
+  background:var(--card-bg);
+  border-radius:var(--border-radius);
+  padding:32px 24px;
+  box-shadow:var(--shadow-dark);
+  transition:var(--transition);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+}
+.feature-card:hover{transform:translateY(-8px);}
+.feature-card h3{
+  margin-bottom:16px;
+  color:var(--accent);
+  font-size:1.4rem;
+}
+.feature-card p{
+  font-size:15px;
+  opacity:0.85;
+  line-height:1.6;
+}
+.feature-card i{
+  font-size:2rem;
+  color:var(--green);
+  margin-bottom:12px;
+}
+
+/* ===========================================================
+   MAKERS SECTION
+=========================================================== */
+.makers{
+  margin:80px 0;
+  text-align:center;
+}
+.makers h3{
+  margin-bottom:48px;
+  font-size:2.2rem;
+}
+
+/* Makers Grid */
+.makers-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:36px;
+  align-items:stretch;
+}
+
+/* Maker card */
+.maker{
+  background:var(--card-bg);
+  text-align:center;
+  border-radius:var(--border-radius);
+  padding:24px;
+  box-shadow:var(--shadow-dark);
+  transition:var(--transition);
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start;
+  align-items:center;
+  height:400px;
+  overflow:hidden;
+}
+.maker:hover{transform:translateY(-5px);}
+.maker img{
+  width:120px;
+  height:120px;
+  border-radius:50%;
+  margin-bottom:16px;
+  object-fit:cover;
+}
+.maker h4{margin-bottom:8px;font-size:1.2rem;}
+.maker p{opacity:0.85;font-size:14px;}
+
+/* ===========================================================
+   CONTRIBUTORS & DONATE SECTION
+=========================================================== */
+.contributors-donate{
+  display:flex;
+  justify-content:center;
+  gap:24px;
+  margin-top:40px;
+  flex-wrap:wrap;
+}
+.contributors-donate .contributor-card{
+  flex:1 1 220px;
+  max-width:240px;
+  background:var(--card-bg);
+  border-radius:var(--border-radius);
+  padding:24px;
+  box-shadow:var(--shadow-dark);
+  text-align:center;
+  cursor:pointer;
+  transition:var(--transition);
+}
+.contributors-donate .contributor-card:hover{
+  transform:translateY(-5px);
+}
+.contributors-donate .contributor-card h4{
+  margin-top:12px;
+  color:var(--accent);
+}
+.contributors-donate .contributor-card p{
+  opacity:0.85;
+  font-size:14px;
+}
+
+/* ===========================================================
+   FOOTER
+=========================================================== */
+footer{
+  background:rgba(15,54,2,0.72);
+  color:#fff;
+  text-align:center;
+  padding:24px;
+  border-radius:20px;
+  margin-top:60px;
+}
+footer .socials{
+  display:flex;
+  justify-content:center;
+  gap:16px;
+  margin-bottom:16px;
+}
+footer .socials img{
+  width:40px;
+  height:40px;
+  border-radius:50%;
+}
+
+/* ===========================================================
+   ANIMATIONS
+=========================================================== */
+@keyframes fadeIn{
+  0%{opacity:0; transform:translateY(20px);}
+  100%{opacity:1; transform:translateY(0);}
+}
+
+/* ===========================================================
+   RESPONSIVE
+=========================================================== */
+@media(max-width:1199px){
+  .makers-grid{grid-template-columns:repeat(2,1fr);gap:28px;}
+}
+@media(max-width:992px){
+  .hero h1{font-size:2.6rem;}
+  .hero p{font-size:1.2rem;}
+}
+@media(max-width:768px){
+  .maker{height:350px;}
+}
+@media(max-width:599px){
+  .hero h1{font-size:2.2rem;}
+  .hero p{font-size:1rem;}
+  .info h2{font-size:2rem;}
+  .info p{font-size:1rem;}
+  .makers-grid{grid-template-columns:1fr;gap:20px;}
+  .maker{height:auto;padding:18px;}
+  .maker img{width:100px;height:100px;}
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <video autoplay muted loop>
+    <source src="./img/rain.mp4" type="video/mp4">
+    Your browser does not support HTML5 video.
+  </video>
+  <div class="overlay"></div>
+  <div class="content">
+    <h1>AI-Powered Agriculture Assistance</h1>
+    <p>Scan soil, get crop suggestions, and farm smarter with AI-powered insights.</p>
+    <div class="btn-group">
+      <a href="signup-form.html" class="btn-primary">Sign Up</a>
+      <a href="login-form.html" class="btn-outline" id="loginBtn">Sign In</a>
+      <a href="#" id="startBtn" class="btn-primary">Start Now</a>
+    </div>
+  </div>
+</section>
+
+<!-- SITE -->
+<div class="site" id="infoSection">
+
+  <!-- INFO -->
+  <section class="info">
+    <h2>Welcome to AgroScan</h2>
+    <p>AgroScan ingests soil metrics, weather, and historical yields to recommend the best crops, fertilizer mix, and irrigation schedule for your farm. Get actionable insights to maximize productivity.</p>
+    <p>Our platform empowers farmers with data-driven decisions for better crop yields, sustainable farming, and optimized resources. Join thousands leveraging technology for smarter agriculture.</p>
+    <a href="features.index.html">Know More Features</a>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features">
+    <div class="feature-card"><i class="fas fa-seedling"></i><h3>Soil Test</h3><p>Analyze soil nutrients and get precise recommendations.</p></div>
+    <div class="feature-card"><i class="fas fa-robot"></i><h3>AI Chat</h3><p>Ask AgroBot questions about crops, pests, and irrigation.</p></div>
+    <div class="feature-card"><i class="fas fa-tractor"></i><h3>Crop Recommendation</h3><p>Suggests profitable crops based on soil and climate.</p></div>
+    <div class="feature-card"><i class="fas fa-vial"></i><h3>Fertilizer Calculator</h3><p>Calculate optimal fertilizer requirements for your fields.</p></div>
+    <div class="feature-card"><i class="fas fa-water"></i><h3>Water Management</h3><p>Plan irrigation schedules based on crop and soil needs.</p></div>
+    <div class="feature-card"><i class="fas fa-chart-line"></i><h3>Crop Yield Estimator</h3><p>Estimate expected crop yield based on conditions and area.</p></div>
+    <div class="feature-card"><i class="fas fa-bug"></i><h3>Pesticide Usage</h3><p>Safe pesticide recommendations per area and crop type.</p></div>
+    <div class="feature-card"><i class="fas fa-dollar-sign"></i><h3>Profit Calculator</h3><p>Compare production costs with revenue to optimize profit.</p></div>
+  </section>
+
+  <!-- MAKERS -->
+  <section class="makers">
+    <h3>Meet the Makers</h3>
+    <div class="makers-grid">
+      <div class="maker"><img src="img/abhinav.jpg" alt="Abhinav"><h4>Abhinav Ranjan</h4><p>Founder • Full Stack Developer & Hardware</p></div>
+      <div class="maker"><img src="img/dj-sir.jpg" alt="Dhananjay"><h4>Dhananjay Sir </h4><p>Coordinator • Project Coordinator for Hardware & Software</p></div>
+          <div class="maker"><img src="img/sudhanshu.jpg" alt="Sudhanshu"><h4>sudhanshu Kumar </h4><p>Member •Frontend Developer</p></div>
+      <div class="maker"><img src="img/abhiraj.jpg" alt="abhiraj"><h4>Abhiraj singh</h4><p>Member • Full Stack Developer</p></div>
+       
+    </div>
+    <!-- MORE CONTRIBUTORS & DONATE -->
+    <div class="contributors-donate">
+      <a href="contributors.html" class="contributor-card">
+        <i class="fas fa-users fa-2x" style="color:var(--green)"></i>
+        <h4>More Contributors</h4>
+        <p>See the full team behind AgroScan</p>
+      </a>
+      <a href="donate.html" class="contributor-card">
+        <i class="fas fa-hand-holding-heart fa-2x" style="color:var(--accent)"></i>
+        <h4>Donate Us</h4>
+        <p>Support AgroScan with your contributions</p>
+      </a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+  <div class="socials">
+    <a href="https://www.instagram.com/agroscan.lumitech/" target="_blank">
+      <img src="img/instagram-logo.png" alt="Instagram">
+    </a>
+    <a href="https://t.me/agroscanorg" target="_blank">
+      <img src="img/telegram-logo.png" alt="Telegram">
+    </a>
+  </div>
+  © 2025 AgroScan. Made with ❤️ by AgroScan Team.
+</footer>
+</div>
+
+<!-- ===========================================================
+   SCRIPT SECTION
+=========================================================== -->
+<script>
+  // Smooth scroll for anchor links
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+      const targetID = this.getAttribute('href');
+      if(targetID.startsWith("#")){
+        e.preventDefault();
+        const target = document.querySelector(targetID);
+        if(target) target.scrollIntoView({behavior:'smooth',block:'start'});
+      }
+    });
+  });
+
+  // Redirect login if user already logged in
+  const loginBtn = document.getElementById('loginBtn');
+  if(sessionStorage.getItem('user')){
+    loginBtn.addEventListener('click',(e)=>{
+      e.preventDefault();
+      window.location.href = 'home.html';
+    });
+  }
+
+  const startBtn = document.getElementById('startBtn');
+
+startBtn.addEventListener('click', (e) => {
+  e.preventDefault(); // prevent default anchor behavior
+  if(sessionStorage.getItem('user')) {
+    // if user exists, go to home
+    window.location.href = 'home.html';
+  } else {
+    // otherwise, go to login form
+    window.location.href = 'login-form.html';
+  }
+});
+
+</script>
+
+</body>
+</html>

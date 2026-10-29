@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌱 AgroScan — Features</title>
+<link rel="icon" href="img/agro-home.jpg" type="image/png">
+<link rel="stylesheet" href="./css.files/header-footer.css">
+<style>
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: #111;
+    color: #fff;
+    margin: 0; padding: 0;
+  }
+  h1, h2.section-title {
+    color: #ffc107;
+    margin: 20px 0 10px;
+  }
+  .features-section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  .cards-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  .feature-card {
+    flex: 1 1 250px;
+    background: #222;
+    border: 2px solid #ffc107;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s, background 0.3s;
+  }
+  .feature-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(255,193,7,0.4);
+    background: #333;
+  }
+  .feature-card h3 { color: #ffc107; margin-bottom: 10px; }
+  .feature-card p { color: #ddd; font-size: 0.9rem; }
+
+  /* Modal */
+  .modal {
+    display: none;
+    position: fixed;
+    top:0; left:0; right:0; bottom:0;
+    background: rgba(0,0,0,0.85);
+    justify-content:center;
+    align-items:center;
+    z-index:1000;
+    padding:10px;
+    overflow-y:auto;
+  }
+  .modal-content {
+    background:#222;
+    border: 2px solid #ffc107;
+    padding:25px;
+    border-radius:12px;
+    width:100%;
+    max-width:600px;
+    position: relative;
+    max-height:90vh;
+    overflow-y:auto;
+  }
+  .modal-close { position:absolute; top:10px; right:15px; cursor:pointer; font-size:28px; color:#ffc107; }
+  .modal-content h3 { color: #ffc107; margin-top:0; }
+  .modal-content p { margin:10px 0; color:#fff; line-height:1.5; }
+</style>
+</head>
+<body>
+
+<!-- ================= Header ================= -->
+<header>
+  <a href="home.html" class="logo-area">
+    <img src="img/agroscan-logo.png" alt="AgroScan Logo" class="logo">
+  </a>
+</header>
+
+<!-- ================= Main ================= -->
+<main class="features-section">
+  <h1>🌱 AgroScan Features</h1>
+
+  <!-- Features Section -->
+  <h2 class="section-title">Core Features</h2>
+  <div class="cards-container" id="featuresContainer"></div>
+</main>
+
+<!-- ================= Modal ================= -->
+<div class="modal" id="featureModal">
+  <div class="modal-content">
+    <span class="modal-close" id="closeModal">&times;</span>
+    <h3 id="modalFeatureName">Feature Name</h3>
+    <p id="modalFeatureDesc">Feature Description goes here in detail...</p>
+  </div>
+</div>
+
+<script>
+// Example: Features extracted and elaborated from README
+const features = [
+  {
+    name: "AgroPedia",
+    description: `AgroPedia is an extensive agricultural knowledge base providing farmers and enthusiasts with detailed information on crops, soil types, pest management, irrigation techniques, and modern farming practices. Users can search by crop type, region, or farming method to get scientifically-backed insights. The platform includes images, diagrams, and step-by-step guides for optimal farming outcomes, ensuring sustainable agricultural practices are followed.`
+  },
+  {
+    name: "Soil Test Analytics",
+    description: `The Soil Test module allows users to input soil samples for analysis. By leveraging a combination of rule-based AI and historical data, the system predicts soil nutrient deficiencies, pH levels, and recommends appropriate fertilizers. This feature helps farmers make data-driven decisions, reduces chemical overuse, and promotes healthier crop growth.`
+  },
+  {
+    name: "AI & Rule Engine Recommendations",
+    description: `AgroScan integrates AI with a rule engine to generate actionable recommendations for crop management, pest control, and irrigation schedules. The AI uses machine learning to understand patterns from previous agricultural data, while the rule engine applies domain-specific rules to provide accurate, explainable suggestions. Farmers can optimize yield while minimizing costs and environmental impact.`
+  },
+  {
+    name: "Analytics Dashboard",
+    description: `The Analytics Dashboard visualizes farm performance metrics, including crop health, soil conditions, historical yield data, and irrigation efficiency. It uses charts, graphs, and tables to help users monitor trends over time. Advanced analytics assist in predictive modeling, helping farmers anticipate challenges and plan interventions ahead of time.`
+  },
+  {
+    name: "AgroShop Integration",
+    description: `AgroShop connects farmers directly with suppliers and agro-product vendors. Users can order seeds, fertilizers, and equipment online, track orders in real-time, and receive recommendations based on their farm profile. The platform ensures transparency, competitive pricing, and timely delivery, improving access to quality agricultural inputs.`
+  },
+  {
+    name: "Chat & Support",
+    description: `The chat module provides instant AI-powered support for users. Farmers can ask questions about crop diseases, irrigation methods, or soil treatment. The system uses OpenAI and HuggingFace integrations to provide natural language responses and guidance. This feature bridges knowledge gaps and empowers users with quick solutions to real-time farming problems.`
+  },
+  {
+    name: "Data Contribution & Community",
+    description: `AgroScan encourages community-driven data contributions. Users can submit their farm data, crop observations, and experimental results. This collective intelligence improves AI accuracy and enriches the knowledge base. Contributors are recognized for their input, fostering a collaborative ecosystem for agricultural advancement.`
+  }
+];
+
+// Render feature cards
+const container = document.getElementById('featuresContainer');
+features.forEach(feature => {
+  const card = document.createElement('div');
+  card.className = 'feature-card';
+  card.innerHTML = `<h3>${feature.name}</h3><p>${feature.description.substring(0, 100)}...</p>`;
+  card.addEventListener('click', () => showModal(feature));
+  container.appendChild(card);
+});
+
+// Modal logic
+function showModal(feature){
+  document.getElementById('modalFeatureName').innerText = feature.name;
+  document.getElementById('modalFeatureDesc').innerText = feature.description;
+  document.getElementById('featureModal').style.display = 'flex';
+}
+
+document.getElementById('closeModal').addEventListener('click', () => {
+  document.getElementById('featureModal').style.display = 'none';
+});
+</script>
+
+
+</body>
+</html>

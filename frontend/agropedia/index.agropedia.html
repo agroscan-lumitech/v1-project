@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌱 AgroScan - AgroPedia</title>
+<link rel="icon" href="../img/agroscan-icon.png" type="image/png">
+<link rel="stylesheet" href="../css.files/header-footer.css">
+<style>
+/* ================= ACTIVE TOP BUTTON ================= */
+#active {
+  background: #66bb6a;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+
+/* ================= BLOG GRID ================= */
+.shop-container {
+  max-width: 1300px;
+  margin: 40px auto;
+  padding: 20px;
+}
+
+.shop-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.shop-header h1 {
+  font-size: 2.6rem;
+  color: #2e7d32;
+  margin-bottom: 10px;
+}
+
+.shop-header p {
+  font-size: 1.1rem;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+/* Blog Grid */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+}
+
+/* Blog Card Styling */
+.product-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+  display: flex;
+  flex-direction: column;
+  transition: 0.3s;
+}
+
+.product-card:hover {
+  transform: translateY(-6px);
+}
+
+.product-card img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 14px 14px 0 0;
+}
+
+.product-info {
+  padding: 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.product-info h3 {
+  font-size: 1.3rem;
+  color: #333;
+  margin-bottom: 6px;
+}
+
+.product-info p {
+  font-size: 0.95rem;
+  color: #666;
+  margin-bottom: 8px;
+  flex-grow: 1;
+}
+
+.author-name {
+  font-size: 0.85rem;
+  color: #2e7d32;
+  margin-bottom: 12px;
+}
+
+.card-btn {
+  display: inline-block;
+  text-decoration: none;
+  padding: 10px 15px;
+  background-color: #66bb6a;
+  color: #fff;
+  border-radius: 5px;
+  font-weight: 600;
+  transition: 0.2s;
+  text-align: center;
+}
+
+.card-btn:hover {
+  background-color: #57a05a;
+}
+
+/* ================= SEARCH & SORT MODAL ================= */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  justify-content: center;
+  align-items: center;
+  z-index: 3000;
+}
+
+.modal.open {
+  display: flex;
+}
+
+.modal-content {
+  background: #fff;
+  width: 90%;
+  max-width: 450px;
+  border-radius: 14px;
+  padding: 20px;
+  position: relative;
+}
+
+.modal-content h3 {
+  color: #2e7d32;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.close-modal {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 1.8rem;
+  color: #555;
+  cursor: pointer;
+}
+
+.modal-content input[type="text"] {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-bottom: 15px;
+  font-size: 1rem;
+}
+
+.modal-content .radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.modal-content label {
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.modal-content button {
+  padding: 10px 15px;
+  background-color: #66bb6a;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  width: 100%;
+}
+
+.modal-content button:hover {
+  opacity: 0.9;
+}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .shop-header h1 { font-size: 2rem; }
+  .product-card img { height: 150px; }
+}
+
+@media(max-width:500px){
+  .shop-header h1 { font-size: 1.6rem; }
+  .shop-header p { font-size: 0.95rem; }
+}
+
+</style>
+</head>
+<body>
+
+<!-- ================= HEADER ================= -->
+<header>
+  <a href="../home.html" class="logo-area">
+    <img src="../img/agroscan-logo.png" alt="AgroScan Logo" class="logo">
+  </a>
+  <div class="nav-options">
+    <div class="dropdown">
+      <button class="dropbtn">Organs</button>
+      <div class="dropdown-content">
+        <a href="../agropedia/index.agropedia.html">AgroPedia</a>
+        <a href="../agroshop/index.agroshop.html">AgroShop</a>
+        <a href="../agroawareness/index.agroawareness.html">AgroAwareness</a>
+        <a href="../agroscheme/index.agroscheme.html">AgroScheme</a>
+      </div>
+    </div>
+    <div class="dropdown profile-dropdown">
+      <div class="profile-area">
+        <img src="../img/profile-logo.jpg" class="profile-logo" alt="Profile">
+        <div class="profile-info">
+          <span id="full-name">Guest User</span>
+          <small id="username-display">@guest</small>
+        </div>
+      </div>
+      <div class="dropdown-content profile-content">
+        <a href="../profile.html">Profile</a>
+        <a href="../login-form.html">Login</a>
+        <a href="#" id="logoutLink" style="display:none;">Logout</a>
+      </div>
+    </div>
+  </div>
+  <div class="hamburger" onclick="toggleSidePanel()">
+    <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+  </div>
+</header>
+
+<!-- ================= TOP NAV ================= -->
+<div class="top-bar">
+    
+  <a href="../home.html" class="top-btn">Home</a>
+  <a href="#" class="top-btn" id="search-btn">Search</a>
+  <a href="#" class="top-btn" id="sort-btn">Sort</a>
+  <a href="../agropedia/index.agropedia.html" class="top-btn" id="active">Pedia</a>
+</div>
+
+<!-- ================= SIDE PANEL ================= -->
+<div class="side-panel">
+  <div class="close-btn" onclick="toggleSidePanel()">×</div>
+  <ul class="side-menu">
+    <li><a href="../home.html">Home</a></li>
+    <li>
+      <button class="side-toggle">Organs</button>
+      <ul class="side-submenu">
+        <a href="../agropedia/index.agropedia.html">AgroPedia</a>
+        <a href="../agroshop/index.agroshop.html">AgroShop</a>
+        <a href="../agroawareness/index.agroawareness.html">AgroAwareness</a>
+        <a href="../agroscheme/index.agroscheme.html">AgroScheme</a>
+      </ul>
+    </li>
+    <li>
+      <button class="side-toggle">Account</button>
+      <ul class="side-submenu">
+        <li><a href="../profile.html">Profile</a></li>
+        <li><a href="../login-form.html">Login</a></li>
+        <li><a href="#" id="logoutLinkMobile" style="display:none;">Logout</a></li>
+      </ul>
+    </li>
+  </ul>
+  <div class="panel-user-info">
+    <img src="../img/profile-logo.jpg" class="profile-logo-slide" alt="Profile">
+    <p><strong>Name:</strong> Guest User</p>
+    <p><strong>Username:</strong> @guest</p>
+  </div>
+</div>
+
+<!-- ================= SHOP CONTENT ================= -->
+<main class="shop-container">
+  <div class="shop-header">
+    <h1>AgroBlogs by AgroPedia</h1>
+    <p>Explore our informative blogs about organic farming and agro tips.</p>
+  </div>
+
+  <!-- Blog Grid -->
+  <div class="product-grid" id="productGrid"></div>
+</main>
+
+<!-- ================= SEARCH MODAL ================= -->
+<div class="modal" id="searchModal">
+  <div class="modal-content">
+    <span class="close-modal" id="closeSearch">&times;</span>
+    <h3>Search Blogs</h3>
+    <input type="text" id="blogSearchInput" placeholder="Search by blog title or author">
+    <button id="performSearch">Search</button>
+  </div>
+</div>
+
+<!-- ================= SORT MODAL ================= -->
+<div class="modal" id="sortModal">
+  <div class="modal-content">
+    <span class="close-modal" id="closeSort">&times;</span>
+    <h3>Sort Blogs</h3>
+    <div class="radio-group">
+      <label><input type="radio" name="sort" value="title"> By Title</label>
+      <label><input type="radio" name="sort" value="author"> By Author</label>
+      <label><input type="radio" name="sort" value="date"> By Date</label>
+    </div>
+    <button id="applySort">Apply</button>
+  </div>
+</div>
+
+<!-- ================= JS ================= -->
+<script>
+// ================== SIDE PANEL ==================
+const sidePanel = document.querySelector(".side-panel");
+
+function toggleSidePanel() {
+  sidePanel.classList.toggle("open");
+}
+
+document.querySelectorAll(".side-toggle").forEach(btn => {
+  btn.addEventListener("click", () => {
+    btn.nextElementSibling.classList.toggle("open");
+  });
+});
+
+// ================== BLOGS ==================
+const blogs = [
+  {title:"Factors Affecting Plant Growth", desc:"Learning the basics - from soil to yield", author:"Abhinav Ranjan", date:"04-10-2025", href:"factors-crop-production.html", img:"../img/cropfac.jpg"},
+  {title:"Crop Rotation", desc:"Importance of Crop Rotation", author:"Abhinav Ranjan", date:"04-10-2025", href:"croprotation.html", img:"../img/rotation.jpg"},
+  {title:"Soil and Soil Types", desc:"Types of Soil and Importance", author:"Abhinav Ranjan", date:"04-10-2025", href:"soiltypes.html", img:"../img/soiltypes.jpg"},
+  {title:"Soil Health", desc:"Tips to maintain and improve soil quality", author:"Abhinav Ranjan", date:"04-10-2025", href:"soilhealth.html", img:"../img/soilhealth.jpg"},
+  {title:"Fertilizers", desc:"Guide to organic and chemical fertilizers", author:"Abhinav Ranjan", date:"04-10-2025", href:"fertilisers.html", img:"../img/fertilisers.jpg"},
+  {title:"Agro-Based Practices", desc:"Guide to Sustainable Development", author:"Agastya Jha", date:"16-10-2025", href:"agroprac.html", img:"../img/sdev.jpg"}
+];
+
+
+function renderBlogs(filtered = []) {
+  const grid = document.getElementById("productGrid");
+  grid.innerHTML = "";
+  const display = filtered.length ? filtered : blogs;
+
+  display.forEach(blog => {
+    const card = document.createElement("div");
+    card.className = "product-card";
+    card.innerHTML = `
+      <img src="${blog.img}" alt="${blog.title}">
+      <div class="product-info">
+        <h3>${blog.title}</h3>
+        <p>${blog.desc}</p>
+        <div class="author-name">By ${blog.author}</div>
+        <a href="${blog.href}" class="card-btn">Read More</a>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+// ================== MODALS ==================
+const searchModal = document.getElementById("searchModal");
+const sortModal = document.getElementById("sortModal");
+
+// Open/close modals
+document.getElementById("search-btn").addEventListener("click", () => searchModal.classList.add("open"));
+document.getElementById("sort-btn").addEventListener("click", () => sortModal.classList.add("open"));
+document.getElementById("closeSearch").addEventListener("click", () => searchModal.classList.remove("open"));
+document.getElementById("closeSort").addEventListener("click", () => sortModal.classList.remove("open"));
+
+// Search blogs
+document.getElementById("performSearch").addEventListener("click", () => {
+  const query = document.getElementById("blogSearchInput").value.toLowerCase();
+  const result = blogs.filter(b => b.title.toLowerCase().includes(query) || b.author.toLowerCase().includes(query));
+  renderBlogs(result);
+  searchModal.classList.remove("open");
+});
+
+// Sort blogs
+document.getElementById("applySort").addEventListener("click", () => {
+  const sortVal = document.querySelector('input[name="sort"]:checked')?.value;
+  if (!sortVal) return;
+
+  const sorted = [...blogs].sort((a, b) => {
+    if (sortVal === "date") return new Date(a.date) - new Date(b.date);
+    return a[sortVal].localeCompare(b[sortVal]);
+  });
+
+  renderBlogs(sorted);
+  sortModal.classList.remove("open");
+});
+
+// ================== ACCORDION FOR SIDE PANEL ==================
+document.querySelectorAll('.side-toggle').forEach(toggle => {
+  toggle.addEventListener('click', function() {
+    const submenu = this.nextElementSibling;
+
+    // Close other submenus
+    document.querySelectorAll('.side-submenu').forEach(sm => {
+      if (sm !== submenu) sm.style.maxHeight = null;
+    });
+
+    // Toggle current submenu
+    submenu.style.maxHeight ? submenu.style.maxHeight = null : submenu.style.maxHeight = submenu.scrollHeight + "px";
+  });
+});
+
+// ================== INITIALIZE ON PAGE LOAD ==================
+window.addEventListener("DOMContentLoaded", () => {
+  populateHeaderSide(); // Load user info
+  renderBlogs();        // Render blogs
+});
+</script>
+<script>
+// ====== Default fallback profile image ======
+const defaultProfile = "../img/profile-logo.jpg";
+
+// ====== Populate Header & Side Panel ======
+function populateHeaderSide() {
+  // Get user from sessionStorage
+  const user = JSON.parse(sessionStorage.getItem("user"));
+
+  // Extract name and username or fallback to Guest
+  const fullName = user?.name || "Guest User";
+  const username = user?.username ? `@${user.username}` : "@guest";
+  const profileImg = user?.profileUrl || defaultProfile;
+
+  // Top header
+  const fullNameEl = document.getElementById("full-name");
+  const usernameEl = document.getElementById("username-display");
+  if (fullNameEl) fullNameEl.innerText = fullName;
+  if (usernameEl) usernameEl.innerText = username;
+
+  // Logout links
+  const logoutLink = document.getElementById("logoutLink");
+  const logoutLinkMobile = document.getElementById("logoutLinkMobile");
+  if (logoutLink) logoutLink.style.display = user ? "block" : "none";
+  if (logoutLinkMobile) logoutLinkMobile.style.display = user ? "block" : "none";
+
+  // Side panel info
+  const panelInfo = document.querySelector(".panel-user-info");
+  if (panelInfo) {
+    panelInfo.innerHTML = `
+      <img src="${profileImg}" onerror="this.src='${defaultProfile}'" class="profile-logo-slide" alt="Profile">
+      <p><strong>Name:</strong> ${fullName}</p>
+      <p><strong>Username:</strong> ${username}</p>
+    `;
+  }
+
+  // Profile dropdown image
+  const profileDropdownImg = document.querySelector(".profile-area img");
+  if (profileDropdownImg) {
+    profileDropdownImg.src = profileImg;
+    profileDropdownImg.onerror = function() { this.src = defaultProfile; };
+  }
+}
+
+// ============================
+// Logout
+// ============================
+function deleteCookie(name) {
+  document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+}
+document.querySelectorAll('#logoutLink, #logoutLinkMobile').forEach(link => {
+  link.addEventListener('click', function(e) {
+    e.preventDefault();
+
+    // Clear sessionStorage and cookies
+    sessionStorage.removeItem('user');
+    document.cookie = 'user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+
+    // Redirect to login page with auto-refresh
+    window.location.href = "../login-form.html";
+    window.location.reload(); // Forces reload of login page
+  });
+});
+// ====== Call on page load ======
+populateHeaderSide();
+
+
+// ================== LOGOUT ==================
+const user = JSON.parse(sessionStorage.getItem('user')) || null;
+const userId = user?.userId;
+
+if (!userId) {
+  alert("No user found. Please login again.");
+  window.location.href = "../login-form.html";
+}
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>🌱 AgroScan — Login</title>
+  <link rel="icon" href="img/agroscan-icon.png" type="image/png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css.files/sign.css">
+</head>
+<body>
+  <div class="stage">
+    <section class="left">
+      <div class="phone-mock" aria-hidden="true">
+        <div class="phone-screen">
+          <div class="feed">
+            <div class="post p1"></div>
+            <div class="post p2"></div>
+            <div class="post p3"></div>
+            <div class="post p4"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="right">
+      <div class="auth-card">
+        <div class="brand">
+          <h1>🌱 AgroScan</h1>
+        </div>
+
+        <div class="auth-box">
+          <form id="loginForm" autocomplete="on" novalidate>
+            <input id="identifier" name="identifier" class="input" type="text" required placeholder="Username, email or phone">
+            <input id="password" name="password" class="input" type="password" required minlength="6" placeholder="Password">
+            <button type="submit" class="btn primary">Log in</button>
+          </form>
+
+          <a class="forgot" href="#">Forgot password?</a>
+
+          <div class="ors">
+            <span class="line"></span>
+            <span class="or">OR</span>
+            <span class="line"></span>
+          </div>
+
+          <!--button class="btn google" id="googleBtn">Login with Google</button-->
+        </div>
+
+        <div class="signup-box">
+          <p>Don't have an account? <a href="signup-form.html" id="showSignup">Sign up</a></p>
+        </div>
+
+        <div class="info-card">
+          <p>🌱 AgroScan — Your AI-powered farming assistant.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+<script>
+  // ============================
+  // COOKIE + SESSION HELPERS
+  // ============================
+  const setCookie = (name, value, days = 7) => {
+    const expires = new Date(Date.now() + days * 864e5).toUTCString();
+    document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/`;
+  };
+
+  const getCookie = (name) => {
+    return document.cookie.split('; ').reduce((r, v) => {
+      const parts = v.split('=');
+      return parts[0] === name ? decodeURIComponent(parts[1]) : r;
+    }, '');
+  };
+
+  // ============================
+  // RESTORE SESSION FROM COOKIE
+  // ============================
+  const restoreSessionFromCookie = () => {
+    if (!sessionStorage.getItem('user')) {
+      const userCookie = getCookie('user');
+      if (userCookie) sessionStorage.setItem('user', userCookie);
+    }
+  };
+
+  // ============================
+  // GET REDIRECT PAGE FROM QUERY PARAM
+  // ============================
+  const getRedirectPage = () => {
+    const params = new URLSearchParams(window.location.search);
+    const redirect = params.get('redirect');
+    // Only allow safe relative paths (prevent external redirects)
+    if (redirect && redirect.startsWith('/')) return redirect;
+    return 'home.html'; // fallback to dashboard/home
+  };
+
+  // ============================
+  // AUTO REDIRECT IF ALREADY LOGGED IN
+  // ============================
+  const redirectIfLoggedIn = () => {
+    restoreSessionFromCookie();
+    if (sessionStorage.getItem('user')) {
+      window.location.href = getRedirectPage();
+    }
+  };
+
+  // Run on page load
+  redirectIfLoggedIn();
+
+  // ============================
+  // SAVE USER TO SESSION + COOKIE
+  // ============================
+  const saveUser = async (user) => {
+    const userStr = JSON.stringify(user);
+    sessionStorage.setItem('user', userStr);
+
+    let expiryDays = 7; // default expiry
+    try {
+      const res = await fetch('https://agroscan-backend.onrender.com/api/controls/cookie_expiry_days');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.value && !isNaN(parseInt(data.value))) expiryDays = parseInt(data.value);
+      }
+    } catch (err) {
+      console.warn('Failed to fetch cookie expiry from server, using default 7 days.');
+    }
+
+    setCookie('user', userStr, expiryDays);
+  };
+
+  // ============================
+  // DISPLAY TOAST MESSAGE
+  // ============================
+  const showToast = (message) => {
+    const toast = document.createElement('div');
+    toast.textContent = message;
+    toast.style.position = 'fixed';
+    toast.style.bottom = '20px';
+    toast.style.left = '50%';
+    toast.style.transform = 'translateX(-50%)';
+    toast.style.backgroundColor = '#4CAF50';
+    toast.style.color = 'white';
+    toast.style.padding = '12px 20px';
+    toast.style.borderRadius = '6px';
+    toast.style.boxShadow = '0 4px 6px rgba(0,0,0,0.2)';
+    toast.style.zIndex = '9999';
+    toast.style.fontFamily = 'Inter, sans-serif';
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000); // remove after 3 seconds
+  };
+
+  // ============================
+  // LOGIN FORM LOGIC
+  // ============================
+  const loginForm = document.getElementById('loginForm');
+
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const identifier = document.getElementById('identifier').value.trim();
+    const password = document.getElementById('password').value.trim();
+
+    if (!identifier || !password) {
+      showToast("Username and password are required");
+      return;
+    }
+
+    try {
+      const response = await fetch('https://agroscan-backend.onrender.com/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identifier, password })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Build user object
+        const user = {
+          username: data.username,
+          userId: data.userId,
+          name: data.name || "",
+          email: data.email || "",
+          phone: data.phone || "",
+          profile: data.profile || ""
+        };
+
+        // Save to session + cookie
+        await saveUser(user);
+
+        // Show welcome toast
+        showToast(`Welcome ${data.name}`);
+
+        // Redirect to original page or fallback
+        window.location.href = getRedirectPage();
+
+      } else {
+        showToast(data.error || 'Login failed');
+      }
+
+    } catch (err) {
+      console.error(err);
+      showToast('Server error, try again later.');
+    }
+  });
+
+</script>
+
+</body>
+</html>

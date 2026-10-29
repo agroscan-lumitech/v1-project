@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🌱 AgroScan - Shop</title>
+  <link rel="icon" href="../img/agroscan-icon.png" type="image/png">
+  <link rel="stylesheet" href="../css.files/header-footer.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ================= HEADER ================= -->
+  <header>
+    <a href="../home.html" class="logo-area">
+      <img src="../img/agroscan-logo.png" alt="AgroScan Logo" class="logo">
+    </a>
+    <div class="nav-options">
+      <div class="dropdown">
+        <button class="dropbtn">Organs</button>
+        <div class="dropdown-content">
+          <a href="../agropedia/index.agropedia.html">AgroPedia</a>
+          <a href="../agroshop/index.agroshop.html">AgroShop</a>
+          <a href="../agroawareness/index.agroawareness.html">AgroAwareness</a>
+        <a href="../agroscheme/index.agroscheme.html">AgroScheme</a>ss
+        </div>
+      </div>
+      <div class="dropdown profile-dropdown">
+        <div class="profile-area">
+          <img src="../img/profile-logo.jpg" class="profile-logo" alt="Profile">
+          <div class="profile-info">
+            <span id="full-name">Guest User</span>
+            <small id="username-display">@guest</small>
+          </div>
+        </div>
+        <div class="dropdown-content profile-content">
+          <a href="../profile.html">Profile</a>
+          <a href="../login-form.html">Login</a>
+          <a href="#" id="logoutLink" style="display:none;">Logout</a>
+        </div>
+      </div>
+    </div>
+    <div class="hamburger" onclick="toggleSidePanel()">
+      <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+    </div>
+  </header>
+
+  <!-- ================= TOP NAV ================= -->
+  <div class="top-bar">
+    <a href="../home.html" class="top-btn">Home</a>
+    <a href="#" class="top-btn" id="cart-top-btn">Cart</a>
+    <a href="#" class="top-btn" id="order-top-btn">Orders</a>
+    <a href="../agroshop/index.agroshop.html" class="top-btn" id="active">Shop</a>
+  </div>
+
+  <!-- ================= SIDE PANEL ================= -->
+  <div class="side-panel">
+    <div class="close-btn" onclick="toggleSidePanel()">×</div>
+    <ul class="side-menu">
+      <li><a href="../home.html">Home</a></li>
+      <li>
+        <button class="side-toggle">Organs</button>
+        <ul class="side-submenu">
+          <a href="../agropedia/index.agropedia.html">AgroPedia</a>
+          <a href="../agroshop/index.agroshop.html">AgroShop</a>
+          <a href="../agroawareness/index.agroawareness.html">AgroAwareness</a>
+          <a href="../agroscheme/index.agroscheme.html">AgroScheme</a>
+        </ul>
+      </li>
+      <li>
+        <button class="side-toggle">Account</button>
+        <ul class="side-submenu">
+          <li><a href="../profile.html">Profile</a></li>
+          <li><a href="../login-form.html">Login</a></li>
+          <li><a href="#" id="logoutLinkMobile" style="display:none;">Logout</a></li>
+        </ul>
+      </li>
+    </ul>
+    <div class="panel-user-info">
+      <img src="../img/profile-logo.jpg" class="profile-logo-slide" alt="Profile">
+      <p><strong>Name:</strong> Guest User</p>
+      <p><strong>Username:</strong> @guest</p>
+    </div>
+  </div>
+
+  <!-- ================= SHOP CONTENT ================= -->
+  <main class="shop-container">
+    <div class="shop-header">
+      <h1>AgroProducts by AgroShop</h1>
+      <p>Explore our organic, high-quality agricultural products available for your farm.</p>
+    </div>
+    <div class="product-grid" id="productGrid"></div>
+  </main>
+
+  <!-- ================= CART MODAL ================= -->
+  <div class="cart-modal" id="cartModal">
+    <div class="cart-content">
+      <h3>Your Cart</h3>
+      <div class="coupon-section">
+        <input type="text" id="couponCode" placeholder="Enter coupon code">
+        <button id="applyCoupon">Apply</button>
+      </div>
+      <table class="cart-table">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Qty</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody id="cart-items"></tbody>
+      </table>
+      <p>Total: ₹<span id="cart-total">0</span></p>
+      <div class="cart-actions">
+        <button class="checkout-btn" id="checkout-btn">Fetch Order</button>
+        <button class="close-cart-btn" id="close-cart">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= ORDERS MODAL ================= -->
+  <div class="orders-modal" id="ordersModal">
+    <div class="orders-content">
+      <h3>Orders</h3>
+      <table class="orders-table" id="orders-table">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <button class="close-cart-btn" id="close-orders">Close</button>
+    </div>
+  </div>
+
+  <!-- ================= ORDER DETAILS MODAL ================= -->
+ <div id="orderDetailsModal" class="modal">
+  <div class="modal-content">
+    <span id="closeOrderDetails" class="close">&times;</span>
+    <h2>Order Details</h2>
+    <p><strong>Name:</strong> <span id="order-customer-name"></span></p>
+    <p><strong>Phone:</strong> <span id="order-customer-phone"></span></p>
+    <p><strong>Address:</strong> <span id="order-address"></span></p>
+    <p><strong>Payment Method:</strong> <span id="order-payment"></span></p>
+    <p><strong>Coupon:</strong> <span id="order-coupon"></span></p>
+    <p><strong>Status:</strong> <span id="order-status"></span></p>
+    <p><strong>Date:</strong> <span id="order-date"></span></p>
+    <ul id="order-items-list"></ul>
+    <p><strong>Total:</strong> <span id="order-total"></span></p>
+  </div>
+</div>
+
+
+ <!-- ================= NEW FETCH ORDER MODAL ================= -->
+<div class="modal" id="fetchOrderModal">
+  <div class="modal-content form-modal">
+    <span class="close-modal" id="closeFetchOrder">&times;</span>
+    <h2>Confirm Your Order</h2>
+    <form id="orderForm">
+      <label>Name</label>
+      <input type="text" id="orderName" required>
+      
+      <label>Phone</label>
+      <input type="text" id="orderPhone" required>
+      
+      <label>Address</label>
+      <textarea id="orderAddress" rows="3" required></textarea>
+      
+      <label>Payment Method</label>
+      <select id="orderPayment" required>
+        <option value="Cash on Delivery">Cash on Delivery</option>
+        <option value="UPI">UPI</option>
+        <option value="Credit Card">Credit Card</option>
+        <option value="Debit Card">Debit Card</option>
+      </select>
+      
+      <p>Total: ₹<span id="final-total">0</span></p>
+      <div class="order-actions">
+        <button type="submit" id="confirmOrderBtn">Place Order</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+  <!-- ================= FLOATING CHAT ================= -->
+ <a href="https://wa.me/8294721929?text=Hey%20I%20am%20from%20AgroScan%20and%20I%20would%20like%20to%20ask%20help%20for
+" class="chat-btn">
+    <img src="../img/msg-logo.png" alt="Chat">
+  </a> 
+
+  <script src="script.js"></script>
+</body>
+</html>

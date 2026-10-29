@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌱 AgroScan - AgroScheme</title>
+<link rel="icon" href="../img/agroscan-icon.png" type="image/png">
+<link rel="stylesheet" href="../css.files/header-footer.css">
+<style>
+/* ================= ACTIVE TOP BUTTON ================= */
+#active {
+  background: #66bb6a;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+
+/* ================= BLOG GRID ================= */
+.shop-container {
+  max-width: 1300px;
+  margin: 40px auto;
+  padding: 20px;
+}
+
+.shop-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.shop-header h1 {
+  font-size: 2.6rem;
+  color: #2e7d32;
+  margin-bottom: 10px;
+}
+
+.shop-header p {
+  font-size: 1.1rem;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+/* Blog Grid */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+}
+
+/* Blog Card Styling */
+.product-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+  display: flex;
+  flex-direction: column;
+  transition: 0.3s;
+}
+
+.product-card:hover {
+  transform: translateY(-6px);
+}
+
+.product-card img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 14px 14px 0 0;
+}
+
+.product-info {
+  padding: 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.product-info h3 {
+  font-size: 1.3rem;
+  color: #333;
+  margin-bottom: 6px;
+}
+
+.product-info p {
+  font-size: 0.95rem;
+  color: #666;
+  margin-bottom: 8px;
+  flex-grow: 1;
+}
+
+.author-name {
+  font-size: 0.85rem;
+  color: #2e7d32;
+  margin-bottom: 12px;
+}
+
+.card-btn {
+  display: inline-block;
+  text-decoration: none;
+  padding: 10px 15px;
+  background-color: #66bb6a;
+  color: #fff;
+  border-radius: 5px;
+  font-weight: 600;
+  transition: 0.2s;
+  text-align: center;
+  cursor: pointer;
+}
+
+.card-btn:hover {
+  background-color: #57a05a;
+}
+
+/* ================= MODALS ================= */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  justify-content: center;
+  align-items: center;
+  z-index: 3000;
+}
+
+.modal.open {
+  display: flex;
+}
+
+/* ================= VISIT PORTAL BUTTON ================= */
+#visitPortalBtn {
+  display: inline-block;      /* ensures it behaves like a button */
+  margin: 20px auto 0;        /* top 20px, auto left/right to center, bottom 0 */
+  padding: 12px 20px;         /* comfortable padding */
+  background-color: #43a047;  /* green button */
+  color: #fff;                /* white text */
+  border-radius: 8px;         /* rounded corners */
+  font-weight: 600;           /* bold text */
+  text-align: center;         /* center text */
+  text-decoration: none;      /* remove underline */
+  cursor: pointer;
+  transition: 0.3s;
+  display: block;             /* make block to center using margin auto */
+}
+
+#visitPortalBtn:hover {
+  background-color: #388e3c;  /* slightly darker on hover */
+}
+
+.modal-content {
+  background: #fff;
+  width: 90%;
+  max-width: 600px;
+  border-radius: 14px;
+  padding: 20px;
+  position: relative;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-content h3 {
+  color: #2e7d32;
+  margin-bottom: 5px;
+}
+
+.modal-content p.author, .modal-content p.desc {
+  font-size: 0.95rem;
+  color: #555;
+  margin-bottom: 10px;
+}
+
+.modal-content pre {
+  background: #f3f3f3;
+  padding: 10px;
+  border-radius: 8px;
+  white-space: pre-wrap;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  overflow-x: auto;
+}
+
+.close-modal {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 1.8rem;
+  color: #555;
+  cursor: pointer;
+}
+
+/* SEARCH & SORT MODALS */
+.search-sort-modal .modal-content {
+  max-width: 450px;
+}
+
+.search-sort-modal input[type="text"] {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-bottom: 15px;
+  font-size: 1rem;
+}
+
+.search-sort-modal .radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.search-sort-modal label {
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.search-sort-modal button {
+  padding: 10px 15px;
+  background-color: #66bb6a;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  width: 100%;
+}
+
+.search-sort-modal button:hover { opacity: 0.9; }
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .shop-header h1 { font-size: 2rem; }
+  .product-card img { height: 150px; }
+}
+
+@media(max-width:500px){
+  .shop-header h1 { font-size: 1.6rem; }
+  .shop-header p { font-size: 0.95rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ================= HEADER ================= -->
+<header>
+  <a href="../home.html" class="logo-area">
+    <img src="../img/agroscan-logo.png" alt="AgroScan Logo" class="logo">
+  </a>
+  <div class="nav-options">
+    <div class="dropdown">
+      <button class="dropbtn">Organs</button>
+      <div class="dropdown-content">
+        <a href="../agropedia/index.agropedia.html">AgroPedia</a>
+        <a href="../agroshop/index.agroshop.html">AgroShop</a>
+        <a href="../agroawareness/index.agroawareness.html">AgroAwareness</a>
+        <a href="../agroscheme/index.agroscheme.html">AgroScheme</a>
+      </div>
+    </div>
+    <div class="dropdown profile-dropdown">
+      <div class="profile-area">
+        <img src="../img/profile-logo.jpg" class="profile-logo" alt="Profile">
+        <div class="profile-info">
+          <span id="full-name">Guest User</span>
+          <small id="username-display">@guest</small>
+        </div>
+      </div>
+      <div class="dropdown-content profile-content">
+        <a href="../profile.html">Profile</a>
+        <a href="../login-form.html">Login</a>
+        <a href="#" id="logoutLink" style="display:none;">Logout</a>
+      </div>
+    </div>
+  </div>
+  <div class="hamburger" onclick="toggleSidePanel()">
+    <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+  </div>
+</header>
+
+<!-- ================= TOP NAV ================= -->
+<div class="top-bar">
+  <a href="../home.html" class="top-btn">Home</a>
+  <a href="#" class="top-btn" id="search-btn">Search</a>
+  <a href="#" class="top-btn" id="sort-btn">Sort</a>
+  <a href="../agroscheme/index.agroscheme.html" class="top-btn" id="active">Scheme</a>
+</div>
+
+<!-- ================= SIDE PANEL ================= -->
+<div class="side-panel">
+  <div class="close-btn" onclick="toggleSidePanel()">×</div>
+  <ul class="side-menu">
+    <li><a href="../home.html">Home</a></li>
+    <li>
+      <button class="side-toggle">Organs</button>
+      <ul class="side-submenu">
+        <a href="../agropedia/index.agropedia.html">AgroPedia</a>
+        <a href="../agroshop/index.agroshop.html">AgroShop</a>
+        <a href="../agroawareness/index.agroawareness.html">AgroAwareness</a>
+        <a href="../agroscheme/index.agroscheme.html">AgroScheme</a>
+      </ul>
+    </li>
+    <li>
+      <button class="side-toggle">Account</button>
+      <ul class="side-submenu">
+        <li><a href="../profile.html">Profile</a></li>
+        <li><a href="../login-form.html">Login</a></li>
+        <li><a href="#" id="logoutLinkMobile" style="display:none;">Logout</a></li>
+      </ul>
+    </li>
+  </ul>
+  <div class="panel-user-info">
+    <img src="../img/profile-logo.jpg" class="profile-logo-slide" alt="Profile">
+    <p><strong>Name:</strong> Guest User</p>
+    <p><strong>Username:</strong> @guest</p>
+  </div>
+</div>
+
+<!-- ================= CONTENT ================= -->
+<main class="shop-container">
+  <div class="shop-header">
+    <h1>AgroScheme - Government Schemes for Farmers</h1>
+    <p>Explore latest government schemes, tips, and guides to help farmers improve productivity and benefits.</p>
+  </div>
+
+  
+
+  <!-- Blog Grid -->
+  <div class="product-grid" id="productGrid"></div>
+</main>
+
+<!-- ================= ARTICLE MODAL ================= -->
+<div class="modal" id="articleModal">
+  <div class="modal-content">
+    <span class="close-modal" id="closeArticle">&times;</span>
+    <h3 id="modalTitle"></h3>
+    <p class="author" id="modalAuthor"></p>
+    <p class="desc" id="modalDesc"></p>
+    <pre id="modalContent"></pre>
+    <a id="visitPortalBtn" href="#" target="_blank" class="card-btn" style="display:none;">Visit Gov Portal</a>
+  </div>
+</div>
+
+<div class="modal" id="articleModal">
+  <div class="modal-content">
+    <span class="close-modal" id="closeArticle">&times;</span>
+    <h3 id="modalTitle"></h3>
+    <p class="author" id="modalAuthor"></p>
+    <p class="desc" id="modalDesc"></p>
+    <pre id="modalContent"></pre>
+    <a id="visitPortalBtn" href="#" target="_blank" class="card-btn" style="display:none;">Visit Gov Portal</a>
+  </div>
+</div>
+
+<!-- ================= SEARCH MODAL ================= -->
+<div class="modal search-sort-modal" id="searchModal">
+  <div class="modal-content">
+    <span class="close-modal" id="closeSearch">&times;</span>
+    <h3>Search Blogs</h3>
+    <input type="text" id="blogSearchInput" placeholder="Search by title or author">
+    <button id="performSearch">Search</button>
+  </div>
+</div>
+
+<!-- ================= SORT MODAL ================= -->
+<div class="modal search-sort-modal" id="sortModal">
+  <div class="modal-content">
+    <span class="close-modal" id="closeSort">&times;</span>
+    <h3>Sort Blogs</h3>
+    <div class="radio-group">
+      <label><input type="radio" name="sort" value="title"> By Title</label>
+      <label><input type="radio" name="sort" value="author"> By Author</label>
+      <label><input type="radio" name="sort" value="date"> By Date</label>
+    </div>
+    <button id="applySort">Apply</button>
+  </div>
+</div>
+
+<!-- ================= JS ================= -->
+<script>
+// ======= SIDE PANEL =======
+const sidePanel = document.querySelector(".side-panel");
+function toggleSidePanel(){ sidePanel.classList.toggle("open"); }
+document.querySelectorAll(".side-toggle").forEach(btn => {
+  btn.addEventListener("click", () => btn.nextElementSibling.classList.toggle("open"));
+});
+
+// ================= BLOG DATA =================
+const blogs = [
+  {title:"PM-KISAN Samman Nidhi", desc:"Direct income support to farmers", author:"Gov India", date:"2025-01-01", content:"Provides ₹6000 per year in three installments directly into eligible farmers' bank accounts.", img:"https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=900&q=80", portal:"https://pmkisan.gov.in/"},
+  {title:"Pradhan Mantri Fasal Bima Yojana", desc:"Crop insurance for farmers", author:"Gov India", date:"2025-01-05", content:"Offers insurance coverage and financial support to farmers against crop failure due to natural calamities, pests, or diseases.", img:"https://images.unsplash.com/photo-1581090466611-7e0cdfbb6799?auto=format&fit=crop&w=900&q=80", portal:"https://pmfby.gov.in/"},
+  {title:"Kisan Credit Card (KCC)", desc:"Low-interest credit for farmers", author:"Gov India", date:"2025-01-10", content:"Provides short-term credit to farmers at subsidized interest rates for crop production and allied activities.", img:"https://images.unsplash.com/photo-1600431521340-491eca880813?auto=format&fit=crop&w=900&q=80", portal:"https://www.india.gov.in/spotlight/kisan-credit-card"},
+  {title:"PM-KUSUM Scheme", desc:"Solar power for farmers", author:"Gov India", date:"2025-01-15", content:"Encourages installation of solar pumps and grid-connected renewable power plants to promote clean irrigation.", img:"https://images.unsplash.com/photo-1607191669277-3e3e93f21eaa?auto=format&fit=crop&w=900&q=80", portal:"https://mnre.gov.in/pmkusum"},
+  {title:"PM Krishi Sinchayee Yojana", desc:"Efficient irrigation system", author:"Gov India", date:"2025-01-20", content:"Aims to ensure water conservation and expand irrigation area through ‘Per Drop More Crop’ initiative.", img:"https://images.unsplash.com/photo-1591608516480-2f2b62a6b942?auto=format&fit=crop&w=900&q=80", portal:"https://pmksy.gov.in/"},
+  {title:"Soil Health Card Scheme", desc:"Monitor soil nutrients for better crops", author:"Gov India", date:"2025-02-01", content:"Provides detailed soil health analysis to farmers, helping them use fertilizers efficiently.", img:"https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=900&q=80", portal:"https://soilhealth.dac.gov.in/"},
+  {title:"Modified Interest Subvention Scheme", desc:"Interest subsidy on farm loans", author:"Gov India", date:"2025-02-05", content:"Offers interest subvention to farmers on short-term loans up to ₹3 lakh, making borrowing affordable.", img:"https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=900&q=80", portal:"https://agricoop.gov.in/en/MISS"},
+  {title:"Agriculture Infrastructure Fund", desc:"Finance for farm infrastructure", author:"Gov India", date:"2025-02-10", content:"Provides medium to long-term financing for post-harvest infrastructure like cold storage and warehouses.", img:"https://images.unsplash.com/photo-1524593034706-9318e3a0d5e9?auto=format&fit=crop&w=900&q=80", portal:"https://agriinfra.dac.gov.in/"},
+  {title:"PM Kisan Maan Dhan Yojana", desc:"Pension for small farmers", author:"Gov India", date:"2025-02-15", content:"A voluntary pension scheme for small and marginal farmers with a monthly contribution for a secure retirement.", img:"https://images.unsplash.com/photo-1600359753651-3c15c9b60d2e?auto=format&fit=crop&w=900&q=80", portal:"https://maandhan.in/pmkmy"},
+  {title:"PM-AASHA Scheme", desc:"Price support for crops", author:"Gov India", date:"2025-02-20", content:"Ensures farmers get remunerative prices through procurement and price deficiency payment mechanisms.", img:"https://images.unsplash.com/photo-1599058917212-d750089bc07e?auto=format&fit=crop&w=900&q=80", portal:"https://agricoop.gov.in/en/PM-AASHA"},
+  {title:"National Agriculture Market (eNAM)", desc:"Digital platform for selling crops", author:"Gov India", date:"2025-02-25", content:"An online trading portal that connects mandis across India, ensuring better price discovery for farmers.", img:"https://images.unsplash.com/photo-1556761175-129418cb2dfe?auto=format&fit=crop&w=900&q=80", portal:"https://enam.gov.in/web/"},
+  {title:"Rashtriya Krishi Vikas Yojana (RKVY)", desc:"Holistic agricultural development", author:"Gov India", date:"2025-03-01", content:"Supports states in strengthening agriculture and allied sectors through need-based planning and funding.", img:"https://images.unsplash.com/photo-1565462908477-0b0d0f2b2e83?auto=format&fit=crop&w=900&q=80", portal:"https://rkvy.nic.in/"},
+  {title:"Paramparagat Krishi Vikas Yojana", desc:"Promoting organic farming", author:"Gov India", date:"2025-03-05", content:"Encourages farmers to adopt organic farming practices using traditional knowledge and bio-inputs.", img:"https://images.unsplash.com/photo-1518081461904-9ac61aa1d2c2?auto=format&fit=crop&w=900&q=80", portal:"https://pgsindia-ncof.gov.in/PKVY/index.aspx"},
+  {title:"Sub-Mission on Agricultural Mechanization", desc:"Subsidy on farm equipment", author:"Gov India", date:"2025-03-10", content:"Provides subsidies for buying modern farm machinery to increase productivity and efficiency.", img:"https://images.unsplash.com/photo-1617196034377-666a6df54b60?auto=format&fit=crop&w=900&q=80", portal:"https://agricoop.gov.in/en/SMAM"},
+  {title:"National Mission on Edible Oils", desc:"Boosting oilseed production", author:"Gov India", date:"2025-03-15", content:"Aims to increase self-sufficiency in edible oils and reduce import dependency through oil palm cultivation.", img:"https://images.unsplash.com/photo-1524593028980-32cbe9b7b3fb?auto=format&fit=crop&w=900&q=80", portal:"https://nmeo.dac.gov.in/"},
+  {title:"Mission for Integrated Development of Horticulture", desc:"Support for horticulture", author:"Gov India", date:"2025-03-20", content:"Promotes holistic growth of horticulture through area expansion, production, and post-harvest management.", img:"https://images.unsplash.com/photo-1518732714860-b62714ce0c59?auto=format&fit=crop&w=900&q=80", portal:"https://midh.gov.in/"},
+  {title:"National Food Security Mission", desc:"Enhancing food grain production", author:"Gov India", date:"2025-03-25", content:"Focuses on increasing production of rice, wheat, pulses, and coarse cereals in identified districts.", img:"https://images.unsplash.com/photo-1573821663912-3f70c2db8d5e?auto=format&fit=crop&w=900&q=80", portal:"https://nfsm.gov.in/"},
+  {title:"National Beekeeping and Honey Mission", desc:"Promoting beekeeping as income source", author:"Gov India", date:"2025-03-30", content:"Supports scientific beekeeping, honey processing units, and provides training for rural farmers.", img:"https://images.unsplash.com/photo-1615569702906-6e689ae02c0f?auto=format&fit=crop&w=900&q=80", portal:"https://nbb.gov.in/"},
+  {title:"Market Intervention Scheme", desc:"Price stability for crops", author:"Gov India", date:"2025-04-01", content:"Government procures crops when prices fall below MSP to protect farmers from distress sales.", img:"https://images.unsplash.com/photo-1602524206063-15d0584e5a4d?auto=format&fit=crop&w=900&q=80", portal:"https://agricoop.gov.in/en/MIS-PSS"},
+  {title:"Pradhan Mantri Formalization of Micro Food Processing Enterprises (PM-FME)", desc:"Boosting rural food processing", author:"Gov India", date:"2025-04-05", content:"Supports small and micro food enterprises to upgrade technology and improve market access.", img:"https://images.unsplash.com/photo-1506801310323-534be5e7b5b2?auto=format&fit=crop&w=900&q=80", portal:"https://mofpi.gov.in/pmfme"}
+];
+
+
+
+// ================= RENDER BLOGS =================
+function renderBlogs(filtered=[]){
+  const grid = document.getElementById("productGrid");
+  grid.innerHTML = "";
+  const display = filtered.length ? filtered : blogs;
+
+  display.forEach((blog,index)=>{
+    const card = document.createElement("div");
+    card.className = "product-card";
+    card.innerHTML=`
+      <div class="product-info">
+        <h3>${blog.title}</h3>
+        <p>${blog.desc}</p>
+        <div class="author-name">By ${blog.author}</div>
+        <button class="card-btn" data-index="${index}">Read More</button>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+
+  document.querySelectorAll(".card-btn").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      const idx = btn.dataset.index;
+      openArticleModal(display[idx]);
+    });
+  });
+}
+
+// ================= ARTICLE MODAL =================
+const articleModal = document.getElementById("articleModal");
+const modalTitle = document.getElementById("modalTitle");
+const modalAuthor = document.getElementById("modalAuthor");
+const modalDesc = document.getElementById("modalDesc");
+const modalContent = document.getElementById("modalContent");
+document.getElementById("closeArticle").addEventListener("click",()=> articleModal.classList.remove("open"));
+
+function openArticleModal(blog){
+  modalTitle.innerText = blog.title;
+  modalAuthor.innerText = `By ${blog.author}`;
+  modalDesc.innerText = blog.desc;
+  modalContent.innerText = blog.content;
+
+  const visitBtn = document.getElementById("visitPortalBtn");
+  if(blog.portal){
+    visitBtn.href = blog.portal;
+    visitBtn.style.display = "inline-block";
+  } else {
+    visitBtn.style.display = "none";
+  }
+
+  articleModal.classList.add("open");
+}
+
+
+// ================= SEARCH & SORT =================
+const searchModal = document.getElementById("searchModal");
+const sortModal = document.getElementById("sortModal");
+document.getElementById("search-btn").addEventListener("click",()=>searchModal.classList.add("open"));
+document.getElementById("sort-btn").addEventListener("click",()=>sortModal.classList.add("open"));
+document.getElementById("closeSearch").addEventListener("click",()=>searchModal.classList.remove("open"));
+document.getElementById("closeSort").addEventListener("click",()=>sortModal.classList.remove("open"));
+
+// Search
+document.getElementById("performSearch").addEventListener("click",()=>{
+  const query = document.getElementById("blogSearchInput").value.toLowerCase();
+  const result = blogs.filter(b=> b.title.toLowerCase().includes(query) || b.author.toLowerCase().includes(query));
+  renderBlogs(result);
+  searchModal.classList.remove("open");
+});
+
+// Sort
+document.getElementById("applySort").addEventListener("click",()=>{
+  const sortVal = document.querySelector('input[name="sort"]:checked')?.value;
+  if(!sortVal) return;
+  const sorted = [...blogs].sort((a,b)=>{
+    if(sortVal==='date') return new Date(a.date)-new Date(b.date);
+    return a[sortVal].localeCompare(b[sortVal]);
+  });
+  renderBlogs(sorted);
+  sortModal.classList.remove("open");
+});
+
+// ================= ACCORDION =================
+document.querySelectorAll('.side-toggle').forEach(toggle=>{
+  toggle.addEventListener('click',function(){
+    const submenu = this.nextElementSibling;
+    document.querySelectorAll('.side-submenu').forEach(sm=>{
+      if(sm!==submenu) sm.style.maxHeight = null;
+    });
+    submenu.style.maxHeight ? submenu.style.maxHeight=null : submenu.style.maxHeight=submenu.scrollHeight+"px";
+  });
+});
+
+// ================= PROFILE & LOGOUT =================
+const defaultProfile = "../img/profile-logo.jpg";
+function populateHeaderSide(){
+  const user = JSON.parse(sessionStorage.getItem("user"));
+  const fullName = user?.name || "Guest User";
+  const username = user?.username ? `@${user.username}` : "@guest";
+  const profileImg = user?.profileUrl || defaultProfile;
+
+  document.getElementById("full-name").innerText = fullName;
+  document.getElementById("username-display").innerText = username;
+
+  const logoutLinks = [document.getElementById("logoutLink"), document.getElementById("logoutLinkMobile")];
+  logoutLinks.forEach(link=> link.style.display = user ? "block" : "none");
+
+  const panelInfo = document.querySelector(".panel-user-info");
+  if(panelInfo){
+    panelInfo.innerHTML=`
+      <img src="${profileImg}" onerror="this.src='${defaultProfile}'" class="profile-logo-slide" alt="Profile">
+      <p><strong>Name:</strong> ${fullName}</p>
+      <p><strong>Username:</strong> ${username}</p>
+    `;
+  }
+
+  const profileDropdownImg = document.querySelector(".profile-area img");
+  if(profileDropdownImg){
+    profileDropdownImg.src = profileImg;
+    profileDropdownImg.onerror=function(){ this.src=defaultProfile; };
+  }
+}
+
+// ============================
+// Logout
+// ============================
+function deleteCookie(name) {
+  document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+}
+document.querySelectorAll('#logoutLink, #logoutLinkMobile').forEach(link => {
+  link.addEventListener('click', function(e) {
+    e.preventDefault();
+
+    // Clear sessionStorage and cookies
+    sessionStorage.removeItem('user');
+    document.cookie = 'user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+
+    // Redirect to login page with auto-refresh
+    window.location.href = "../login-form.html";
+    window.location.reload(); // Forces reload of login page
+  });
+});
+// ====== Call on page load ======
+populateHeaderSide();
+
+
+// ================== LOGOUT ==================
+const user = JSON.parse(sessionStorage.getItem('user')) || null;
+const userId = user?.userId;
+
+if (!userId) {
+  alert("No user found. Please login again.");
+  window.location.href = "../login-form.html";
+}
+
+// ================= INITIALIZE =================
+window.addEventListener("DOMContentLoaded",()=>{
+  populateHeaderSide();
+  renderBlogs();
+});
+</script>
+</body>
+</html>

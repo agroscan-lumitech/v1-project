@@ -1,0 +1,8 @@
+# Netlify config for the FRONTEND site (agroscan-org)
+# When connecting this repo on Netlify: New site from Git -> set
+# "Base directory" to  frontend  (this matters in a monorepo -- without
+# it Netlify tries to publish the whole repo root, and every relative
+# path breaks).
+[build]
+  base = "frontend"
+  publish = "."

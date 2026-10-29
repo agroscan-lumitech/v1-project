@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌱 AgroScan</title>
+<link rel="icon" href="img/agroscan-icon.png" type="image/png">
+<link rel="stylesheet" href="./css.files/header-footer.css">
+<style>
+  #active {
+  background: #66bb6a;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+
+/* ================= Dashboard Container ================= */
+.dashboard {
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  font-family: "Segoe UI", Arial, sans-serif;
+}
+
+/* ================= Welcome Section ================= */
+.welcome-section {
+  background: #e8f5e9;
+  padding: 25px 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.welcome-section:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+.welcome-section h1 {
+  font-size: 2rem;
+  color: #2e7d32;
+  margin-bottom: 8px;
+}
+.welcome-section p {
+  font-size: 1rem;
+  color: #555;
+}
+
+/* ================= Quick Action Buttons ================= */
+.quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+.action-btn {
+  flex: 1 1 220px;
+  text-align: center;
+  padding: 20px 10px;
+  background: linear-gradient(135deg, #66bb6a, #388e3c);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  transition: all 0.3s ease;
+}
+.action-btn:hover {
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+}
+.action-btn i {
+  display: block;
+  font-size: 1.5rem;
+  margin-bottom: 8px;
+}
+
+/* ================= Cards / Stats / Charts ================= */
+.stats-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+.card {
+  flex: 1 1 280px;
+  background: #f1f8f1;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+.card h3 {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+  color: #2e7d32;
+}
+.card p {
+  font-size: 1rem;
+  color: #555;
+}
+
+.modal-content h3{
+  color:rgb(29, 211, 29);
+  margin-top:5px;
+}
+
+/* ================= Media Queries for Responsive ================= */
+@media (max-width: 1024px) {
+  .dashboard {
+    padding: 0 15px;
+  }
+  .welcome-section h1 {
+    font-size: 1.8rem;
+  }
+  .action-btn {
+    flex: 1 1 45%;
+    padding: 18px 10px;
+  }
+  .card {
+    flex: 1 1 45%;
+  }
+}
+
+@media (max-width: 768px) {
+  .quick-actions {
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .action-btn {
+    flex: 1 1 48%; /* 2 buttons per row */
+    padding: 16px 10px;
+    font-size: 0.95rem;
+    margin-bottom: 10px;
+  }
+  .cards-section {
+    display: none; /* hide cards on tablets/smaller screens */
+  }
+  .welcome-section {
+    padding: 20px 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .welcome-section h1 {
+    font-size: 1.5rem;
+  }
+  .welcome-section p {
+    font-size: 0.9rem;
+  }
+  .action-btn {
+    padding: 14px 10px;
+    font-size: 0.9rem;
+    flex: 1 1 48%; /* still 2 per row */
+  }
+}
+/* Container Card */
+.profile-card {
+  background: #fff;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  margin-bottom: 30px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Scrollable Lands */
+.lands-wrapper {
+  overflow-x: auto;
+  padding: 10px 0;
+}
+
+.lands-scroll {
+  display: flex;
+  gap: 15px;
+}
+
+/* Land Card */
+.land-card,
+.add-land-card {
+  flex: 0 0 200px;
+  background: #f9f9f9;
+  border-radius: 10px;
+  padding: 15px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.land-card:hover,
+.add-land-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.12);
+}
+
+.land-card h3 {
+  font-size: 1rem;
+  margin-bottom: 5px;
+}
+
+/* Add Land Card */
+.add-land-card {
+  border: 2px dashed #2e7d32;
+  background: #e8f5e9;
+  color: #2e7d32;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Modal */
+.modal {
+  display: none;
+  position: fixed;
+  top:0; left:0; right:0; bottom:0;
+  background: rgba(0,0,0,0.5);
+  justify-content:center;
+  align-items:center;
+  z-index: 1000;
+  padding: 10px;
+  overflow-y: auto;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 25px;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 400px;
+  position: relative;
+  box-sizing: border-box;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-content input {
+  width: 100%;
+  padding: 10px;
+  margin: 6px 0;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #f9f9f9;
+}
+
+.modal-close {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  cursor: pointer;
+  font-size: 24px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+
+/* Buttons */
+.btn { padding: 8px 16px; border:none; border-radius:6px; cursor:pointer; font-size:14px; }
+.btn-save { background:#1976d2; color:#fff; }
+.btn-cancel { background:#d32f2f; color:#fff; }
+.btn-delete { background:#b71c1c; color:#fff; }
+.btn-edit-card { background-color:#0d6efd; color:#fff; margin-right:5px; }
+.btn-delete-card { background-color:#dc3545; color:#fff; }
+
+/* Responsive */
+@media (max-width:768px){
+  .land-card, .add-land-card { flex:0 0 150px; padding:10px; }
+  .modal-content { max-width:95%; padding:20px; }
+}
+
+.modal-content h3{
+  color:rgb(29, 211, 29);
+  margin-top:5px;
+}
+.modal-content h2{
+  color:rgb(29, 211, 29);
+  margin-top:5px;
+}
+header {
+  display: flex;
+  align-items: center;   /* ✅ vertically aligns logo, organs, and profile */
+}
+
+header .dropdown, 
+header .dropbtn {
+  margin: 0;             /* remove default margins */
+  padding: 8px 14px;     /* consistent padding */
+  line-height: normal;   /* reset weird line-height issues */
+  display: flex;
+  align-items: center;   /* center Organs text inside button */
+}
+
+
+</style>
+</head>
+<body>
+
+<!-- ================= Header ================= -->
+<header>
+  <a href="home.html" class="logo-area">
+    <img src="img/agroscan-logo.png" alt="AgroScan Logo" class="logo">
+  </a>
+
+  <div class="nav-options">
+    <!-- Courses Dropdown -->
+    <div class="dropdown">
+      <button class="dropbtn">Organs</button>
+      <div class="dropdown-content">
+        <a href="./agropedia/index.agropedia.html">AgroPedia</a>
+        <a href="./agroshop/index.agroshop.html">AgroShop</a>
+        <a href="./agroawareness/index.agroawareness.html">AgroAwareness</a>
+        <a href="./agroscheme/index.agroscheme.html">AgroScheme</a>
+      </div>
+    </div>
+
+    <!-- Profile Dropdown -->
+    <div class="dropdown profile-dropdown">
+      <div class="profile-area">
+        <img src="img/profile-logo.jpg" class="profile-logo" alt="Profile">
+        <div class="profile-info">
+          <span id="full-name">Guest User</span>
+          <small id="username-display">@guest</small>
+        </div>
+      </div>
+      <div class="dropdown-content profile-content">
+        <a href="profile.html">Profile</a>
+        <a href="login-form.html">Login</a>
+        <a href="#" id="logoutLink" style="display:none;">Logout</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hamburger for mobile -->
+  <div class="hamburger" onclick="toggleSidePanel()">
+    <span class="bar"></span>
+    <span class="bar"></span>
+    <span class="bar"></span>
+  </div>
+</header>
+
+<!-- ================= Top Navigation Bar ================= -->
+<div class="top-bar">
+  <a href="home.html" class="top-btn" id="active">Home</a>
+  <a href="soil-test.html" class="top-btn" id="n-active">Soil Test</a>
+  <a href="chat.html" class="top-btn" id="n-active">AI Chat</a>
+  <a href="other.html" class="top-btn" id="n-active">Other</a>
+</div>
+
+<!-- ================= Side Panel ================= -->
+<div class="side-panel">
+  <div class="close-btn" onclick="toggleSidePanel()">×</div>
+  <ul class="side-menu">
+    <li><a href="home.html">Home</a></li>
+    <li>
+      <button class="side-toggle">Organs</button>
+      <ul class="side-submenu">
+        <a href="./agropedia/index.agropedia.html">AgroPedia</a>
+        <a href="./agroshop/index.agroshop.html">AgroShop</a>
+        <a href="./agroawareness/index.agroawareness.html">AgroAwareness</a>
+        <a href="./agroscheme/index.agroscheme.html">AgroScheme</a>
+      </ul>
+    </li>
+    <li>
+      <button class="side-toggle">Account</button>
+      <ul class="side-submenu">
+        <li><a href="profile.html">Profile</a></li>
+        <li><a href="login-form.html">Login</a></li>
+        <li><a href="#" id="logoutLinkMobile" style="display:none;">Logout</a></li>
+      </ul>
+    </li>
+  </ul>
+
+  <div class="panel-user-info">
+    <img src="img/profile-logo.jpg" class="profile-logo-slide" alt="Profile">
+    <p><strong>Name:</strong> Guest User</p>
+    <p><strong>Username:</strong> @guest</p>
+  </div>
+</div>
+
+<!-- ================= Main Content ================= -->
+<main class="dashboard">
+
+  <!-- Welcome Section -->
+  <section class="welcome-section">
+    <h1>Welcome,<br> <span id="user-name-welcome">Guest User</span>!</h1>
+    <p>Here are Quick Links and your todays statics.</p>
+  </section>
+
+  <!-- Quick Action Buttons -->
+  <section class="quick-actions">
+    <a href="soil-test.html" class="action-btn">🌱 Soil Test</a>
+    <a href="chat.html" class="action-btn">🤖 AI Chat</a>
+    <a href="analytics.html" class="action-btn">📊 AgroAnalytics</a>
+    <a href="./management.repostat/repo.html" class="action-btn">📚 RepoMedia</a>
+    <a href="https://docs.google.com/forms/d/e/1FAIpQLSe6Wphv-HzG6H6rm9Wv6SWt3PWMUAoXLRhr435xiPZHyaoOMA/viewform?usp=dialog" class="action-btn">🌱 Feedback Form</a>
+    <a href="https://docs.google.com/forms/d/e/1FAIpQLSeu9K_MNhsG3WlgoWFYH8W_1WcAR08cDh1Yoq63kNmratEZVA/viewform?usp=header" class="action-btn">📊 ReportBug Form</a>
+    <a href="mailto:agroscan-dev@gmail.com?subject=AgroScan-Org%20Write%20to%20us" class="action-btn">🤖 Write to Us</a>
+    <a href="other.html" class="action-btn">📚 See More</a>
+  </section>
+  
+
+<section class="lands">
+
+ <!-- ---- Cultivated Lands Card ---- -->
+<div class="profile-card" id="landsCard">
+  <h2>Cultivated Lands</h2>
+  <div class="lands-wrapper">
+    <div class="lands-scroll" id="landsScroll">
+      <!-- Add Land Card -->
+      <div class="land-card add-land-card" id="addLandCard">
+        <p>+ Add New Land</p>
+      </div>
+    </div>
+  </div>
+  <p class="msg" id="landsMsg"></p>
+</div>
+
+<!-- ================= Add/Edit Land Modal ================= -->
+<div class="modal" id="addLandModal">
+  <div class="modal-content">
+    <span class="modal-close" id="closeLandModal">&times;</span>
+    <h2 id="modalTitle">Add New Land</h2>
+    <form id="addLandForm">
+      <!-- Basic Info -->
+      <input type="text" id="landName" placeholder="Land Name" required maxlength="50">
+      <input type="number" step="any" id="landSize" placeholder="Size (acres)" required>
+      <input type="text" id="landCrop" placeholder="Crop" maxlength="50">
+
+      <!-- Address Info -->
+      <input type="text" id="landStreet" placeholder="Street">
+      <input type="text" id="landCity" placeholder="City">
+      <input type="text" id="landState" placeholder="State">
+      <input type="text" id="landZip" placeholder="ZIP">
+      <input type="text" id="landCountry" placeholder="Country">
+
+      <!-- Soil Info -->
+      <input type="text" id="soilTypeInput" placeholder="Soil Type">
+      <input type="number" step="any" id="soilPhInput" placeholder="pH">
+      <input type="number" step="any" id="soilMoistureInput" placeholder="Moisture (%)">
+      <input type="number" step="any" id="soilTempInput" placeholder="Temperature (°C)">
+      <input type="text" id="soilLightInput" placeholder="Light">
+      <input type="text" id="soilOtherInput" placeholder="Other Info">
+
+      <!-- Action Buttons -->
+      <div class="modal-actions">
+        <button type="submit" class="btn btn-save">Save</button>
+        <button type="button" class="btn btn-cancel" id="cancelAddLand">Cancel</button>
+        <button type="button" class="btn btn-delete" id="deleteLandBtn" style="display:none;">Delete</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ================= Land Details Modal ================= -->
+<div class="modal" id="landDetailsModal">
+  <div class="modal-content">
+    <span class="modal-close" id="closeLandDetails">&times;</span>
+    <h2>Land Details</h2>
+    <p><strong>Land ID:</strong> <span id="detailLandId"></span></p>
+    <p><strong>Land Name:</strong> <span id="detailLandName"></span></p>
+    <p><strong>Crop:</strong> <span id="detailCrop"></span></p>
+    <p><strong>Address:</strong> <span id="detailAddress"></span></p>
+
+    <h3>Soil Information</h3>
+    <p><strong>Soil Type:</strong> <span id="soilType"></span></p>
+    <p><strong>pH:</strong> <span id="soilPh"></span></p>
+    <p><strong>Moisture:</strong> <span id="soilMoisture"></span></p>
+    <p><strong>Temperature:</strong> <span id="soilTemp"></span></p>
+    <p><strong>Light:</strong> <span id="soilLight"></span></p>
+    <p><strong>Other Info:</strong> <span id="soilOther"></span></p>
+
+    <!-- Edit / Delete Buttons -->
+    <div class="modal-actions" style="margin-top:15px;">
+      <button type="button" class="btn btn-save" id="editLandBtn">Edit</button>
+      <button type="button" class="btn btn-delete" id="deleteLandDetailBtn">Delete</button>
+      <button type="button" class="btn btn-cancel" id="closeDetailsBtn">Close</button>
+    </div>
+  </div>
+</div>
+
+</section>
+
+</main>
+<!-- ================= Footer ================= -->
+<footer>
+  <div class="social-links">
+    <a href="https://www.instagram.com/agroscan.lumitech" target="_blank">
+      <img src="img/instagram-logo.png" alt="Instagram">
+    </a>
+    <a href="https://t.me/agroscanorg" target="_blank">
+      <img src="img/telegram-logo.png" alt="Telegram">
+    </a>
+  </div>
+  <p>&copy; 2025 AgroScan. All rights reserved.</p>
+  Made by AgroScan Team.
+</footer>
+
+<!-- ================= Scripts ================= -->
+<script>
+/* Toggle side panel for mobile */
+function toggleSidePanel(){
+  document.querySelector('.side-panel').classList.toggle('open');
+}
+
+/* Close panel if clicking outside */
+window.addEventListener('click', function(e){
+  const panel = document.querySelector('.side-panel');
+  const hamburger = document.querySelector('.hamburger');
+  if(!panel.contains(e.target) && !hamburger.contains(e.target)){
+    panel.classList.remove('open');
+  }
+});
+
+/* Accordion submenu for side panel */
+const toggles = document.querySelectorAll('.side-toggle');
+toggles.forEach(toggle => {
+  toggle.addEventListener('click', function(){
+    const submenu = this.nextElementSibling;
+
+    // Close other submenus
+    document.querySelectorAll('.side-submenu').forEach(sm => {
+      if(sm !== submenu){
+        sm.style.maxHeight = null;
+      }
+    });
+
+    // Toggle current submenu
+    if(submenu.style.maxHeight){
+      submenu.style.maxHeight = null;
+    } else {
+      submenu.style.maxHeight = submenu.scrollHeight + "px";
+    }
+  });
+});
+
+/* Top buttons active state */
+document.querySelectorAll('.top-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.top-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+
+/* User info display */
+const user = JSON.parse(sessionStorage.getItem('user')) || null;
+// Extract userId correctly
+const userId = user?.userId;
+
+if (!userId) {
+  alert("No user found. Please login again.");
+  window.location.href = "login-form.html";
+}
+function showUserInfo(user){
+  const fullName = user?.fullName || `${user?.name || 'Guest User'}`;
+  const username = user?.username ? `@${user.username}` : "@guest";
+  document.getElementById('full-name').innerText = fullName;
+  document.getElementById('username-display').innerText = username;
+  document.getElementById('logoutLink').style.display = user ? 'block' : 'none';
+  document.getElementById('logoutLinkMobile').style.display = user ? 'block' : 'none';
+  const panelInfo = document.querySelector('.panel-user-info');
+  panelInfo.innerHTML = `
+    <img src="img/profile-logo.jpg" class="profile-logo-slide" alt="Profile">
+    <p><strong>Name:</strong> ${fullName}</p>
+    <p><strong>Username:</strong> ${username}</p>
+  `;
+  document.getElementById('user-name-welcome').innerText = fullName;
+}
+showUserInfo(user);
+
+/* Logout functionality */
+/* Logout functionality */
+function deleteCookie(name) {
+  document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+}
+
+document.querySelectorAll('#logoutLink, #logoutLinkMobile').forEach(link => {
+  link.addEventListener('click', function(e) {
+    e.preventDefault();
+    
+    // Clear sessionStorage
+    sessionStorage.removeItem('user');
+
+    // Clear cookie
+    deleteCookie('user');
+
+    // Optional: clear user info UI
+    showUserInfo(null);
+
+    alert("Logged out successfully");
+    window.location.href = "index.html"; // redirect to login page
+  });
+});
+
+
+/* ================= Optional: Card 3D effect on mouse move ================= */
+document.addEventListener('mousemove', e => {
+  const cards = document.querySelectorAll('.card');
+  cards.forEach(card => {
+    let x = (window.innerWidth / 2 - e.pageX) / 50;
+    let y = (window.innerHeight / 2 - e.pageY) / 50;
+    card.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
+  });
+});
+
+////////////////////////////////////////////////////
+// Land Section
+////////////////////////////////////////////////////
+const landsScroll = document.getElementById('landsScroll');
+const addLandCard = document.getElementById('addLandCard');
+const addLandModal = document.getElementById('addLandModal');
+const closeLandModal = document.getElementById('closeLandModal');
+const addLandForm = document.getElementById('addLandForm');
+const landDetailsModal = document.getElementById('landDetailsModal');
+const closeLandDetails = document.getElementById('closeLandDetails');
+
+const cancelAddLandBtn = document.getElementById('cancelAddLand');
+const deleteLandBtn = document.getElementById('deleteLandBtn'); // inside add/edit modal
+const editLandDetailBtn = document.getElementById('editLandBtn'); // inside details modal
+const deleteLandDetailBtn = document.getElementById('deleteLandDetailBtn');
+const closeDetailsBtn = document.getElementById('closeDetailsBtn');
+
+let currentEditLandId = null;    // id when editing from add/edit modal
+let currentDetailLandId = null;  // id when viewing details
+
+// open add modal
+addLandCard && addLandCard.addEventListener('click', () => openLandModal(null, false));
+
+// close icon on modal
+closeLandModal && closeLandModal.addEventListener('click', () => {
+  addLandModal.style.display = 'none';
+  addLandForm.reset();
+  currentEditLandId = null;
+  if (deleteLandBtn) deleteLandBtn.style.display = 'none';
+});
+
+// cancel button inside add/edit modal
+cancelAddLandBtn && cancelAddLandBtn.addEventListener('click', () => {
+  addLandModal.style.display = 'none';
+  addLandForm.reset();
+  currentEditLandId = null;
+  if (deleteLandBtn) deleteLandBtn.style.display = 'none';
+});
+
+// close details modal
+closeLandDetails && closeLandDetails.addEventListener('click', () => {
+  landDetailsModal.style.display = 'none';
+  currentDetailLandId = null;
+});
+
+// close button in details modal
+closeDetailsBtn && closeDetailsBtn.addEventListener('click', () => {
+  landDetailsModal.style.display = 'none';
+  currentDetailLandId = null;
+});
+
+// click outside to close modals
+window.addEventListener('click', e => {
+  if (e.target === addLandModal) {
+    addLandModal.style.display = 'none';
+    addLandForm.reset();
+    currentEditLandId = null;
+    if (deleteLandBtn) deleteLandBtn.style.display = 'none';
+  }
+  if (e.target === landDetailsModal) {
+    landDetailsModal.style.display = 'none';
+    currentDetailLandId = null;
+  }
+});
+
+async function loadLands() {
+  if (!userId) return;
+  try {
+    const res = await fetch(`https://agroscan-backend.onrender.com/api/users/${userId}/lands`);
+    if (!res.ok) throw new Error('Failed to fetch lands');
+    const data = await res.json();
+
+    // clear and re-render
+    landsScroll.innerHTML = '';
+    data.forEach(land => {
+      const card = document.createElement('div');
+      card.className = 'land-card';
+      card.dataset.landId = land.id;
+      card.innerHTML = `
+        <h3>${land.land_name}</h3>
+        <p>ID: ${land.id}</p>
+        <p>Crop: ${land.crop || ''}</p>
+        <div style="display:flex;gap:5px;margin-top:8px;justify-content:center;">
+          <button class="btn btn-edit-card">Edit</button>
+          <button class="btn btn-delete-card">Delete</button>
+        </div>
+      `;
+
+      // Edit button on card (open edit modal)
+      card.querySelector('.btn-edit-card').addEventListener('click', (e) => {
+        e.stopPropagation();
+        openLandModal(land.id, true);
+      });
+
+      // Delete button on card
+      card.querySelector('.btn-delete-card').addEventListener('click', async (e) => {
+        e.stopPropagation();
+        alert("Initiating Land Deletion! (Bypassing confirm block)");
+        await deleteLand(land.id);
+      });
+
+      // clicking card shows details
+      card.addEventListener('click', () => showLandDetails(land.id));
+      landsScroll.appendChild(card);
+    });
+
+    // append the Add card at the end
+    if (addLandCard) landsScroll.appendChild(addLandCard);
+  } catch (err) {
+    console.error(err);
+    document.getElementById('landsMsg').textContent = 'Could not load lands';
+  }
+}
+
+async function openLandModal(landId = null, isEdit = false) {
+  currentEditLandId = landId;
+  addLandModal.style.display = 'flex';
+  document.querySelector('#addLandModal h2').textContent = isEdit ? 'Edit Land' : 'Add New Land';
+  addLandForm.reset();
+
+  // Show delete button only in edit mode
+  if (deleteLandBtn) deleteLandBtn.style.display = isEdit ? 'inline-block' : 'none';
+
+  if (isEdit && landId) {
+    try {
+      const res = await fetch(`https://agroscan-backend.onrender.com/api/users/${userId}/lands/${landId}`);
+      if (!res.ok) throw new Error('Failed to fetch land');
+      const land = await res.json();
+
+      // populate fields (IDs used in your HTML)
+      document.getElementById('landName').value = land.land_name || '';
+      document.getElementById('landSize').value = land.size || '';
+      document.getElementById('landCrop').value = land.crop || '';
+      document.getElementById('soilTypeInput').value = land.soil_type || '';
+      document.getElementById('soilPhInput').value = land.ph || '';
+      document.getElementById('soilMoistureInput').value = land.moisture || '';
+      document.getElementById('soilTempInput').value = land.temperature || '';
+      document.getElementById('soilLightInput').value = land.light || '';
+      document.getElementById('soilOtherInput').value = land.other_info || '';
+      document.getElementById('landStreet').value = land.street || '';
+      document.getElementById('landCity').value = land.city || '';
+      document.getElementById('landState').value = land.state || '';
+      document.getElementById('landZip').value = land.zip || '';
+      document.getElementById('landCountry').value = land.country || '';
+
+      // attach delete handler for this edit session (replace previous)
+      if (deleteLandBtn) {
+        deleteLandBtn.onclick = async () => {
+          if (!currentEditLandId) return;
+          if (confirm(`Delete land "${land.land_name}"?`)) {
+            await deleteLand(currentEditLandId);
+            addLandModal.style.display = 'none';
+            addLandForm.reset();
+            currentEditLandId = null;
+            deleteLandBtn.style.display = 'none';
+          }
+        };
+      }
+    } catch (err) {
+      console.error('openLandModal (edit) error:', err);
+      alert('Could not load land for editing');
+      addLandModal.style.display = 'none';
+    }
+  } else {
+    // add mode: ensure delete handler removed and inputs cleared
+    if (deleteLandBtn) {
+      deleteLandBtn.style.display = 'none';
+      deleteLandBtn.onclick = null;
+    }
+  }
+}
+
+// submit handler (create or update)
+addLandForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const landData = {
+    land_name: document.getElementById('landName').value.trim(),
+    size: document.getElementById('landSize').value.trim(),
+    crop: document.getElementById('landCrop').value.trim(),
+    soil_type: document.getElementById('soilTypeInput').value.trim(),
+    ph: document.getElementById('soilPhInput').value.trim(),
+    moisture: document.getElementById('soilMoistureInput').value.trim(),
+    temperature: document.getElementById('soilTempInput').value.trim(),
+    light: document.getElementById('soilLightInput').value.trim(),
+    other_info: document.getElementById('soilOtherInput').value.trim(),
+    street: document.getElementById('landStreet').value.trim(),
+    city: document.getElementById('landCity').value.trim(),
+    state: document.getElementById('landState').value.trim(),
+    zip: document.getElementById('landZip').value.trim(),
+    country: document.getElementById('landCountry').value.trim()
+  };
+
+  if (!landData.land_name || !landData.size) {
+    alert("Land name & size required");
+    return;
+  }
+
+  try {
+    let url = `https://agroscan-backend.onrender.com/api/users/${userId}/lands`;
+    let method = 'POST';
+    if (currentEditLandId) {
+      url += `/${currentEditLandId}`;
+      method = 'PUT';
+    }
+
+    const res = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(landData)
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (res.ok) {
+      addLandModal.style.display = 'none';
+      addLandForm.reset();
+      currentEditLandId = null;
+      if (deleteLandBtn) deleteLandBtn.style.display = 'none';
+      await loadLands();
+    } else {
+      alert(data.error || "Failed to save land");
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Server error");
+  }
+});
+
+async function deleteLand(landId) {
+  try {
+    const res = await fetch(`https://agroscan-backend.onrender.com/api/users/${userId}/lands/${landId}`, { method: 'DELETE' });
+    if (res.ok) {
+      await loadLands();
+      // if details modal open for same id, close it
+      if (currentDetailLandId === landId) {
+        landDetailsModal.style.display = 'none';
+        currentDetailLandId = null;
+      }
+      return true;
+    } else {
+      const data = await res.json().catch(()=>({}));
+      alert(data.error || "Failed to delete land");
+      return false;
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Server error");
+    return false;
+  }
+}
+
+async function showLandDetails(landId) {
+  try {
+    const res = await fetch(`https://agroscan-backend.onrender.com/api/users/${userId}/lands/${landId}`);
+    if (!res.ok) throw new Error('Failed to fetch land details');
+    const land = await res.json();
+
+    currentDetailLandId = landId; // used by details edit/delete
+
+    document.getElementById('detailLandId').textContent = land.id;
+    document.getElementById('detailLandName').textContent = land.land_name;
+    document.getElementById('detailCrop').textContent = land.crop || '';
+    document.getElementById('detailAddress').textContent = `${land.street || ''}, ${land.city || ''}, ${land.state || ''}, ${land.zip || ''}`;
+    document.getElementById('soilType').textContent = land.soil_type || '';
+    document.getElementById('soilPh').textContent = land.ph || '';
+    document.getElementById('soilMoisture').textContent = land.moisture || '';
+    document.getElementById('soilTemp').textContent = land.temperature || '';
+    document.getElementById('soilLight').textContent = land.light || '';
+    document.getElementById('soilOther').textContent = land.other_info || '';
+
+    // show details modal
+    landDetailsModal.style.display = 'flex';
+  } catch (err) {
+    console.error(err);
+    alert('Could not load land details');
+  }
+}
+
+// details modal: edit -> open add/edit modal in edit mode
+editLandDetailBtn && editLandDetailBtn.addEventListener('click', () => {
+  landDetailsModal.style.display = 'none';
+  if (currentDetailLandId) openLandModal(currentDetailLandId, true);
+});
+
+// details modal: delete -> delete current detail
+deleteLandDetailBtn && deleteLandDetailBtn.addEventListener('click', async () => {
+  if (!currentDetailLandId) return;
+  alert("Initiating Land Deletion from Details! (Bypassing confirm block)");
+  await deleteLand(currentDetailLandId);
+  landDetailsModal.style.display = 'none';
+  currentDetailLandId = null;
+});
+
+// initialize
+loadLands();
+
+  // ============================
+  // Edit / Save / Cancel Functions
+  // ============================
+  function enableEdit(section) {
+    if(!userId){ window.location.href='login-form.html'; return; }
+
+    let fields, actionsEl;
+    if(section==='primary'){ 
+      fields = ['name','username','email','phone']; 
+      actionsEl = document.getElementById('primaryActions'); 
+    } else { 
+      fields = ['street','city','state','zip','country']; 
+      actionsEl = document.getElementById('addressActions'); 
+    }
+
+    fields.forEach(f => document.getElementById(f).removeAttribute('readonly'));
+
+    actionsEl.innerHTML = `
+      <button class="btn btn-save" id="save${section}">Save</button>
+      <button class="btn btn-cancel" id="cancel${section}">Cancel</button>
+    `;
+    document.getElementById(`save${section}`).addEventListener('click', ()=>saveChanges(section));
+    document.getElementById(`cancel${section}`).addEventListener('click', ()=>cancelEdit(section));
+  }
+
+  async function saveChanges(section) {
+    const profileMsg = document.getElementById(section==='primary'?'profileMsg':'addressMsg');
+    profileMsg.textContent = '';
+
+    try {
+      let url = `https://agroscan-backend.onrender.com/api/users/${userId}`;
+      let body = {};
+
+      if(section==='primary'){
+        body = {
+          name: document.getElementById('name').value,
+          username: document.getElementById('username').value,
+          email: document.getElementById('email').value,
+          phone: document.getElementById('phone').value
+        };
+      } else {
+        url += '/address';
+        body = {
+          street: document.getElementById('street').value,
+          city: document.getElementById('city').value,
+          state: document.getElementById('state').value,
+          zip: document.getElementById('zip').value,
+          country: document.getElementById('country').value
+        };
+      }
+
+      const res = await fetch(url, {
+        method:'PUT',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(body)
+      });
+
+      const data = await res.json().catch(()=>{});
+      if(res.ok){
+        profileMsg.textContent = section==='primary' ? 'Updated successfully!' : 'Address updated successfully!';
+        profileMsg.className = 'msg success';
+      } else {
+        profileMsg.textContent = data?.error || 'Update failed';
+        profileMsg.className = 'msg error';
+      }
+
+      await loadProfile();
+      cancelEdit(section);
+
+    } catch(err){
+      console.error(err);
+      profileMsg.textContent='Update failed';
+      profileMsg.className='msg error';
+    }
+  }
+
+  function cancelEdit(section){
+    let fields, actionsEl;
+    if(section==='primary'){ 
+      fields = ['name','username','email','phone']; 
+      actionsEl = document.getElementById('primaryActions'); 
+      // include both Edit and Change Password buttons
+      actionsEl.innerHTML = `
+        <button class="btn btn-edit" id="editPrimaryBtn">Edit</button>
+        <button class="btn btn-edit" id="changePasswordBtn">Change Password</button>
+      `;
+      // reattach event listeners
+      document.getElementById('editPrimaryBtn').addEventListener('click', ()=>enableEdit('primary'));
+      document.getElementById('changePasswordBtn').addEventListener('click', () => {
+          document.getElementById('passwordModal').style.display = 'flex';
+      });
+    } else { 
+      fields = ['street','city','state','zip','country']; 
+      actionsEl=document.getElementById('addressActions'); 
+      actionsEl.innerHTML=`<button class="btn btn-edit" id="editAddressBtn">Edit</button>`; 
+      document.getElementById('editAddressBtn').addEventListener('click', ()=>enableEdit('address'));
+    }
+    fields.forEach(f=>document.getElementById(f).setAttribute('readonly',''));
+}
+
+  // ============================
+  // Swipe functionality for mobile
+  // ============================
+
+let isDown = false;
+let startX;
+let scrollLeft;
+
+landsScroll.addEventListener('mousedown', (e) => {
+  isDown = true;
+  landsScroll.classList.add('active');
+  startX = e.pageX - landsScroll.offsetLeft;
+  scrollLeft = landsScroll.scrollLeft;
+});
+
+landsScroll.addEventListener('mouseleave', () => {
+  isDown = false;
+  landsScroll.classList.remove('active');
+});
+
+landsScroll.addEventListener('mouseup', () => {
+  isDown = false;
+  landsScroll.classList.remove('active');
+});
+
+landsScroll.addEventListener('mousemove', (e) => {
+  if (!isDown) return;
+  e.preventDefault();
+  const x = e.pageX - landsScroll.offsetLeft;
+  const walk = (x - startX) * 1.5; // scroll speed multiplier
+  landsScroll.scrollLeft = scrollLeft - walk;
+});
+
+// ----- Touch support for mobile -----
+landsScroll.addEventListener('touchstart', (e) => {
+  isDown = true;
+  startX = e.touches[0].pageX - landsScroll.offsetLeft;
+  scrollLeft = landsScroll.scrollLeft;
+}, { passive: true });
+
+landsScroll.addEventListener('touchend', () => {
+  isDown = false;
+});
+
+landsScroll.addEventListener('touchmove', (e) => {
+  if (!isDown) return;
+  const x = e.touches[0].pageX - landsScroll.offsetLeft;
+  const walk = (x - startX) * 1.5;
+  landsScroll.scrollLeft = scrollLeft - walk;
+}, { passive: true });
+
+
+
+</script>
+</body>
+</html>

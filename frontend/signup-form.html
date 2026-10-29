@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>🌱 AgroScan — Sign Up</title>
+<link rel="icon" href="img/agroscan-icon.png" type="image/png">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css.files/sign.css">
+</head>
+<body>
+<div class="stage">
+  <!-- Phone mock -->
+  <section class="left">
+    <div class="phone-mock" aria-hidden="true">
+      <div class="phone-screen">
+        <div class="feed">
+          <div class="post p1"></div>
+          <div class="post p2"></div>
+          <div class="post p3"></div>
+          <div class="post p4"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sign Up form -->
+  <section class="right">
+    <div class="auth-card">
+      <div class="brand"><h1>🌱 AgroScan</h1></div>
+      <div class="auth-box">
+        <form id="signupForm" autocomplete="on" novalidate>
+          <input name="name" class="input" type="text" placeholder="Full Name" required maxlength="50">
+          <input name="username" class="input" type="text" placeholder="Username" required maxlength="25">
+          <input name="email" class="input" type="email" placeholder="Email" required>
+          <input name="phone" class="input" type="text" placeholder="Contact Phone No." required maxlength="10" pattern="[0-9]{10}">
+          <input name="password" class="input" type="password" placeholder="Password" required minlength="6" maxlength="25">
+          <input name="confirmPassword" class="input" type="password" placeholder="Confirm Password" required minlength="6" maxlength="25">
+
+          <div class="checkbox-container">
+            <input type="checkbox" id="acceptTerms">
+            <label for="acceptTerms">I accept <span id="termsLink">Terms & Policy</span></label>
+                    <div class="signup-box">
+          <p>Already have an account? <a href="login-form.html" id="showSignup">Sign in</a></p>
+        </div>
+          </div>
+          
+          
+        
+
+          <button type="submit" class="btn primary" id="signupBtn" disabled>Sign Up</button>
+        </form>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Terms Modal -->
+<div class="modal" id="termsModal">
+  <div class="modal-content">
+    <span class="modal-close" id="modalClose">&times;</span>
+    <h2>Terms & Policy</h2>
+ <pre>
+Last Updated: October 10, 2025
+
+Welcome to Agroscan (referred to as "we", "our", or "us").
+By accessing or using our website — Agroscan-org.netlify.app
+ — you agree to comply with and be bound by these Terms and Conditions. Please read them carefully before using our services.
+
+1. Acceptance of Terms
+
+By accessing or using Agroscan, you agree to be legally bound by these Terms. If you do not agree, please discontinue use of our website immediately.
+
+2. About Agroscan
+
+Agroscan is a free agri-tech platform providing tools for agriculture data analysis, soil testing insights, and crop prediction to help farmers and agricultural professionals make data-driven decisions.
+
+3. User Responsibilities
+
+You agree to use our services only for lawful purposes.
+
+You must not misuse or attempt to damage our website or disrupt its operation.
+
+You are responsible for the accuracy of any information you share with us.
+
+4. Data Collection and Privacy
+
+We collect basic user data (such as name, email, location, and agricultural information) to provide better analysis and improve our services.
+Your data is handled according to our Privacy Policy. We never sell or misuse your personal information.
+
+Note: You are encouraged to review our Privacy Policy to understand how your data is stored and used.
+
+5. Intellectual Property
+
+All content on this website, including text, graphics, logos, designs, and code, is the property of Agroscan or its licensors.
+You may not copy, modify, reproduce, or distribute any material from this site without prior written consent.
+
+6. Limitation of Liability
+
+Agroscan provides services and information for general agricultural purposes only.
+We do not guarantee 100% accuracy or results from crop predictions, soil analysis, or any data-based recommendations.
+Agroscan and its team are not liable for any loss, damage, or inconvenience arising from use of our website or reliance on its data.
+
+7. No Fees or Charges
+
+Agroscan is a completely free platform.
+We do not charge users for any tools or services currently offered.
+
+8. Third-Party Links
+
+Our website may contain links to third-party websites.
+We are not responsible for the content, accuracy, or policies of those sites.
+
+9. Modifications
+
+We reserve the right to update or modify these Terms at any time without prior notice.
+Changes will be posted on this page, and the “Last Updated” date will be revised.
+
+10. Governing Law
+
+These Terms are governed by and interpreted under the laws of India.
+Any disputes shall be subject to the exclusive jurisdiction of the courts in [Your City/State, India].
+
+11. Contact Us
+
+If you have any questions or concerns regarding these Terms, please contact us at:
+📧 agroscan.support@gmail.com
+ (or your actual support email)
+</pre>
+  </div>
+</div>
+
+
+
+<script>
+// Elements
+const acceptTerms = document.getElementById('acceptTerms');
+const signupBtn = document.getElementById('signupBtn');
+const termsLink = document.getElementById('termsLink');
+const modal = document.getElementById('termsModal');
+const modalClose = document.getElementById('modalClose');
+
+// Enable/disable signup button
+acceptTerms.addEventListener('change', () => {
+  signupBtn.disabled = !acceptTerms.checked;
+});
+
+// Open modal
+termsLink.addEventListener('click', (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  modal.style.display = 'flex';
+});
+
+// Close modal
+modalClose.addEventListener('click', () => modal.style.display = 'none');
+window.addEventListener('click', (e) => {
+  if(e.target === modal) modal.style.display = 'none';
+});
+
+// Form submission with backend call
+document.getElementById('signupForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const name = e.target.name.value.trim();
+  const username = e.target.username.value.trim();
+  const email = e.target.email.value.trim();
+  const phone = e.target.phone.value.trim();
+  const password = e.target.password.value.trim();
+  const confirmPassword = e.target.confirmPassword.value.trim();
+
+  if (!acceptTerms.checked) {
+    alert("You must accept Terms & Policy");
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    alert("Passwords do not match");
+    return;
+  }
+
+  if (!/^\d{10}$/.test(phone)) {
+    alert("Phone number must be exactly 10 digits");
+    return;
+  }
+
+   // Username validation
+  if (/\s/.test(username)) {
+    alert("Username cannot contain spaces");
+    return;
+  }
+  if (/\$/.test(username)) {
+    alert("Username cannot contain '$'");
+    return;
+  }
+  if (!/^[A-Za-z0-9_]{3,25}$/.test(username)) {
+    alert("Username must be 3–25 characters and only letters, numbers, or underscores");
+    return;
+  }
+
+  try {
+    const res = await fetch("https://agroscan-backend.onrender.com/api/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, username, email, phone, password })
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      alert("Signup successful! You can now log in.");
+      window.location.href = "login-form.html";
+    } else {
+      alert(data.error || "Signup failed");
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Server error, try again later.");
+  }
+});
+</script>
+</body>
+</html>

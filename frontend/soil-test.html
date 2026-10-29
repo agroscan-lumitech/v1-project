@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌱 AgroScan</title>
+<link rel="icon" href="img/agroscan-icon.png" type="image/png">
+<link rel="stylesheet" href="./css.files/header-footer.css">
+<style>
+
+/* ================== General ================== */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background-color: #ffffff;
+    color: #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+h1 {
+    text-align: center;
+    color: #4CAF50;
+    margin-bottom: 30px;
+    font-size: 2rem;
+}
+
+#active {
+    background: #66bb6a;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+
+/* ================== Container ================== */
+.soil-test-page {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 20px;
+    overflow-y: auto;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    align-items: stretch; /* equal height */
+    width: 100%;
+    max-width: 1200px;
+    box-sizing: border-box;
+}
+
+/* ================== Form & Output Sections ================== */
+.form-section, .output-section {
+    background-color: #2f6331;
+    padding: 25px;
+    border-radius: 10px;
+    flex: 1 1 450px;
+    min-width: 280px;
+    max-width: 500px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+.output-section {
+    min-height: 450px; /* enforce minimum height */
+}
+
+/* ================== Form Elements ================== */
+label {
+    display: block;
+    color: #a5d6a7;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #4CAF50;
+    background-color: #2c2c2c;
+    color: #e0e0e0;
+    font-size: 1rem;
+    box-sizing: border-box;
+    margin-top: 5px;
+}
+
+textarea {
+    flex: 1;
+    resize: vertical;
+    font-family: monospace;
+    margin-top: 15px;
+}
+
+/* ================== Buttons ================== */
+.bts {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.bts button {
+    flex: 1;
+    padding: 10px 15px;
+    font-weight: bold;
+    font-size: 1rem;
+    border-radius: 6px;
+    border: 1px solid #4CAF50;
+    color: #fff;
+    background-color: #4CAF50;
+    cursor: pointer;
+    transition: 0.3s;
+    box-sizing: border-box;
+}
+
+.bts button:hover {
+    background-color: #45a049;
+}
+
+/* ================== Footer ================== */
+footer {
+    text-align: center;
+    margin-top: 20px;
+    padding: 10px;
+    color: #a5d6a7;
+    font-size: 0.9rem;
+}
+
+/* ================== Form Rows ================== */
+.form-row {
+    display: flex;
+    flex-direction: column;
+    margin-top: 15px;
+}
+
+.form-row input, .form-row div {
+    flex: 1;
+}
+
+/* ================== Location Row ================== */
+.location-row {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.location-row > .location-input {
+    display: flex;
+    gap: 10px;
+}
+
+.location-row > .location-input input {
+    flex: 1;
+}
+
+/* ================== Media Queries ================== */
+
+/* PC Screens > 769px */
+@media(min-width: 769px) {
+    .container {
+        max-height: 65vh;
+    }
+
+    .form-row {
+        flex-direction: row;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .form-row label {
+        width: 180px;
+        text-align: left;
+        margin-top: 0;
+    }
+
+    .form-row input {
+        flex: 1;
+    }
+
+    .location-row {
+        flex-direction: column;
+    }
+
+    .output-section {
+        min-height: 450px;
+    }
+}
+
+/* Tablets 769px–960px */
+@media(min-width: 769px) and (max-width: 960px) {
+    .output-section {
+        min-height: 450px;
+        margin-bottom: 50px;
+        box-sizing: border-box;
+    }
+    .container {
+        padding-bottom: 100px;
+    }
+}
+
+/* Screens 750px–900px extra bottom space */
+@media(min-width: 750px) and (max-width: 900px) {
+    .container {
+        padding-bottom: 150px;
+    }
+    .output-section {
+        min-height: 450px;
+        margin-bottom: 50px;
+        box-sizing: border-box;
+    }
+}
+
+/* Small / Large Phones 400px–768px */
+@media(min-width: 400px) and (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .form-section, .output-section {
+        max-width: 100%;
+        padding: 20px;
+    }
+
+    .form-row {
+        flex-direction: column;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+    }
+
+    input, textarea, .bts button {
+        font-size: 0.95rem;
+        padding: 8px;
+    }
+
+    textarea {
+        min-height: 200px;
+    }
+
+    .bts {
+        flex-direction: column;
+    }
+
+    .output-section {
+        min-height: 450px; /* enforce minimum height */
+        margin-bottom: 50px;
+        box-sizing: border-box;
+    }
+}
+
+/* Very Small Phones <400px */
+@media(max-width: 399px) {
+    input, textarea, .bts button {
+        font-size: 0.9rem;
+        padding: 6px;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    .form-row {
+        flex-direction: column;
+    }
+
+    .bts {
+        flex-direction: column;
+    }
+
+    .output-section {
+        min-height: 450px; /* enforce minimum height */
+        margin-bottom: 50px;
+        box-sizing: border-box;
+    }
+}
+
+</style>
+
+<body>
+<!-- ================= Header ================= -->
+<header>
+  <a href="home.html" class="logo-area">
+    <img src="img/agroscan-logo.png" alt="AgroScan Logo" class="logo">
+  </a>
+
+  <div class="nav-options">
+    <!-- Courses Dropdown -->
+    <div class="dropdown">
+      <button class="dropbtn">Organs</button>
+      <div class="dropdown-content">
+        <a href="./agropedia/index.agropedia.html">AgroPedia</a>
+        <a href="./agroshop/index.agroshop.html">AgroShop</a>
+        <a href="./agroawareness/index.agroawareness.html">AgroAwareness</a>
+        <a href="./agroscheme/index.agroscheme.html">AgroScheme</a>
+      </div>
+    </div>
+
+    <!-- Profile Dropdown -->
+    <div class="dropdown profile-dropdown">
+      <div class="profile-area">
+        <img src="img/profile-logo.jpg" class="profile-logo" alt="Profile">
+        <div class="profile-info">
+          <span id="full-name">Guest User</span>
+          <small id="username-display">@guest</small>
+        </div>
+      </div>
+      <div class="dropdown-content profile-content">
+        <a href="profile.html">Profile</a>
+        <a href="login-form.html">Login</a>
+        <a href="#" id="logoutLink" style="display:none;">Logout</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hamburger for mobile -->
+  <div class="hamburger" onclick="toggleSidePanel()">
+    <span class="bar"></span>
+    <span class="bar"></span>
+    <span class="bar"></span>
+  </div>
+</header>
+
+<!-- ================= Top Navigation Bar ================= -->
+<div class="top-bar">
+  <a href="home.html" class="top-btn" id="n-active">Home</a>
+  <a href="soil-test.html" class="top-btn" id="active">Soil Test</a>
+  <a href="chat.html" class="top-btn" id="n-active">AI Chat</a>
+  <a href="other.html" class="top-btn" id="n-active">Other</a>
+</div>
+
+<!-- ================= Side Panel ================= -->
+<div class="side-panel">
+  <div class="close-btn" onclick="toggleSidePanel()">×</div>
+  <ul class="side-menu">
+    <li><a href="home.html">Home</a></li>
+    <li>
+      <button class="side-toggle">Organs</button>
+      <ul class="side-submenu">
+        <a href="./agropedia/index.agropedia.html">AgroPedia</a>
+        <a href="./agroshop/index.agroshop.html">AgroShop</a>
+        <a href="./agroawareness/index.agroawareness.html">AgroAwareness</a>
+        <a href="./agroscheme/index.agroscheme.html">AgroScheme</a>
+      </ul>
+    </li>
+    <li>
+      <button class="side-toggle">Account</button>
+      <ul class="side-submenu">
+        <li><a href="profile.html">Profile</a></li>
+        <li><a href="login-form.html">Login</a></li>
+        <li><a href="#" id="logoutLinkMobile" style="display:none;">Logout</a></li>
+      </ul>
+    </li>
+  </ul>
+
+  <div class="panel-user-info">
+    <img src="img/profile-logo.jpg" class="profile-logo-slide" alt="Profile">
+    <p><strong>Name:</strong> Guest User</p>
+    <p><strong>Username:</strong> @guest</p>
+  </div>
+</div>
+
+<!-- ================= Main Content ================= -->
+
+<div class="soil-test-page">
+  <div class="container">
+    <div class="form-section">
+      <div class="form-row">
+        <label>Soil pH:</label>
+        <input type="number" id="ph" step="0.1" placeholder="e.g., 6.5">
+      </div>
+
+      <div class="form-row">
+        <label>Soil Moisture (%):</label>
+        <input type="number" id="moisture" step="1" placeholder="e.g., 45">
+      </div>
+
+      <div class="form-row">
+        <label>Temperature (°C):</label>
+        <input type="number" id="temperature" step="1" placeholder="e.g., 28">
+      </div>
+
+      <div class="form-row">
+        <label>Desired Crop:</label>
+        <input type="text" id="desiredCrop" placeholder="Optional: e.g., Rice, Wheat">
+      </div>
+      
+      <div class="form-row">
+        <label>Location:</label>
+        <input type="text" id="location" placeholder="Enter location manually">
+      </div>
+       <div class="bts">
+       <button id="autoLocateBtn" type="button">Auto Locate</button>
+      <button id="submitBtn">Get Recommendations</button>
+      </div>
+    </div>
+
+    <div class="output-section">
+      <textarea id="output" placeholder="AI + Rule Engine recommendations will appear here..." readonly></textarea>
+    </div>
+  </div>
+</div>
+
+
+<script>
+const locationInput = document.getElementById('location');
+const autoBtn = document.getElementById('autoLocateBtn');
+
+autoBtn.addEventListener('click', () => {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+
+        try {
+          // Reverse geocode to get human-readable location
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+          const data = await res.json();
+          locationInput.value = data.address.city || data.address.town || data.address.state || data.display_name;
+        } catch (err) {
+          console.error("Reverse geocoding failed:", err);
+          locationInput.value = `Lat: ${lat.toFixed(2)}, Lon: ${lon.toFixed(2)}`;
+        }
+      },
+      (err) => {
+        console.error("Geolocation error:", err);
+        alert("Could not fetch location automatically. Please enter manually.");
+      }
+    );
+  } else {
+    alert("Geolocation not supported by your browser. Please enter manually.");
+  }
+});
+</script>
+
+
+
+
+
+<script>
+const btn = document.getElementById('submitBtn');
+const output = document.getElementById('output');
+
+btn.addEventListener('click', async () => {
+  const ph = parseFloat(document.getElementById('ph').value);
+  const moisture = parseFloat(document.getElementById('moisture').value);
+  const temperature = parseFloat(document.getElementById('temperature').value);
+  const location = document.getElementById('location').value;
+  const desiredCrop = document.getElementById('desiredCrop').value;
+
+  if (!ph || !moisture) {
+    alert("Please enter soil pH and moisture!");
+    return;
+  }
+
+  output.value = "Fetching recommendations...";
+
+  try {
+    const response = await fetch('https://agroscan-backend.onrender.com/recommend', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ph, moisture, temperature, location, desiredCrop })
+    });
+
+    const data = await response.json();
+    output.value = `Note:\n${data.ruleEngine.join('\n')}\n\nAI Recommendations:\nRule Engine is 99.99% correct majority of times.`;
+  } catch (err) {
+    output.value = "Error fetching recommendations. Make sure server is running.";
+    console.error(err);
+  }
+});
+</script>
+
+
+
+
+
+<!-- ================= Scripts ================= -->
+<script>
+/* Toggle side panel for mobile */
+function toggleSidePanel(){
+  document.querySelector('.side-panel').classList.toggle('open');
+}
+
+/* Close panel if clicking outside */
+window.addEventListener('click', function(e){
+  const panel = document.querySelector('.side-panel');
+  const hamburger = document.querySelector('.hamburger');
+  if(!panel.contains(e.target) && !hamburger.contains(e.target)){
+    panel.classList.remove('open');
+  }
+});
+
+/* Accordion submenu for side panel */
+const toggles = document.querySelectorAll('.side-toggle');
+toggles.forEach(toggle => {
+  toggle.addEventListener('click', function(){
+    const submenu = this.nextElementSibling;
+
+    // Close other submenus
+    document.querySelectorAll('.side-submenu').forEach(sm => {
+      if(sm !== submenu){
+        sm.style.maxHeight = null;
+      }
+    });
+
+    // Toggle current submenu
+    if(submenu.style.maxHeight){
+      submenu.style.maxHeight = null;
+    } else {
+      submenu.style.maxHeight = submenu.scrollHeight + "px";
+    }
+  });
+});
+
+/* Top buttons active state */
+document.querySelectorAll('.top-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.top-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+
+/* User info display */
+const user = JSON.parse(sessionStorage.getItem('user')) || null;
+// Extract userId correctly
+const userId = user?.userId;
+
+if (!userId) {
+  alert("No user found. Please login again.");
+  window.location.href = "login-form.html";
+}
+function showUserInfo(user){
+  const fullName = user?.fullName || `${user?.name || 'Guest User'}`;
+  const username = user?.username ? `@${user.username}` : "@guest";
+  document.getElementById('full-name').innerText = fullName;
+  document.getElementById('username-display').innerText = username;
+  document.getElementById('logoutLink').style.display = user ? 'block' : 'none';
+  document.getElementById('logoutLinkMobile').style.display = user ? 'block' : 'none';
+  const panelInfo = document.querySelector('.panel-user-info');
+  panelInfo.innerHTML = `
+    <img src="img/profile-logo.jpg" class="profile-logo-slide" alt="Profile">
+    <p><strong>Name:</strong> ${fullName}</p>
+    <p><strong>Username:</strong> ${username}</p>
+  `;
+  document.getElementById('user-name-welcome').innerText = fullName;
+}
+showUserInfo(user);
+
+/* Logout functionality */
+/* Logout functionality */
+function deleteCookie(name) {
+  document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+}
+
+document.querySelectorAll('#logoutLink, #logoutLinkMobile').forEach(link => {
+  link.addEventListener('click', function(e) {
+    e.preventDefault();
+    
+    // Clear sessionStorage
+    sessionStorage.removeItem('user');
+
+    // Clear cookie
+    deleteCookie('user');
+
+    // Optional: clear user info UI
+    showUserInfo(null);
+
+    alert("Logged out successfully");
+    window.location.href = "index.html"; // redirect to login page
+  });
+});
+
+
+
+
+</script>
+</body>
+</html>

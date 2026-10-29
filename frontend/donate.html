@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌱 AgroScan — Donate</title>
+<link rel="icon" href="img/agro-home.jpg" type="image/png">
+<link rel="stylesheet" href="./css.files/header-footer.css">
+<style>
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: #111;
+    color: #fff;
+    margin:0; padding:0;
+  }
+  header {
+    display:flex;
+    align-items:center;
+    padding:10px 20px;
+    background:#2e7d32;
+    border-bottom:2px solid #ffc107;
+  }
+  header .logo { height:50px; }
+
+  main {
+    max-width:1200px;
+    margin:20px auto;
+    padding:10px 20px;
+  }
+
+  h2.section-title {
+    color: #ffc107;
+    margin:20px 0 10px;
+    text-align:center;
+  }
+
+  .donation-container {
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:20px;
+  }
+
+  .donation-card {
+    background:#222;
+    border:2px solid #ffc107;
+    border-radius:12px;
+    padding:20px;
+    width:250px;
+    text-align:center;
+    transition: transform 0.3s, box-shadow 0.3s;
+    cursor:pointer;
+  }
+  .donation-card:hover {
+    transform: translateY(-4px);
+    box-shadow:0 8px 20px rgba(255,193,7,0.4);
+    background:#333;
+  }
+
+  .donation-card img {
+    width:180px;
+    height:180px;
+    object-fit:contain;
+    margin-bottom:15px;
+    border:2px solid #ffc107;
+    border-radius:12px;
+  }
+
+  .donation-card h3 { color:#ffc107; margin-bottom:10px; }
+  .donation-card p { color:#ddd; font-size:0.95rem; word-wrap:break-word; }
+
+  /* Modal */
+  .modal {
+    display:none;
+    position:fixed;
+    top:0; left:0; right:0; bottom:0;
+    background:rgba(0,0,0,0.8);
+    justify-content:center;
+    align-items:center;
+    z-index:1000;
+    padding:20px;
+  }
+  .modal-content {
+    background:#222;
+    border:2px solid #ffc107;
+    border-radius:12px;
+    padding:20px;
+    text-align:center;
+    max-width:400px;
+    width:100%;
+    position:relative;
+  }
+  .modal-content img {
+    width:100%;
+    max-width:300px;
+    border:2px solid #ffc107;
+    border-radius:12px;
+    margin-bottom:15px;
+  }
+  .modal-content h3 { color:#ffc107; margin:10px 0; }
+  .modal-content p { color:#ddd; }
+  .modal-close {
+    position:absolute;
+    top:10px; right:15px;
+    font-size:28px;
+    color:#ffc107;
+    cursor:pointer;
+  }
+
+  @media(max-width:768px){
+    .donation-card { width:45%; }
+  }
+  @media(max-width:480px){
+    .donation-card { width:90%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <a href="home.html" class="logo-area">
+    <img src="img/agroscan-logo.png" alt="AgroScan Logo" class="logo">
+  </a>
+</header>
+
+<!-- Main Content -->
+<main>
+  <h2 class="section-title">Support AgroScan</h2>
+  <p style="text-align:center; color:#ddd; max-width:800px; margin:0 auto 30px;">
+    Your support helps us continue developing AgroScan, providing farmers with reliable tools and insights. 
+    You can donate via UPI using the QR codes or IDs below. Click on any card to enlarge the QR code.
+  </p>
+
+  <div class="donation-container" id="donationContainer"></div>
+</main>
+
+<!-- Modal -->
+<div class="modal" id="qrModal">
+  <div class="modal-content">
+    <span class="modal-close" id="closeModal">&times;</span>
+    <img id="modalQr" src="" alt="QR Code">
+    <h3 id="modalName"></h3>
+    <p>UPI ID: <strong id="modalUpi"></strong></p>
+  </div>
+</div>
+
+<script>
+const donations = [
+];
+
+const container = document.getElementById('donationContainer');
+const modal = document.getElementById('qrModal');
+const modalQr = document.getElementById('modalQr');
+const modalName = document.getElementById('modalName');
+const modalUpi = document.getElementById('modalUpi');
+const closeModal = document.getElementById('closeModal');
+
+donations.forEach(d => {
+  const card = document.createElement('div');
+  card.className = 'donation-card';
+  card.innerHTML = `
+    <img src="${d.qr}" alt="${d.name} QR Code">
+    <h3>${d.name}</h3>
+    <p>UPI ID: <strong>${d.upi}</strong></p>
+  `;
+  card.addEventListener('click', () => {
+    modalQr.src = d.qr;
+    modalName.textContent = d.name;
+    modalUpi.textContent = d.upi;
+    modal.style.display = 'flex';
+  });
+  container.appendChild(card);
+});
+
+closeModal.addEventListener('click', () => {
+  modal.style.display = 'none';
+});
+window.addEventListener('click', (e) => {
+  if(e.target === modal) modal.style.display = 'none';
+});
+</script>
+
+</body>
+</html>
