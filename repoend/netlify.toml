@@ -1,0 +1,8 @@
+# Netlify config for the REPOEND site (agroscan-lumitech)
+# When connecting this repo on Netlify: New site from Git -> set
+# "Base directory" to  repoend  (this matters in a monorepo -- without
+# it Netlify tries to publish the whole repo root, and every relative
+# path breaks).
+[build]
+  base = "repoend"
+  publish = "."

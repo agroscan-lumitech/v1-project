@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌱 AgroScan — Contributors</title>
+<link rel="icon" href="agro-home.jpg" type="image/png">
+<link rel="stylesheet" href="header-footer.css">
+<style>
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: #111; /* dark background */
+    color: #fff;
+    margin:0; padding:0;
+  }
+  h2.section-title {
+    color: #ffc107; /* yellow headings */
+    margin: 20px 0 10px;
+  }
+  .contributors-section { max-width: 1200px; margin: 0 auto; padding: 20px; }
+  .cards-container { display: flex; flex-wrap: wrap; gap: 20px; }
+  .contributor-card {
+    flex: 1 1 220px;
+    background: #222; /* dark card */
+    border: 2px solid #ffc107;
+    border-radius: 12px;
+    padding: 15px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s, background 0.3s;
+  }
+  .contributor-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(255,193,7,0.4);
+    background: #333;
+  }
+  .contributor-card img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin-bottom: 10px;
+    object-fit: cover;
+    border: 2px solid #ffc107;
+  }
+  .contributor-card h3 { margin: 5px 0; color: #ffc107; }
+  .contributor-card p { margin: 0; color: #ddd; font-size: 0.9rem; }
+
+  /* Modal */
+  .modal {
+    display: none;
+    position: fixed;
+    top:0; left:0; right:0; bottom:0;
+    background: rgba(0,0,0,0.8);
+    justify-content:center;
+    align-items:center;
+    z-index:1000;
+    padding:10px;
+    overflow-y:auto;
+  }
+  .modal-content {
+    background:#222;
+    border: 2px solid #ffc107;
+    padding:25px;
+    border-radius:12px;
+    width:100%;
+    max-width:400px;
+    position: relative;
+    max-height:90vh;
+    overflow-y:auto;
+  }
+  .modal-close { position:absolute; top:10px; right:15px; cursor:pointer; font-size:24px; color:#ffc107; }
+  .modal-content h3 { color: #ffc107; margin-top:0; }
+  .modal-content p { margin:5px 0; color:#fff; }
+  .modal-content span { color:#ffc107; }
+
+</style>
+</head>
+<body>
+
+<!-- ================= Header ================= -->
+<header>
+  <a href="index.html" class="logo-area">
+    <img src="agroscan-logo.png" alt="AgroScan Logo" class="logo">
+  </a>
+
+</header>
+
+<!-- ================= Main ================= -->
+<main class="contributors-section">
+
+  <!-- Developers Section -->
+  <h2 class="section-title">Primary Developers</h2>
+  <div class="cards-container" id="developersContainer"></div>
+
+  <!-- Project Management Section -->
+  <h2 class="section-title">Secondary Developers</h2>
+  <div class="cards-container" id="pmContainer"></div>
+
+  <!-- Hardware Controllers Section -->
+  <h2 class="section-title">Hardware Developer</h2>
+  <div class="cards-container" id="hardwareContainer"></div>
+
+  <!-- Data Contributors Section -->
+  <h2 class="section-title">Project Cordinator</h2>
+  <div class="cards-container" id="dataContainer"></div>
+
+  
+
+<!-- ================= Modal ================= -->
+<div class="modal" id="contributorModal">
+  <div class="modal-content">
+    <span class="modal-close" id="closeModal">&times;</span>
+    <h3 id="modalName">Name</h3>
+    <p><strong>Role:</strong> <span id="modalRole"></span></p>
+    <p><strong>Email:</strong> <span id="modalEmail"></span></p>
+    <p><strong>Phone:</strong> <span id="modalPhone"></span></p>
+    <p><strong>Contributions:</strong> <span id="modalContributions"></span></p>
+  </div>
+</div>
+
+<script>
+const contributors = {
+  developers: [
+    { name:"Abhinav Ranjan", role:"Full stack developer", email:"abhinav@agroscan.dev", phone:"8294721929", contributions:"UI, Dashboard, AgroPedia,Database" },
+    { name:"Abhiraj Singh", role:"Full stack developer", email:"abhiraj@agroscan.dev", phone:"9939374795", contributions:"Devend, Backend" },
+     { name:"Sudhanshu Kumar", role:"Full stack Developer", email:"sudhanshu@agroscan.dev", phone:"9631777955", contributions:"Frontend , Web structure" }
+      
+    
+],
+  projectManagement: [
+    { name:"Julfekar Alam ", role:"Project Manager", email:"Julfekar@agroscan.dev", phone:"9661447747", contributions:"Planning, Coordination" },
+     { name:"Agastya Jha ", role:"Debuging", email:"Agastya@agroscan.dev", phone:"7808802145", contributions:"Planning, Coordination" },
+     { name:"Sarika Sharma ", role:"Debuging", email:"sarika@agroscan.dev", phone:"9955029533", contributions:"Planning, Coordination" }
+  ],
+  hardware: [
+    { name:"Julfekar Alam ", role:"Project Manager", email:"Julfekar@agroscan.dev", phone:"9661447747", contributions:"Planning, Coordination" },
+    { name:"Dipika prabha ", role:"Project Manager", email:"dipika@agroscan.dev", phone:"9661447747", contributions:"Planning, Coordination" },
+    { name:"Anshu priya ", role:"Project Manager", email:"anshupriya@agroscan.dev", phone:"9661447747", contributions:"Decoration" },
+     { name:"Abhinav ranjan ", role:"Project Manager", email:"anshupriya@agroscan.dev", phone:"9661447747", contributions:"Planing ,coordination" }
+  ],
+  data: [
+    { name:"Dhananjay sir", role:"project cordinator", email:"dhananjay@agro-scan.org", phone:"555666777", contributions:"cordination" },
+    { name:"Anand sir", role:"project cordinator", email:"anand@agro-scan.org", phone:"555666777", contributions:"cordination" }
+  ],
+  others: [
+   
+  ]
+};
+
+function createCard(person){
+  const card = document.createElement('div');
+  card.className = 'contributor-card';
+  card.innerHTML = `
+    <img src="profile-logo.jpg" alt="${person.name}">
+    <h3>${person.name}</h3>
+    <p>${person.role}</p>
+  `;
+  card.addEventListener('click', () => showModal(person));
+  return card;
+}
+
+function renderSection(containerId, people){
+  const container = document.getElementById(containerId);
+  people.forEach(person => container.appendChild(createCard(person)));
+}
+
+function showModal(person){
+  document.getElementById('modalName').innerText = person.name;
+  document.getElementById('modalRole').innerText = person.role;
+  document.getElementById('modalEmail').innerText = person.email;
+  document.getElementById('modalPhone').innerText = person.phone;
+  document.getElementById('modalContributions').innerText = person.contributions;
+  document.getElementById('contributorModal').style.display = 'flex';
+}
+
+document.getElementById('closeModal').addEventListener('click', () => {
+  document.getElementById('contributorModal').style.display = 'none';
+});
+
+// Render all sections
+renderSection('developersContainer', contributors.developers);
+renderSection('pmContainer', contributors.projectManagement);
+renderSection('hardwareContainer', contributors.hardware);
+renderSection('dataContainer', contributors.data);
+renderSection('othersContainer', contributors.others);
+</script>
+
+</body>
+</html>

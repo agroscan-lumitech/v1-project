@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Agroscan - Launching Soon</title>
+    <link rel="icon" href="agro-home.jpg" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #0a3d0a 100%);
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Branding Section */
+        .branding {
+            text-align: center;
+            padding: 4rem 0 2rem;
+            animation: fadeIn 1.5s ease-out;
+        }
+
+        .logo {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: #00ff41;
+            text-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+            margin-bottom: 1rem;
+            letter-spacing: 2px;
+        }
+
+        .tagline {
+            font-size: 1.3rem;
+            color: #90ee90;
+            margin-bottom: 3rem;
+            font-weight: 300;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Countdown Section */
+        .countdown-container {
+            background: rgba(0, 255, 65, 0.1);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(0, 255, 65, 0.3);
+            border-radius: 25px;
+            padding: 3rem;
+            margin: 2rem auto;
+            max-width: 900px;
+            box-shadow: 0 10px 40px rgba(0, 255, 65, 0.2);
+            animation: slideUp 1s ease-out;
+        }
+
+        .countdown-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 2.5rem;
+            color: #00ff41;
+            text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+        }
+
+        .countdown {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .countdown-item {
+            text-align: center;
+            min-width: 130px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 20px;
+            padding: 1.5rem;
+            border: 1px solid rgba(0, 255, 65, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .countdown-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(0, 255, 65, 0.3);
+        }
+
+        .countdown-number {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: #00ff41;
+            text-shadow: 0 0 15px rgba(0, 255, 65, 0.7);
+            margin-bottom: 0.5rem;
+        }
+
+        .countdown-label {
+            font-size: 1rem;
+            color: #90ee90;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 500;
+        }
+
+        .launch-date {
+    text-align: center; /* centers text inside */
+    font-size: 1.4rem;
+    margin: 2.5rem auto; /* auto left & right centers the block */
+    color: #fff;
+    background: rgba(0, 255, 65, 0.15);
+    padding: 1.2rem 2rem;
+    border-radius: 15px;
+    display: inline-block;
+    border: 1px solid rgba(0, 255, 65, 0.3);
+    animation: pulse 2s infinite;
+}
+
+
+        /* Website Link Section */
+        .website-link {
+            text-align: center;
+            margin: 3rem 0;
+        }
+
+        .website-btn {
+            background: linear-gradient(135deg, #00ff41 0%, #00cc33 100%);
+            color: #000;
+            border: none;
+            padding: 1.2rem 3rem;
+            font-size: 1.3rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            box-shadow: 0 5px 20px rgba(0, 255, 65, 0.4);
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .website-btn:hover:not(.disabled) {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 10px 30px rgba(0, 255, 65, 0.6);
+        }
+
+        .website-btn:active:not(.disabled) {
+            transform: translateY(-2px);
+        }
+
+        .website-btn.disabled {
+            background: linear-gradient(135deg, #333 0%, #555 100%);
+            color: #666;
+            cursor: not-allowed;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .website-btn.disabled:hover {
+            transform: none;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Founder Section */
+        .founder-section {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 25px;
+            padding: 3rem;
+            margin: 4rem auto;
+            max-width: 1000px;
+            border: 1px solid rgba(0, 255, 65, 0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            animation: slideUp 1.2s ease-out;
+        }
+
+        .founder-section h2 {
+            font-size: 2.5rem;
+            color: #00ff41;
+            margin-bottom: 2rem;
+            text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+        }
+
+        .founder-content {
+            display: flex;
+            align-items: center;
+            gap: 3rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 800px;
+        }
+
+        .founder-image {
+            flex: 1;
+            min-width: 250px;
+            max-width: 300px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 255, 65, 0.3);
+            transition: all 0.4s ease;
+        }
+
+        .founder-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform 0.4s ease;
+        }
+
+        .founder-image:hover {
+            transform: scale(1.05);
+        }
+
+        .founder-image:hover img {
+            transform: scale(1.1);
+        }
+
+        .founder-info {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .founder-name {
+            font-size: 2.2rem;
+            margin-bottom: 1rem;
+            color: #00ff41;
+            font-weight: 700;
+        }
+
+        .founder-role {
+            font-size: 1.2rem;
+            color: #90ee90;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .founder-bio {
+            color: #ccc;
+            line-height: 1.7;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            background: rgba(0, 255, 65, 0.2);
+            color: #00ff41;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0, 255, 65, 0.3);
+        }
+
+        .social-links a:hover {
+            background: #00ff41;
+            color: #000;
+            transform: translateY(-3px) scale(1.1);
+        }
+
+        /* Features Section */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2.5rem;
+            margin: 4rem 0;
+        }
+
+        .feature-card {
+            background: rgba(0, 255, 65, 0.1);
+            border-radius: 20px;
+            padding: 2.5rem;
+            text-align: center;
+            transition: all 0.4s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 255, 65, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .feature-card:hover::before {
+            left: 100%;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(0, 255, 65, 0.3);
+            background: rgba(0, 255, 65, 0.15);
+        }
+
+        .feature-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            color: #00ff41;
+            text-shadow: 0 0 15px rgba(0, 255, 65, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: rotate(10deg) scale(1.1);
+        }
+
+        .feature-title {
+            font-size: 1.8rem;
+            margin-bottom: 1.2rem;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .feature-description {
+            color: #90ee90;
+            line-height: 1.7;
+            font-size: 1.1rem;
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 255, 65, 0.95);
+            color: #000;
+            padding: 1.2rem 2.5rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 255, 65, 0.4);
+            transform: translateX(150%);
+            transition: transform 0.6s ease;
+            z-index: 1000;
+            font-weight: 600;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        /* Particles */
+        .particle {
+            position: absolute;
+            background: rgba(0, 255, 65, 0.6);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 255, 65, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(0, 255, 65, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 255, 65, 0); }
+        }
+
+        .float {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .logo {
+                font-size: 2.8rem;
+            }
+
+            .tagline {
+                font-size: 1.1rem;
+            }
+
+            .countdown-container {
+                padding: 2rem;
+            }
+
+            .countdown {
+                gap: 1rem;
+            }
+
+            .countdown-item {
+                min-width: 100px;
+                padding: 1rem;
+            }
+
+            .countdown-number {
+                font-size: 2.5rem;
+            }
+
+            .countdown-title {
+                font-size: 2rem;
+            }
+
+            .founder-content {
+                flex-direction: column;
+                gap: 2rem;
+            }
+
+            .founder-image {
+                max-width: 250px;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .feature-card {
+                padding: 2rem;
+            }
+
+            .social-links {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo {
+                font-size: 2.2rem;
+                margin-top:50px;
+            }
+
+            .countdown-number {
+                font-size: 2rem;
+            }
+
+            .countdown-item {
+                min-width: 80px;
+                padding: 0.8rem;
+            }
+
+            .founder-section {
+                padding: 2rem;
+            }
+
+            .founder-name {
+                font-size: 1.8rem;
+            }
+
+            .website-btn {
+                padding: 1rem 2rem;
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Branding -->
+        <div class="branding">
+            <h1 class="logo">Project Agroscan</h1>
+            <p class="tagline">Innovating Agriculture with New Technology<br>#1 World's First Agriculture Automation System, Now Easy and More Bug Free</p>
+        </div>
+
+        <!-- Countdown -->
+        <div class="countdown-container">
+            <h2 class="countdown-title">Web Version 1.1 Launching Soon</h2>
+            <div class="countdown">
+                <div class="countdown-item">
+                    <div class="countdown-number" id="days">00</div>
+                    <div class="countdown-label">Days</div>
+                </div>
+                <div class="countdown-item">
+                    <div class="countdown-number" id="hours">00</div>
+                    <div class="countdown-label">Hours</div>
+                </div>
+                <div class="countdown-item">
+                    <div class="countdown-number" id="minutes">00</div>
+                    <div class="countdown-label">Minutes</div>
+                </div>
+                <div class="countdown-item">
+                    <div class="countdown-number" id="seconds">00</div>
+                    <div class="countdown-label">Seconds</div>
+                </div>
+            </div>
+            
+            <div class="launch-date">
+                October 18, 2025 at 10:00 AM
+            </div>
+            
+        </div>
+
+        <!-- Website Link -->
+        <div class="website-link">
+            <button id="website-btn" class="website-btn disabled">Website Coming Soon</button>
+        </div>
+
+        <!-- Features -->
+        <div class="features">
+            <div class="feature-card float">
+                <div class="feature-icon">🌱</div>
+                <h3 class="feature-title">Smart Farming</h3>
+                <p class="feature-description">AI-powered crop monitoring and analysis for increased yield and reduced waste, ensuring optimal farm health at all times.</p>
+            </div>
+                        <div class="feature-card float">
+                <div class="feature-icon">💧</div>
+                <h3 class="feature-title">Water Optimization</h3>
+                <p class="feature-description">IoT-driven irrigation system that ensures crops receive the right amount of water while minimizing waste.</p>
+            </div>
+            <div class="feature-card float">
+                <div class="feature-icon">🤖</div>
+                <h3 class="feature-title">AI Crop Diagnostics</h3>
+                <p class="feature-description">Advanced AI model that identifies plant diseases, nutrient deficiencies, and pest infections in real time.</p>
+            </div>
+            <div class="feature-card float">
+                <div class="feature-icon">📊</div>
+                <h3 class="feature-title">Data-Driven Insights</h3>
+                <p class="feature-description">Analytics dashboard for farmers to visualize performance, resource use, and yield improvements.</p>
+            </div>
+            <div class="feature-card float">
+                <div class="feature-icon">🌾</div>
+                <h3 class="feature-title">Sustainable Growth</h3>
+                <p class="feature-description">Empowering agriculture with technology that enhances productivity while preserving natural ecosystems.</p>
+            </div>
+             <div class="feature-card float">
+                <div class="feature-icon">🤫</div>
+                <h3 class="feature-title">More Out Reach Coming Soon</h3>
+                <p class="feature-description">Full App and Features Coming Soon, Wait to see the newest and combined TechArt Mixture.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notify">✨Welcome to Project Agroscan!</div>
+
+    <!-- FontAwesome -->
+    <script src="https://kit.fontawesome.com/a2e0e9b6a2.js" crossorigin="anonymous"></script>
+
+    <!-- Countdown Script -->
+    <script>
+        const targetDate = new Date("Oct 18, 2025 10:00:00").getTime();
+        const btn = document.getElementById("website-btn");
+        const notify = document.getElementById("notify");
+
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const diff = targetDate - now;
+
+           if (diff <= 0) {
+    document.getElementById("days").textContent = "00";
+    document.getElementById("hours").textContent = "00";
+    document.getElementById("minutes").textContent = "00";
+    document.getElementById("seconds").textContent = "00";
+
+    btn.textContent = "Visit Website";                     // ✅ Changes button text
+    btn.classList.remove("disabled");                      // ✅ Enables button
+    btn.onclick = () => window.location.href = "https://agroscan-lumitech.netlify.app"; // ✅ Opens link
+    return;
+}
+
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            document.getElementById("days").textContent = days.toString().padStart(2, "0");
+            document.getElementById("hours").textContent = hours.toString().padStart(2, "0");
+            document.getElementById("minutes").textContent = minutes.toString().padStart(2, "0");
+            document.getElementById("seconds").textContent = seconds.toString().padStart(2, "0");
+        }
+
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        // Notification slide-in
+        window.addEventListener("load", () => {
+            notify.classList.add("show");
+            setTimeout(() => notify.classList.remove("show"), 4000);
+        });
+
+        // Floating green particles
+        const particleCount = 30;
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement("div");
+            particle.classList.add("particle");
+            particle.style.width = particle.style.height = `${Math.random() * 6 + 3}px`;
+            particle.style.top = `${Math.random() * 100}%`;
+            particle.style.left = `${Math.random() * 100}%`;
+            particle.style.opacity = Math.random();
+            particle.style.animation = `float ${3 + Math.random() * 5}s ease-in-out infinite`;
+            document.body.appendChild(particle);
+        }
+        
+    </script>
+</body>
+</html>
