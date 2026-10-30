@@ -335,7 +335,7 @@ app.post("/api/login", rateLimit(10,60000), async (req,res) => {
       await db.query("UPDATE users SET password=? WHERE user_id=?", [h, u.user_id]);
     }
     res.cookie("agroscan_session", createUserSessionToken(u.user_id), { httpOnly:true, secure:true, sameSite:"none", maxAge:604800000, path:"/" });
-    res.json({ userId:u.user_id, username:u.username, name:u.name, email:u.email, phone:u.phone, profileUrl:`/api/users/${u.user_id}/profile`, sessionProof:createUserSessionToken(u.user_id) });
+    res.json({ userId:u.user_id, username:u.username, name:u.name, email:u.email, phone:u.phone, profileUrl:`/api/users/${u.user_id}/profile` });
   } catch(e) { res.status(500).json({ error:"Database error" }); }
 });
 
