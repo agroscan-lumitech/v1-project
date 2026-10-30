@@ -169,7 +169,11 @@ app.get("/health/db", async (_, res) => {
     });
   } catch (e) {
     console.error("❌ Database health check failed:", e.code || e.message);
-    res.status(503).json({ status: "error", database: "unavailable" });
+    res.status(503).json({
+      status: "error",
+      database: "unavailable",
+      code: e.code || "DB_ERROR"
+    });
   }
 });
 
@@ -879,8 +883,12 @@ async function startServer() {
       console.log(`🔒 bcrypt | rate-limit | dev-token-auth | login-logging`);
     });
   } catch (e) {
-    console.error("❌ AgroScan startup blocked by database initialization:", e.code || e.message);
-    process.exit(1);
+    console.error("❌ Database initialization failed:", e.code || e.message);
+    console.warn("⚠️ Starting API in database-degraded mode. Database-backed features remain unavailable until DB settings are corrected.");
+    app.listen(PORT, () => {
+      console.log(`⚠️ AgroScan API running without a verified database → http://localhost:${PORT}`);
+      console.log(`🔒 bcrypt | rate-limit | dev-token-auth | login-logging`);
+    });
   }
 }
 
