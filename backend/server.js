@@ -346,7 +346,7 @@ app.get("/api/devusers/:id/profile", async (req,res) => {
     if (!rows.length || !rows[0].profile) return res.status(404).json({ error:"No profile picture" });
     res.setHeader("Content-Type", "image/jpeg");
     res.setHeader("Cache-Control", "public, max-age=3600");
-    res.end(rows[0].profile);
+    res.end(Buffer.from(rows[0].profile, "base64"));
   } catch(e) { res.status(500).json({ error:"Server error" }); }
 });
 
