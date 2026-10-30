@@ -122,7 +122,7 @@ export async function appendMutations(operations) {
       createdAt: new Date().toISOString()
     };
     document.events.push(event);
-    await writeFile(journalPath, JSON.stringify(document, null, 2) + "\\n", "Journal AgroScan data mutation", journal?.sha);
+    await writeFile(journalPath, JSON.stringify(document, null, 2) + "\n", "Journal AgroScan data mutation", journal?.sha);
     for (const op of event.operations) {
       const doc = await readCollection(op.collection);
       applyOperation(doc, op);
@@ -175,12 +175,12 @@ export async function syncPendingMutations() {
     const changes = {};
     for (const name of names) {
       docs[name].updatedAt = now;
-      changes["data/" + name + ".json"] = JSON.stringify(docs[name], null, 2) + "\\n";
+      changes["data/" + name + ".json"] = JSON.stringify(docs[name], null, 2) + "\n";
     }
     await atomicBatch(changes);
     const latest = await readFile(journalPath);
     if (latest?.sha !== journal.sha) throw new Error("Journal changed during sync; retaining it for safe replay");
-    await writeFile(journalPath, JSON.stringify({ schemaVersion: 1, events: [] }, null, 2) + "\\n", "Checkpoint synchronized journal", latest.sha);
+    await writeFile(journalPath, JSON.stringify({ schemaVersion: 1, events: [] }, null, 2) + "\n", "Checkpoint synchronized journal", latest.sha);
     for (const name of names) {
       cache.set(name, docs[name]);
       cacheLoadedAt.set(name, Date.now());
