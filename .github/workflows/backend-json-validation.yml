@@ -1,0 +1,21 @@
+name: Backend syntax validation
+on:
+  push:
+    branches:
+      - feature/github-json-storage
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-json-validation.yml"
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Check backend JavaScript syntax
+        run: |
+          node --check backend/server.js
+          node --check backend/json-db.js
+          node --check backend/github-json-store.js
