@@ -339,6 +339,11 @@ app.post("/api/login", rateLimit(10,60000), async (req,res) => {
   } catch(e) { res.status(500).json({ error:"Database error" }); }
 });
 
+app.post("/api/logout", (req,res) => {
+  res.clearCookie("agroscan_session", { httpOnly:true, secure:true, sameSite:"none", path:"/" });
+  res.json({ success:true });
+});
+
 // ── SIGNUP — ✅ bcrypt ───────────────────────────────────────
 app.post("/api/signup", rateLimit(5,60000), async (req,res) => {
   const { name, username, email, phone, password } = req.body;
