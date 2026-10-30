@@ -224,7 +224,9 @@ export function createJsonDb() {
       const operations = [];
       for (const row of rows) {
         if (!matchesWhere(row, m[3], whereValues)) continue;
-        const patch = { ...parsed.values };\n        for (const [field, value] of Object.entries(patch)) if (Buffer.isBuffer(value)) patch[field] = value.toString("base64");\n        const updated = { ...clone(row), ...clone(patch) };
+        const patch = { ...parsed.values };
+        for (const [field, value] of Object.entries(patch)) if (Buffer.isBuffer(value)) patch[field] = value.toString("base64");
+        const updated = { ...clone(row), ...clone(patch) };
         const key = updated.id ?? updated.user_id ?? updated.session_id ?? updated.chat_id ?? updated.function_name;
         operations.push({ collection: name, action: "upsert", recordId: String(key), record: updated });
       }
