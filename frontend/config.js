@@ -35,7 +35,7 @@
       catch { return null; }
     },
     setUser(user) { sessionStorage.setItem(this.SESSION_USER_KEY, JSON.stringify(user)); },
-    clearUser() { sessionStorage.removeItem(this.SESSION_USER_KEY); },
+    clearUser() {\n      sessionStorage.removeItem(this.SESSION_USER_KEY);\n      document.cookie = "user=; Max-Age=0; Path=/; SameSite=Lax";\n      fetch(this.BACKEND_URL + "/api/logout", { method: "POST" }).catch(() => {});\n    },
     getUserId() { const user = this.getUser(); return user?.userId || user?.user_id || null; },
     isLoggedIn() { return !!this.getUser(); },
     requireLogin(loginPath = "/login-form.html") {
@@ -49,5 +49,15 @@
       });
     }
   };
+  const nativeFetch = window.fetch.bind(window);
+  window.fetch = function (input, init = {}) {
+    const requestUrl = typeof input === "string" ? input : input && input.url;
+    const isBackendRequest = typeof requestUrl === "string" && requestUrl.startsWith(AGRO.BACKEND_URL);
+    return nativeFetch(input, {
+      ...init,
+      ...(isBackendRequest ? { credentials: "include" } : {})
+    });
+  };
+
   window.AGRO = AGRO;
 })();
