@@ -102,6 +102,32 @@ const db = createJsonDb();
 function hashBearerToken(token) {
   return crypto.createHash("sha256").update(String(token)).digest("hex");
 }
+function createUserSessionToken(userId) {
+  const secret = process.env.USER_SESSION_SECRET || process.env.GITHUB_DATA_TOKEN;
+  if (!secret) throw new Error("User session signing secret is not configured");
+  const payload = Buffer.from(JSON.stringify({
+    sub: String(userId),
+    exp: Date.now() + 7 * 24 * 60 * 60 * 1000
+  })).toString("base64url");
+  const signature = crypto.createHmac("sha256", secret).update(payload).digest("base64url");
+  return payload + "." + signature;
+}
+
+function decodeUserSessionToken(token) {
+  const secret = process.env.USER_SESSION_SECRET || process.env.GITHUB_DATA_TOKEN;
+  if (!secret || typeof token !== "string") return null;
+  const parts = token.split(".");
+  if (parts.length !== 2) return null;
+  const expected = crypto.createHmac("sha256", secret).update(parts[0]).digest();
+  let supplied;
+  try { supplied = Buffer.from(parts[1], "base64url"); } catch { return null; }
+  if (supplied.length !== expected.length || !crypto.timingSafeEqual(supplied, expected)) return null;
+  try {
+    const payload = JSON.parse(Buffer.from(parts[0], "base64url").toString("utf8"));
+    if (!payload.sub || !Number.isFinite(payload.exp) || payload.exp <= Date.now()) return null;
+    return payload;
+  } catch { return null; }
+}
 
 // ── DEV TOKEN MIDDLEWARE ────────────────────────────────────
 async function requireUserToken(req, res, next) {
@@ -109,16 +135,13 @@ async function requireUserToken(req, res, next) {
   if (!auth?.startsWith("Bearer ")) {
     return res.status(401).json({ error: "User authentication required." });
   }
-  const tokenHash = hashBearerToken(auth.slice(7));
   try {
+    const payload = decodeUserSessionToken(auth.slice(7));
+    if (!payload) return res.status(401).json({ error: "Session expired. Please sign in again." });
     const document = await readCollection("users");
-    const user = document.records.find(row =>
-      row.session_token_hash === tokenHash &&
-      row.session_token_expires_at &&
-      new Date(row.session_token_expires_at) > new Date()
-    );
-    if (!user) return res.status(401).json({ error: "Session expired. Please sign in again." });
-    req.userId = user.user_id;
+    const userExists = document.records.some(row => String(row.user_id) === String(payload.sub));
+    if (!userExists) return res.status(401).json({ error: "User session is no longer valid." });
+    req.userId = payload.sub;
     next();
   } catch (error) {
     console.error("❌ User token verification failed:", error.response?.status || error.message);
