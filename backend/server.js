@@ -240,6 +240,8 @@ app.get("/api/server/stats", requireDevToken, (_, res) => {
 // USER ENDPOINTS
 // ══════════════════════════════════════════════════════════════
 
+app.use("/api/users/:userId", requireUserToken, requireUserOwnership);
+
 // GET user profile
 app.get("/api/users/:userId", async (req, res) => {
   try {
