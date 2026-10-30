@@ -332,7 +332,7 @@ app.post("/api/login", rateLimit(10,60000), async (req,res) => {
       const h = await bcrypt.hash(password, BCRYPT_ROUNDS);
       await db.query("UPDATE users SET password=? WHERE user_id=?", [h, u.user_id]);
     }
-    res.json({ userId:u.user_id, username:u.username, name:u.name, email:u.email, phone:u.phone, profileUrl:`/api/users/${u.user_id}/profile` });
+    res.json({ userId:u.user_id, username:u.username, name:u.name, email:u.email, phone:u.phone, profileUrl:`/api/users/${u.user_id}/profile`, sessionProof:createUserSessionToken(u.user_id) });
   } catch(e) { res.status(500).json({ error:"Database error" }); }
 });
 
