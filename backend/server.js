@@ -22,12 +22,12 @@ import dotenv      from "dotenv";
 import bodyParser  from "body-parser";
 import cors        from "cors";
 import multer      from "multer";
-import mysql       from "mysql2/promise";
+import { createJsonDb } from "./json-db.js";
 import bcrypt      from "bcrypt";
 import os          from "os";
 import crypto      from "crypto";
 import path        from "path";
-import { initializeDatabase } from "./db-init.js";
+import { initializeStore, startSyncScheduler, syncPendingMutations, readCollection } from "./github-json-store.js";
 
 import { ruleEngine }             from "./ruleEngine.js";
 import { askPerplexityRecommend } from "./perplexity-recommend-handler.js";
@@ -97,24 +97,18 @@ setInterval(() => { const now = Date.now(); for (const [k,v] of rlStore) if (now
 //    certificate contents as a single env var (works fine as a multi-line
 //    Render/Netlify env var — paste the whole ca.pem including BEGIN/END lines).
 //    Leave DB_CA_CERT unset for a local MySQL dev database with no SSL.
-const dbSsl = process.env.DB_CA_CERT
-  ? { ca: process.env.DB_CA_CERT, rejectUnauthorized: true }
-  : undefined;
+const db = createJsonDb();
 
-const db = mysql.createPool({
-  host: process.env.DB_HOST, user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD, database: process.env.DB_NAME,
-  port: process.env.DB_PORT ? Number(process.env.DB_PORT) : 3306,
-  ssl: dbSsl,
-  waitForConnections: true, connectionLimit: 10
-});
+function hashBearerToken(token) {
+  return crypto.createHash("sha256").update(String(token)).digest("hex");
+}
 
 // ── DEV TOKEN MIDDLEWARE ────────────────────────────────────
 async function requireDevToken(req, res, next) {
   const auth = req.headers["authorization"];
   if (!auth?.startsWith("Bearer "))
     return res.status(401).json({ error: "Dev auth required. Missing Bearer token." });
-  const token = auth.slice(7);
+  const token = hashBearerToken(auth.slice(7));
   try {
     const [rows] = await db.query(
       "SELECT dev_id FROM dev_tokens WHERE token=? AND (expires_at IS NULL OR expires_at > NOW()) LIMIT 1",
@@ -158,22 +152,17 @@ app.get("/test",(_, res) => res.json({ status: "ok", time: new Date().toISOStrin
 // Database readiness check: status only; never returns credentials or connection details.
 app.get("/health/db", async (_, res) => {
   try {
-    await db.query("SELECT 1");
-    const [rows] = await db.query(
-      "SELECT COUNT(*) AS tableCount FROM information_schema.tables WHERE table_schema = DATABASE()"
-    );
+    const doc = await readCollection("users", { force: true });
     res.json({
       status: "ok",
-      database: "connected",
-      tableCount: Number(rows[0].tableCount)
+      database: "github-json",
+      repository: process.env.GITHUB_DATA_REPO || "secure-json-database",
+      cachedCollections: 11,
+      users: doc.records.length
     });
   } catch (e) {
-    console.error("❌ Database health check failed:", e.code || e.message);
-    res.status(503).json({
-      status: "error",
-      database: "unavailable",
-      code: e.code || "DB_ERROR"
-    });
+    console.error("❌ JSON store health check failed:", e.response?.status || e.message);
+    res.status(503).json({ status: "error", database: "unavailable" });
   }
 });
 
@@ -325,7 +314,7 @@ app.get("/api/users/:userId/profile", async (req,res) => {
     const mimeType = rows[0].profile_type || "image/jpeg";
     res.setHeader("Content-Type", mimeType);
     res.setHeader("Cache-Control", "public, max-age=3600");
-    res.end(rows[0].profile);
+    res.end(Buffer.from(rows[0].profile, "base64"));
   } catch(e) { res.status(500).json({ error:"Server error" }); }
 });
 
@@ -699,7 +688,7 @@ app.post("/api/dev-login", rateLimit(5,60000), async (req,res) => {
     // Generate 24hr token
     const token     = crypto.randomBytes(64).toString("hex");
     const expiresAt = new Date(Date.now() + 24*3600*1000);
-    await db.query("INSERT INTO dev_tokens (dev_id,token,expires_at) VALUES (?,?,?)", [dev.id, token, expiresAt]);
+    await db.query("INSERT INTO dev_tokens (dev_id,token,expires_at) VALUES (?,?,?)", [dev.id, hashBearerToken(token), expiresAt]);
     await logDevLogin({ devId:dev.id, devEmail:dev.email, devName:dev.name, method:"email", req, success:true });
     const { password:_, uic:__, profile:___, ...safe } = dev;
     res.json({ success:true, user:safe, token });
@@ -718,7 +707,7 @@ app.post("/api/dev-login-udc", rateLimit(5,60000), async (req,res) => {
     }
     const dev   = rows[0];
     const token = crypto.randomBytes(64).toString("hex");
-    await db.query("INSERT INTO dev_tokens (dev_id,token,expires_at) VALUES (?,?,?)", [dev.id, token, new Date(Date.now()+24*3600*1000)]);
+    await db.query("INSERT INTO dev_tokens (dev_id,token,expires_at) VALUES (?,?,?)", [dev.id, hashBearerToken(token), new Date(Date.now()+24*3600*1000)]);
     await logDevLogin({ devId:dev.id, devEmail:dev.email, devName:dev.name, method:"uic", req, success:true });
     const { password:_, uic:__, profile:___, ...safe } = dev;
     res.json({ success:true, user:safe, token });
@@ -812,16 +801,11 @@ app.get("/api/dev/tables", requireDevToken, async (_,res) => {
 });
 
 // POST SQL console — dev-only, logs all non-SELECT queries
-app.post("/api/sql-run", requireDevToken, async (req,res) => {
-  const { sql } = req.body;
-  if (!sql||typeof sql!=="string") return res.status(400).json({ success:false, error:"SQL required" });
-  const upper = sql.trim().toUpperCase();
-  if (!upper.startsWith("SELECT") && !upper.startsWith("SHOW") && !upper.startsWith("DESCRIBE"))
-    console.warn(`⚠️ Non-SELECT SQL from devId ${req.devId}:`, sql.substring(0,120));
-  try {
-    const [rows] = await db.query(sql);
-    res.json({ success:true, result:rows });
-  } catch(e) { res.status(500).json({ success:false, error:e.message }); }
+app.post("/api/sql-run", requireDevToken, async (_req,res) => {
+  res.status(410).json({
+    success: false,
+    error: "SQL console is unavailable with the JSON document store. Use the read-only database viewer."
+  });
 });
 
 // ══════════════════════════════════════════════════════════════
@@ -866,28 +850,24 @@ app.use((err, req, res, next) => {
 // ══════════════════════════════════════════════════════════════
 async function startServer() {
   try {
-    const required = ["DB_HOST", "DB_PORT", "DB_USER", "DB_PASSWORD", "DB_NAME"];
-    const missing = required.filter(key => !process.env[key]?.trim());
-    if (missing.length) {
-      throw new Error("Missing required database environment variables: " + missing.join(", "));
+    const status = await initializeStore();
+    console.log("✅ GitHub JSON store initialized:", status);
+    try {
+      const sync = await syncPendingMutations();
+      if (sync.synced) console.log("✅ Recovered pending journal events:", sync.synced);
+    } catch (error) {
+      console.error("⚠️ Startup recovery deferred; durable journal retained:", error.response?.status || error.message);
     }
-    if (process.env.DB_HOST.endsWith(".aivencloud.com") && !process.env.DB_CA_CERT?.includes("BEGIN CERTIFICATE")) {
-      throw new Error("DB_CA_CERT is required for verified Aiven TLS connections.");
-    }
-
-    const schemaResult = await initializeDatabase(db, process.env.DB_NAME);
-    console.log(`✅ MySQL connected to ${schemaResult.database}; ${schemaResult.tableCount} tables verified; ${schemaResult.controlCount} controls available.`);
-
+    startSyncScheduler();
     app.listen(PORT, () => {
-      console.log(`✅ AgroScan server → http://localhost:${PORT}`);
-      console.log(`🔒 bcrypt | rate-limit | dev-token-auth | login-logging`);
+      console.log("✅ AgroScan API listening on port " + PORT);
+      console.log("🔒 bcrypt | rate-limit | hashed-dev-token | GitHub JSON journal | 4-hour batch sync");
     });
-  } catch (e) {
-    console.error("❌ Database initialization failed:", e.code || e.message);
-    console.warn("⚠️ Starting API in database-degraded mode. Database-backed features remain unavailable until DB settings are corrected.");
+  } catch (error) {
+    console.error("❌ GitHub JSON store initialization failed:", error.response?.status || error.message);
+    console.warn("⚠️ Starting degraded API. Configure GITHUB_DATA_TOKEN and private repository access.");
     app.listen(PORT, () => {
-      console.log(`⚠️ AgroScan API running without a verified database → http://localhost:${PORT}`);
-      console.log(`🔒 bcrypt | rate-limit | dev-token-auth | login-logging`);
+      console.log("⚠️ AgroScan API running in degraded mode on port " + PORT);
     });
   }
 }
