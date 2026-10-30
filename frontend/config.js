@@ -49,5 +49,15 @@
       });
     }
   };
+  const nativeFetch = window.fetch.bind(window);
+  window.fetch = function (input, init = {}) {
+    const requestUrl = typeof input === "string" ? input : input && input.url;
+    const isBackendRequest = typeof requestUrl === "string" && requestUrl.startsWith(AGRO.BACKEND_URL);
+    return nativeFetch(input, {
+      ...init,
+      ...(isBackendRequest ? { credentials: "include" } : {})
+    });
+  };
+
   window.AGRO = AGRO;
 })();
