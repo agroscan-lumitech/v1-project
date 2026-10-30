@@ -818,7 +818,7 @@ app.get("/api/dev/tables", requireDevToken, async (_,res) => {
     const result = {};
     for (const row of tables) {
       const tbl  = row[key];
-      const [rows] = await db.query(`SELECT * FROM \`${tbl}\` LIMIT 20`);
+      const rows = (await readCollection(tbl)).records.slice(0, 20);
       result[tbl] = rows.map(r => {
         const c = {...r};
         HIDDEN.forEach(h => delete c[h]);
