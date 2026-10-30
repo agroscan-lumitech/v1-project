@@ -71,6 +71,53 @@ export function createJsonDb() {
   async function rowsFor(name, tx) {
     return (await getDoc(name, tx)).records;
   }
+  function matchesWhere(row, where, values) {
+    const groups = where.split(/\\s+OR\\s+/i);
+    let valueIndex = 0;
+    const compiled = groups.map(group => group.split(/\\s+AND\\s+/i).map(condition => {
+      const eq = condition.match(/^([A-Z_]+)\\s*=\\s*\\?$/i);
+      const isNull = condition.match(/^([A-Z_]+)\\s+IS\\s+NULL$/i);
+      const notNull = condition.match(/^([A-Z_]+)\\s+IS\\s+NOT\\s+NULL$/i);
+      if (eq) return { field: eq[1].toLowerCase(), value: values[valueIndex++], type: "eq" };
+      if (isNull) return { field: isNull[1].toLowerCase(), type: "null" };
+      if (notNull) return { field: notNull[1].toLowerCase(), type: "notNull" };
+      return { type: "unsupported" };
+    }));
+    return compiled.some(group => group.every(test => {
+      if (test.type === "eq") return String(row[test.field]) === String(test.value);
+      if (test.type === "null") return row[test.field] == null;
+      if (test.type === "notNull") return row[test.field] != null;
+      return false;
+    }));
+  }
+  function buildSetValues(setClause, values) {
+    let p = 0;
+    const out = {};
+    for (const assignment of setClause.split(",")) {
+      const match = assignment.trim().match(/^([A-Z_]+)\\s*=\\s*(\\?|NOW\\(\\)|NULL|'[^']*')$/i);
+      if (!match) throw new Error("Unsupported UPDATE assignment: " + assignment);
+      const field = match[1].toLowerCase(), raw = match[2];
+      if (raw === "?") out[field] = values[p++];
+      else if (/^NOW\\(\\)$/i.test(raw)) out[field] = dateNow();
+      else if (/^NULL$/i.test(raw)) out[field] = null;
+      else out[field] = stripQuotes(raw);
+    }
+    return { values: out, used: p };
+  }
+  async function stageMany(operations, tx) {
+    if (!operations.length) return;
+    if (!tx) return appendMutations(operations);
+    for (const op of operations) {
+      const doc = await getDoc(op.collection, tx);
+      const rows = doc.records;
+      const keyOf = row => String(row.id ?? row.user_id ?? row.session_id ?? row.chat_id ?? row.function_name ?? "");
+      const index = rows.findIndex(row => keyOf(row) === String(op.recordId));
+      if (op.action === "delete") { if (index >= 0) rows.splice(index, 1); }
+      else if (index >= 0) rows[index] = clone(op.record);
+      else rows.push(clone(op.record));
+      tx.operations.push(op);
+    }
+  }
   async function query(sql, params = [], tx = null) {
     const q = String(sql).replace(/\s+/g, " ").trim().replace(/;$/, "");
     const upper = q.toUpperCase();
@@ -165,6 +212,33 @@ export function createJsonDb() {
       }
       rows = rows.slice(offset, offset + limit);
       return result(rows.map(row => project(row, fields)));
+    }
+
+    if ((m = q.match(/^UPDATE ([A-Z_]+) SET (.+) WHERE (.+)$/i))) {
+      const name = table(m[1].toLowerCase());
+      const parsed = buildSetValues(m[2], values);
+      const whereValues = values.slice(parsed.used);
+      const rows = await rowsFor(name, tx);
+      const operations = [];
+      for (const row of rows) {
+        if (!matchesWhere(row, m[3], whereValues)) continue;
+        const updated = { ...clone(row), ...clone(parsed.values) };
+        const key = updated.id ?? updated.user_id ?? updated.session_id ?? updated.chat_id ?? updated.function_name;
+        operations.push({ collection: name, action: "upsert", recordId: String(key), record: updated });
+      }
+      await stageMany(operations, tx);
+      return writeResult(operations.length);
+    }
+
+    if ((m = q.match(/^DELETE FROM ([A-Z_]+) WHERE (.+)$/i))) {
+      const name = table(m[1].toLowerCase());
+      const rows = await rowsFor(name, tx);
+      const operations = rows.filter(row => matchesWhere(row, m[2], values)).map(row => ({
+        collection: name, action: "delete",
+        recordId: String(row.id ?? row.user_id ?? row.session_id ?? row.chat_id ?? row.function_name)
+      }));
+      await stageMany(operations, tx);
+      return writeResult(operations.length);
     }
 
     if ((m = q.match(/^INSERT INTO (USERS|LANDS|ORDERS|CHAT_SESSIONS|AI_CHATS|CONTROLS|DEVUSERS|DEV_LOGIN_LOGS|DEV_TOKENS|SOIL_TESTS|FEEDBACK) \((.+)\) VALUES \((.+)\)$/i))) {
