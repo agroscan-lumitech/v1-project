@@ -35,7 +35,11 @@
       catch { return null; }
     },
     setUser(user) { sessionStorage.setItem(this.SESSION_USER_KEY, JSON.stringify(user)); },
-    clearUser() {\n      sessionStorage.removeItem(this.SESSION_USER_KEY);\n      document.cookie = "user=; Max-Age=0; Path=/; SameSite=Lax";\n      fetch(this.BACKEND_URL + "/api/logout", { method: "POST" }).catch(() => {});\n    },
+    clearUser() {
+      sessionStorage.removeItem(this.SESSION_USER_KEY);
+      document.cookie = "user=; Max-Age=0; Path=/; SameSite=Lax";
+      fetch(this.BACKEND_URL + "/api/logout", { method: "POST" }).catch(() => {});
+    },
     getUserId() { const user = this.getUser(); return user?.userId || user?.user_id || null; },
     isLoggedIn() { return !!this.getUser(); },
     requireLogin(loginPath = "/login-form.html") {

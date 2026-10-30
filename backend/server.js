@@ -47,6 +47,7 @@ const ALLOWED_ORIGINS = [
   "https://agroscan-lumitech.netlify.app",
   "https://2026.agroscan.dpdns.org",
   "https://v1.agroscan.dpdns.org",
+  "https://v1-agroscan.netlify.app",
   "http://localhost:3000",
   "http://localhost:5500",
   "http://127.0.0.1:5500",
