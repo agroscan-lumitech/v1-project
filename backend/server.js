@@ -27,6 +27,7 @@ import bcrypt      from "bcrypt";
 import os          from "os";
 import crypto      from "crypto";
 import path        from "path";
+import { initializeDatabase } from "./db-init.js";
 
 import { ruleEngine }             from "./ruleEngine.js";
 import { askPerplexityRecommend } from "./perplexity-recommend-handler.js";
@@ -45,6 +46,7 @@ const ALLOWED_ORIGINS = [
   "https://agroscan-dev.netlify.app",
   "https://agroscan-lumitech.netlify.app",
   "https://2026.agroscan.dpdns.org",
+  "https://v1.agroscan.dpdns.org",
   "http://localhost:3000",
   "http://localhost:5500",
   "http://127.0.0.1:5500",
@@ -152,6 +154,24 @@ async function verifyPassword(plain, stored) {
 // ══════════════════════════════════════════════════════════════
 app.get("/",    (_, res) => res.send("🌱 AgroScan AI Server Running"));
 app.get("/test",(_, res) => res.json({ status: "ok", time: new Date().toISOString() }));
+
+// Database readiness check: status only; never returns credentials or connection details.
+app.get("/health/db", async (_, res) => {
+  try {
+    await db.query("SELECT 1");
+    const [rows] = await db.query(
+      "SELECT COUNT(*) AS tableCount FROM information_schema.tables WHERE table_schema = DATABASE()"
+    );
+    res.json({
+      status: "ok",
+      database: "connected",
+      tableCount: Number(rows[0].tableCount)
+    });
+  } catch (e) {
+    console.error("❌ Database health check failed:", e.code || e.message);
+    res.status(503).json({ status: "error", database: "unavailable" });
+  }
+});
 
 // ── Server time (synced, dev-only) ──────────────────────────
 app.get("/api/server/time", requireDevToken, (_, res) => {
@@ -603,7 +623,10 @@ app.get("/api/controls", async (_,res) => {
   try {
     const [rows] = await db.query("SELECT function_name,value,description FROM controls");
     res.json(rows);
-  } catch(e) { res.status(500).json({ error:"Failed to fetch controls" }); }
+  } catch(e) {
+    console.error("❌ Failed to fetch controls:", e.code || e.message);
+    res.status(500).json({ error:"Failed to fetch controls" });
+  }
 });
 
 app.get("/api/controls/:function_name", async (req,res) => {
@@ -837,7 +860,28 @@ app.use((err, req, res, next) => {
 // ══════════════════════════════════════════════════════════════
 // START
 // ══════════════════════════════════════════════════════════════
-app.listen(PORT, () => {
-  console.log(`✅ AgroScan server → http://localhost:${PORT}`);
-  console.log(`🔒 bcrypt | rate-limit | dev-token-auth | login-logging`);
-});
+async function startServer() {
+  try {
+    const required = ["DB_HOST", "DB_PORT", "DB_USER", "DB_PASSWORD", "DB_NAME"];
+    const missing = required.filter(key => !process.env[key]?.trim());
+    if (missing.length) {
+      throw new Error("Missing required database environment variables: " + missing.join(", "));
+    }
+    if (process.env.DB_HOST.endsWith(".aivencloud.com") && !process.env.DB_CA_CERT?.includes("BEGIN CERTIFICATE")) {
+      throw new Error("DB_CA_CERT is required for verified Aiven TLS connections.");
+    }
+
+    const schemaResult = await initializeDatabase(db, process.env.DB_NAME);
+    console.log(`✅ MySQL connected to ${schemaResult.database}; ${schemaResult.tableCount} tables verified; ${schemaResult.controlCount} controls available.`);
+
+    app.listen(PORT, () => {
+      console.log(`✅ AgroScan server → http://localhost:${PORT}`);
+      console.log(`🔒 bcrypt | rate-limit | dev-token-auth | login-logging`);
+    });
+  } catch (e) {
+    console.error("❌ AgroScan startup blocked by database initialization:", e.code || e.message);
+    process.exit(1);
+  }
+}
+
+startServer();
