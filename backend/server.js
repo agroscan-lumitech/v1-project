@@ -104,6 +104,35 @@ function hashBearerToken(token) {
 }
 
 // ── DEV TOKEN MIDDLEWARE ────────────────────────────────────
+async function requireUserToken(req, res, next) {
+  const auth = req.headers["authorization"];
+  if (!auth?.startsWith("Bearer ")) {
+    return res.status(401).json({ error: "User authentication required." });
+  }
+  const tokenHash = hashBearerToken(auth.slice(7));
+  try {
+    const document = await readCollection("users");
+    const user = document.records.find(row =>
+      row.session_token_hash === tokenHash &&
+      row.session_token_expires_at &&
+      new Date(row.session_token_expires_at) > new Date()
+    );
+    if (!user) return res.status(401).json({ error: "Session expired. Please sign in again." });
+    req.userId = user.user_id;
+    next();
+  } catch (error) {
+    console.error("❌ User token verification failed:", error.response?.status || error.message);
+    res.status(503).json({ error: "Authentication service unavailable." });
+  }
+}
+
+function requireUserOwnership(req, res, next) {
+  if (req.params.userId !== undefined && String(req.params.userId) !== String(req.userId)) {
+    return res.status(403).json({ error: "You cannot access another user's data." });
+  }
+  next();
+}
+
 async function requireDevToken(req, res, next) {
   const auth = req.headers["authorization"];
   if (!auth?.startsWith("Bearer "))
