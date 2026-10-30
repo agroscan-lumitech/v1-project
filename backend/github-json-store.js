@@ -174,7 +174,7 @@ export async function syncPendingMutations() {
     const journal = await readFile(journalPath);
     if (!journal?.text.trim()) return { synced: 0 };
     const events = journal.text.split("\n").filter(Boolean).map(JSON.parse);
-    const operations = events.flatMap(event => event.operations || [event]);
+    const operations = events.flatMap(event => event.operations || []);\n    if (!operations.length) return { synced: 0 };
     const names = [...new Set(operations.map(op => op.collection))];
     const docs = {};
     for (const name of names) docs[name] = await readCollection(name, { force: true });
