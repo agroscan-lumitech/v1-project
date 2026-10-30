@@ -17,7 +17,7 @@ const api = axios.create({
     "X-GitHub-Api-Version": "2022-11-28"
   }
 });
-const journalPath = "journal/pending.jsonl";
+const journalPath = "journal/events.json";
 const CACHE_TTL_MS = Number(process.env.JSON_CACHE_TTL_MS || 60000);
 const cache = new Map();
 const cacheLoadedAt = new Map();
@@ -86,18 +86,15 @@ export async function initializeStore() {
   auth();
   for (const name of COLLECTIONS) await readCollection(name, { force: true });
   const journal = await readFile(journalPath);
-  if (journal?.text.trim()) {
-    const events = journal.text.split("\n").filter(Boolean).map(JSON.parse);
-    for (const event of events) {
-      const operations = event.operations || [event];
-      for (const op of operations) {
-        if (!COLLECTIONS.includes(op.collection)) continue;
-        const doc = await readCollection(op.collection);
-        applyOperation(doc, op);
-      }
+  const events = journal?.text.trim() ? JSON.parse(journal.text).events || [] : [];
+  for (const event of events) {
+    for (const op of event.operations || []) {
+      if (!COLLECTIONS.includes(op.collection)) continue;
+      const doc = await readCollection(op.collection);
+      applyOperation(doc, op);
     }
   }
-  return { collections: COLLECTIONS.length, journalPending: Boolean(journal?.text.trim()) };
+  return { collections: COLLECTIONS.length, journalPending: events.some(event => event.operations?.length) };
 }
 
 // Journal first, then mutate cache. An acknowledged write therefore survives
@@ -110,29 +107,22 @@ export async function appendMutations(operations) {
     if (!COLLECTIONS.includes(op.collection)) throw new Error("Unknown collection");
     if (!["upsert", "delete"].includes(op.action)) throw new Error("Invalid action");
     if (op.recordId === undefined || op.recordId === null) throw new Error("recordId is required");
-    if (op.action === "upsert" && (!op.record || typeof op.record !== "object")) {
-      throw new Error("Record is required for upsert");
-    }
+    if (op.action === "upsert" && (!op.record || typeof op.record !== "object")) throw new Error("Record is required for upsert");
   }
-
   return serializeWrite(async () => {
     const journal = await readFile(journalPath);
+    const document = journal?.text.trim() ? JSON.parse(journal.text) : { schemaVersion: 1, events: [] };
+    if (!Array.isArray(document.events)) throw new Error("Invalid mutation journal document");
     const event = {
       eventId: crypto.randomUUID(),
       operations: operations.map(op => ({
-        collection: op.collection,
-        action: op.action,
-        recordId: String(op.recordId),
+        collection: op.collection, action: op.action, recordId: String(op.recordId),
         ...(op.action === "upsert" ? { record: op.record } : {})
       })),
       createdAt: new Date().toISOString()
     };
-    await writeFile(
-      journalPath,
-      (journal?.text || "") + JSON.stringify(event) + "\n",
-      "Journal AgroScan data mutation",
-      journal?.sha
-    );
+    document.events.push(event);
+    await writeFile(journalPath, JSON.stringify(document, null, 2) + "\\n", "Journal AgroScan data mutation", journal?.sha);
     for (const op of event.operations) {
       const doc = await readCollection(op.collection);
       applyOperation(doc, op);
@@ -173,25 +163,24 @@ export async function syncPendingMutations() {
   return serializeWrite(async () => {
     const journal = await readFile(journalPath);
     if (!journal?.text.trim()) return { synced: 0 };
-    const events = journal.text.split("\n").filter(Boolean).map(JSON.parse);
-    const operations = events.flatMap(event => event.operations || []);\n    if (!operations.length) return { synced: 0 };
+    const document = JSON.parse(journal.text);
+    const events = Array.isArray(document.events) ? document.events : [];
+    const operations = events.flatMap(event => event.operations || []);
+    if (!operations.length) return { synced: 0 };
     const names = [...new Set(operations.map(op => op.collection))];
     const docs = {};
     for (const name of names) docs[name] = await readCollection(name, { force: true });
     for (const op of operations) applyOperation(docs[op.collection], op);
-
     const now = new Date().toISOString();
     const changes = {};
     for (const name of names) {
       docs[name].updatedAt = now;
-      changes["data/" + name + ".json"] = JSON.stringify(docs[name], null, 2) + "\n";
+      changes["data/" + name + ".json"] = JSON.stringify(docs[name], null, 2) + "\\n";
     }
     await atomicBatch(changes);
     const latest = await readFile(journalPath);
-    if (latest?.sha !== journal.sha) {
-      throw new Error("Journal changed during sync; retaining it for safe replay");
-    }
-    await writeFile(journalPath, "", "Clear synchronized AgroScan journal", latest.sha);
+    if (latest?.sha !== journal.sha) throw new Error("Journal changed during sync; retaining it for safe replay");
+    await writeFile(journalPath, JSON.stringify({ schemaVersion: 1, events: [] }, null, 2) + "\\n", "Checkpoint synchronized journal", latest.sha);
     for (const name of names) {
       cache.set(name, docs[name]);
       cacheLoadedAt.set(name, Date.now());
