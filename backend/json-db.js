@@ -169,9 +169,11 @@ export function createJsonDb() {
       const rows = sortRows(await rowsFor("orders", tx), "created_at", "DESC");
       return result(rows.slice(Number(values[1]) || 0, (Number(values[1]) || 0) + (Number(values[0]) || 50)));
     }
-    if (/^SELECT COUNT\(\*\) AS TOTAL FROM (ORDERS|AI_CHATS|DEV_LOGIN_LOGS)$/i.test(q)) {
-      const name = q.match(/FROM (ORDERS|AI_CHATS|DEV_LOGIN_LOGS)/i)[1].toLowerCase();
-      return result([{ total: (await rowsFor(name, tx)).length }]);
+    if ((m = q.match(/^SELECT COUNT\\(\\*\\) AS ([A-Z_]+) FROM ([A-Z_]+)(?: WHERE (.+))?$/i))) {
+      const name = table(m[2].toLowerCase());
+      const rows = await rowsFor(name, tx);
+      const selected = m[3] ? rows.filter(row => matchesWhere(row, m[3], values)) : rows;
+      return result([{ [m[1].toLowerCase()]: selected.length }]);
     }
     if (/^SELECT \* FROM DEV_LOGIN_LOGS ORDER BY LOGIN_TIME DESC LIMIT \? OFFSET \?$/i.test(q)) {
       const rows = sortRows(await rowsFor("dev_login_logs", tx), "login_time", "DESC");
@@ -222,7 +224,7 @@ export function createJsonDb() {
       const operations = [];
       for (const row of rows) {
         if (!matchesWhere(row, m[3], whereValues)) continue;
-        const updated = { ...clone(row), ...clone(parsed.values) };
+        const patch = { ...parsed.values };\n        for (const [field, value] of Object.entries(patch)) if (Buffer.isBuffer(value)) patch[field] = value.toString("base64");\n        const updated = { ...clone(row), ...clone(patch) };
         const key = updated.id ?? updated.user_id ?? updated.session_id ?? updated.chat_id ?? updated.function_name;
         operations.push({ collection: name, action: "upsert", recordId: String(key), record: updated });
       }
@@ -255,7 +257,7 @@ export function createJsonDb() {
       }
       const rows = await rowsFor(name, tx);
       const key = name === "users" ? "user_id" : name === "chat_sessions" ? "session_id" : name === "ai_chats" ? "chat_id" : "id";
-      if (name === "chat_sessions" || name === "dev_tokens" || name === "users" || name === "lands" || name === "orders" || name === "ai_chats" || name === "soil_tests" || name === "feedback" || name === "dev_login_logs") record[key] = nextId(rows);
+      if (name === "chat_sessions" || name === "devusers" || name === "controls" || name === "dev_tokens" || name === "users" || name === "lands" || name === "orders" || name === "ai_chats" || name === "soil_tests" || name === "feedback" || name === "dev_login_logs") record[key] = nextId(rows);
       if (name === "users" || name === "lands" || name === "orders" || name === "chat_sessions" || name === "ai_chats" || name === "controls" || name === "devusers" || name === "dev_login_logs" || name === "dev_tokens" || name === "soil_tests" || name === "feedback") {
         record.created_at ??= dateNow();
         if (name === "ai_chats") record.timestamp ??= dateNow();
