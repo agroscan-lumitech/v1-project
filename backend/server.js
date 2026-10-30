@@ -150,6 +150,16 @@ async function requireUserToken(req, res, next) {
   }
 }
 
+async function optionalUserToken(req, res, next) {
+  if (!req.body || !req.body.userId) return next();
+  await requireUserToken(req, res, () => {
+    if (String(req.body.userId) !== String(req.userId)) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+    next();
+  });
+}
+
 function requireUserOwnership(req, res, next) {
   if (req.params.userId !== undefined && String(req.params.userId) !== String(req.userId)) {
     return res.status(403).json({ error: "You cannot access another user's data." });
