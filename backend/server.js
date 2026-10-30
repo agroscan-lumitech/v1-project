@@ -591,8 +591,9 @@ app.get("/api/users/:userId/soil-tests", async (req,res) => {
 // AI CHAT — Improved context management
 // ══════════════════════════════════════════════════════════════
 
-app.post("/chat", async (req,res) => {
+app.post("/chat", requireUserToken, async (req,res) => {
   const { message, userId } = req.body;
+  if (String(userId) !== String(req.userId)) return res.status(403).json({ error:"Access denied" });
   if (!message||!userId) return res.status(400).json({ error:"Message and userId required" });
   try {
     // Get or create chat session
@@ -639,7 +640,7 @@ app.post("/chat", async (req,res) => {
   }
 });
 
-app.get("/api/chat/history/:userId", async (req,res) => {
+app.get("/api/chat/history/:userId", requireUserToken, requireUserOwnership, async (req,res) => {
   const limit  = parseInt(req.query.limit)  || 20;
   const offset = parseInt(req.query.offset) || 0;
   try {
@@ -652,7 +653,7 @@ app.get("/api/chat/history/:userId", async (req,res) => {
   } catch(e) { res.status(500).json({ error:"Failed to fetch chat history" }); }
 });
 
-app.delete("/api/chat/clear/:userId", async (req,res) => {
+app.delete("/api/chat/clear/:userId", requireUserToken, requireUserOwnership, async (req,res) => {
   try {
     await db.query("DELETE FROM ai_chats     WHERE user_id=?", [req.params.userId]);
     await db.query("DELETE FROM chat_sessions WHERE user_id=?", [req.params.userId]);
@@ -661,7 +662,7 @@ app.delete("/api/chat/clear/:userId", async (req,res) => {
 });
 
 // New chat session (manual reset)
-app.post("/api/chat/new-session/:userId", async (req,res) => {
+app.post("/api/chat/new-session/:userId", requireUserToken, requireUserOwnership, async (req,res) => {
   try {
     await db.query("UPDATE chat_sessions SET ended_at=NOW() WHERE user_id=? AND ended_at IS NULL", [req.params.userId]);
     const [r] = await db.query("INSERT INTO chat_sessions (user_id) VALUES (?)", [req.params.userId]);
