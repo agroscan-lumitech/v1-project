@@ -57,7 +57,7 @@ function emptyCollection(name) {
   return { schemaVersion: 1, collection: name, updatedAt: null, records: [] };
 }
 function idFor(row) {
-  return String(row.id ?? row.user_id ?? row.session_id ?? row.chat_id ?? "");
+  return String(row.id ?? row.user_id ?? row.session_id ?? row.chat_id ?? row.function_name ?? "");
 }
 function applyOperation(doc, op) {
   const rows = doc.records;
