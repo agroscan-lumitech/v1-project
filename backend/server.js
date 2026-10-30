@@ -401,7 +401,7 @@ app.delete("/api/users/:userId/profile", async (req,res) => {
 });
 
 // Developer profile picture (devend)
-app.get("/api/devusers/:id/profile", async (req,res) => {
+app.get("/api/devusers/:id/profile", requireDevToken, async (req,res) => {
   try {
     const [rows] = await db.query("SELECT profile FROM devusers WHERE id=?", [req.params.id]);
     if (!rows.length || !rows[0].profile) return res.status(404).json({ error:"No profile picture" });
@@ -411,7 +411,7 @@ app.get("/api/devusers/:id/profile", async (req,res) => {
   } catch(e) { res.status(500).json({ error:"Server error" }); }
 });
 
-app.post("/api/devusers/:id/profile", upload.single("profile"), async (req,res) => {
+app.post("/api/devusers/:id/profile", requireDevToken, upload.single("profile"), async (req,res) => {
   if (!req.file) return res.status(400).json({ error:"No image uploaded" });
   try {
     await db.query("UPDATE devusers SET profile=? WHERE id=?", [req.file.buffer, req.params.id]);
@@ -789,7 +789,7 @@ app.post("/api/dev-logout", requireDevToken, async (req,res) => {
 // DEVUSERS MANAGEMENT (no duplicate routes)
 // ══════════════════════════════════════════════════════════════
 
-app.get("/api/devusers/:id", async (req,res) => {
+app.get("/api/devusers/:id", requireDevToken, async (req,res) => {
   try {
     const [rows] = await db.query("SELECT id,name,email,phone,role,created_at FROM devusers WHERE id=?", [req.params.id]);
     if (!rows.length) return res.status(404).json({ error:"Dev user not found" });
@@ -797,7 +797,7 @@ app.get("/api/devusers/:id", async (req,res) => {
   } catch(e) { res.status(500).json({ error:"Server error" }); }
 });
 
-app.put("/api/devusers/:id", async (req,res) => {
+app.put("/api/devusers/:id", requireDevToken, async (req,res) => {
   const { name, email, phone } = req.body;
   try {
     const [r] = await db.query("UPDATE devusers SET name=?,email=?,phone=? WHERE id=?", [name,email,phone,req.params.id]);
@@ -806,7 +806,7 @@ app.put("/api/devusers/:id", async (req,res) => {
   } catch(e) { res.status(500).json({ error:"Server error" }); }
 });
 
-app.put("/api/devusers/:id/change-password", async (req,res) => {
+app.put("/api/devusers/:id/change-password", requireDevToken, async (req,res) => {
   const { oldPassword, newPassword } = req.body;
   if (!oldPassword||!newPassword) return res.status(400).json({ error:"Both passwords required" });
   if (newPassword.length<8) return res.status(400).json({ error:"Min 8 characters" });
