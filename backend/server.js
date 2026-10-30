@@ -716,7 +716,7 @@ app.post("/api/dev-login-udc", rateLimit(5,60000), async (req,res) => {
 
 // POST dev logout — invalidate token
 app.post("/api/dev-logout", requireDevToken, async (req,res) => {
-  const token = req.headers["authorization"].slice(7);
+  const token = hashBearerToken(req.headers["authorization"].slice(7));
   try {
     await db.query("DELETE FROM dev_tokens WHERE token=?", [token]);
     res.json({ success:true, message:"Logged out" });
