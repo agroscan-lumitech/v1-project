@@ -132,11 +132,12 @@ function decodeUserSessionToken(token) {
 // ── DEV TOKEN MIDDLEWARE ────────────────────────────────────
 async function requireUserToken(req, res, next) {
   const auth = req.headers["authorization"];
-  if (!auth?.startsWith("Bearer ")) {
-    return res.status(401).json({ error: "User authentication required." });
-  }
+  const cookieToken = (req.headers.cookie || "").split(";").map(part => part.trim())
+    .find(part => part.startsWith("agroscan_session="))?.slice("agroscan_session=".length);
+  const token = auth?.startsWith("Bearer ") ? auth.slice(7) : cookieToken;
+  if (!token) return res.status(401).json({ error: "User authentication required." });
   try {
-    const payload = decodeUserSessionToken(auth.slice(7));
+    const payload = decodeUserSessionToken(decodeURIComponent(token));
     if (!payload) return res.status(401).json({ error: "Session expired. Please sign in again." });
     const document = await readCollection("users");
     const userExists = document.records.some(row => String(row.user_id) === String(payload.sub));
