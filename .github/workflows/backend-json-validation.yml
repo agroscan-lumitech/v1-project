@@ -5,6 +5,7 @@ on:
       - feature/github-json-storage
     paths:
       - "backend/**"
+      - "frontend/config.js"
       - ".github/workflows/backend-json-validation.yml"
 jobs:
   syntax:
@@ -19,3 +20,4 @@ jobs:
           node --check backend/server.js
           node --check backend/json-db.js
           node --check backend/github-json-store.js
+          node --check frontend/config.js
