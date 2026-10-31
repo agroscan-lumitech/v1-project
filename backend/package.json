@@ -1,11 +1,14 @@
 {
   "name": "agroscan-ai",
   "version": "1.0.0",
-  "description": "AgroScan AI project for soil analysis and recommendations",
+  "description": "AgroScan AI API and GitHub JSON document store",
   "type": "module",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "check": "node --check server.js && node --check json-db.js && node --check github-json-store.js && node --check security-utils.js",
+    "test": "node --test test/*.test.js",
+    "validate": "npm run check && npm test"
   },
   "keywords": [
     "agriculture",

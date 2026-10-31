@@ -193,6 +193,12 @@ header {
 }
 
 </style>
+<meta name="robots" content="noindex,nofollow">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#ffd700">
+<script src="../pwa-register.js" defer></script>
+<script src="../config.js"></script>
+<script>window.DEV_CONFIG?.requireAuth("../login-form.html");</script>
 </head>
 <body>
 
@@ -304,12 +310,20 @@ document.addEventListener("DOMContentLoaded", async () => {
   loadUserInfo();
 
   // ---------------- Edit Info ----------------
-  function enableEdit() {
-    uiName.innerHTML = `<input type="text" id="edit-name" value="${userData.name || ""}">`;
-    uiEmail.innerHTML = `<input type="email" id="edit-email" value="${userData.email || ""}">`;
-    uiPhone.innerHTML = `<input type="text" id="edit-phone" value="${userData.phone || ""}">`;
-    editBtn.textContent = "Save";
+  function makeEditInput(id, type, value) {
+    const input = document.createElement("input");
+    input.type = type;
+    input.id = id;
+    input.value = String(value || "");
+    input.maxLength = type === "email" ? 254 : 80;
+    return input;
+  }
 
+  function enableEdit() {
+    uiName.replaceChildren(makeEditInput("edit-name", "text", userData.name));
+    uiEmail.replaceChildren(makeEditInput("edit-email", "email", userData.email));
+    uiPhone.replaceChildren(makeEditInput("edit-phone", "tel", userData.phone));
+    editBtn.textContent = "Save";
     editBtn.removeEventListener("click", enableEdit);
     editBtn.addEventListener("click", saveEdit);
   }
@@ -322,7 +336,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     };
 
     try {
-      const res = await fetch(`https://agroscan-backend.onrender.com/api/devusers/${userData.id}`, {
+      const res = await DEV_CONFIG.authFetch(`/api/devusers/${encodeURIComponent(String(userData.id))}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updated)
@@ -368,7 +382,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     try {
-      const res = await fetch(`https://agroscan-backend.onrender.com/api/devusers/${userData.id}/change-password`, {
+      const res = await DEV_CONFIG.authFetch(`/api/devusers/${encodeURIComponent(String(userData.id))}/change-password`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ oldPassword: oldPass, newPassword: newPass })
@@ -398,35 +412,28 @@ document.addEventListener("DOMContentLoaded", async () => {
   privateLinks.forEach(l => {
     const div = document.createElement("div");
     div.className = "card";
-    div.innerHTML = `<a href="${l.href}" style="color:#ffd700;">${l.title}</a>`;
+    const link = document.createElement("a");
+    link.href = l.href;
+    link.textContent = l.title;
+    link.style.color = "#ffd700";
+    div.appendChild(link);
     privateCards.appendChild(div);
   });
 
   // ---------------- Password Manager Cards ----------------
   const passwordCards = document.getElementById("password-cards");
-  const passwords = [
-    { app:"Gmail", user:"agroscan.lumitech@gmail.com", pass:"••••••" },
-    { app:"Instagram", user:"agroscan.lumitech", pass:"••••••" }
-  ];
-  passwords.forEach(p => {
-    const div = document.createElement("div");
-    div.className = "card";
-    div.innerHTML = `<strong>${p.app}</strong><br>User: ${p.user}<br>Password: <span>${p.pass}</span>`;
-    passwordCards.appendChild(div);
-  });
+  passwordCards.textContent = "This dashboard does not store account passwords or API credentials.";
 
 });
 </script>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  const devUser = JSON.parse(sessionStorage.getItem("devUser"));
-  if(!devUser){
-    window.location.href = "../login-form.html";
-  } else {
-    document.getElementById("profile-name").textContent = devUser.name || devUser.email;
+  const devUser = DEV_CONFIG.requireAuth("../login-form.html");
+  if (!devUser) return;
+  document.getElementById("profile-name").textContent = devUser.name || devUser.email;
     document.getElementById("profile-id").textContent = "ID: " + (devUser.id || "N/A");
-  }
+  
 
   // ✅ Sidebar toggle for mobile
   document.querySelector(".hamburger").addEventListener("click", ()=>{
@@ -436,8 +443,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Logout
   document.getElementById("logout-btn").addEventListener("click", e=>{
     e.preventDefault();
-    sessionStorage.clear();
-    window.location.href = "../login-form.html";
+    DEV_CONFIG.logout();
   });
 });
 </script>

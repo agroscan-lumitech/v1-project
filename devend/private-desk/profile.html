@@ -106,6 +106,12 @@ header {
   .profile-card h2{font-size:1.3rem;}
 }
 </style>
+<meta name="robots" content="noindex,nofollow">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#ffd700">
+<script src="../pwa-register.js" defer></script>
+<script src="../config.js"></script>
+<script>window.DEV_CONFIG?.requireAuth("../login-form.html");</script>
 </head>
 <body>
 
@@ -151,18 +157,16 @@ header {
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  const devUser = JSON.parse(sessionStorage.getItem("devUser"));
-  if(!devUser){
-    window.location.href = "../login-form.html";
-  } else {
-    document.getElementById("dev-name").textContent = devUser.name || "Unknown Dev";
+  const devUser = DEV_CONFIG.requireAuth("../login-form.html");
+  if (!devUser) return;
+  document.getElementById("dev-name").textContent = devUser.name || "Unknown Dev";
     document.getElementById("dev-email").textContent = devUser.email || "N/A";
     document.getElementById("dev-id").textContent = devUser.id || "N/A";
     document.getElementById("dev-role-info").textContent = devUser.role || "Developer";
 
     document.getElementById("profile-name").textContent = devUser.name || devUser.email;
     document.getElementById("profile-id").textContent = "ID: " + (devUser.id || "N/A");
-  }
+  
 
   // ✅ Sidebar toggle for mobile
   document.querySelector(".hamburger").addEventListener("click", ()=>{
@@ -172,8 +176,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Logout
   document.getElementById("logout-btn").addEventListener("click", e=>{
     e.preventDefault();
-    sessionStorage.clear();
-    window.location.href = "../login-form.html";
+    DEV_CONFIG.logout();
   });
 });
 </script>

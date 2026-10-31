@@ -1,118 +1,102 @@
-# Luminary Agroscan
+# AgroScan AI
 
-The full AgroScan ecosystem, reorganized into five clearly separated "ends."
-Same files, same logic as your original project — reorganized and patched
-for real deployment, not restructured or rewritten.
+AgroScan AI is a multi-part web application for agricultural knowledge, farmer tools, soil recommendations and developer operations.
 
-## The five ends
+## Current deployment architecture
 
-| End | What it is | Deploys to |
+| Component | Repository folder | Hosting | Canonical origin |
+|---|---|---|---|
+| Farmer-facing web app | frontend/ | Netlify | https://v1.agroscan.dpdns.org |
+| Developer dashboard | devend/ | Netlify | Configured AgroScan developer Netlify site |
+| Public project and updates site | repoend/ | Netlify | https://media.v1.agroscan.dpdns.org |
+| API | backend/ | Render Web Service | https://backend.v1.agroscan.dpdns.org |
+| Persistent application data | Private GitHub repository | GitHub Contents and Git Trees API | Backend only |
+
+**The active application database is GitHub JSON storage.** Do not configure this deployment against PostgreSQL, MySQL, Aiven or a local database. The compatibility adapter in backend/json-db.js exposes the existing API query shape while persisting collections through backend/github-json-store.js.
+
+## Repository map
+
+- frontend/ contains the main AgroScan website, educational sections, shop, account pages, central backend connection file and main PWA.
+- devend/ contains developer login and the private developer dashboard. Its PWA intentionally does not cache dashboard pages or API responses.
+- backend/ contains the Express API, authentication, GitHub JSON store adapter, validation helpers and backend tests.
+- repoend/ contains the public project information and updates site.
+- tools/validate-static.mjs verifies key metadata, PWA, host and security configuration.
+
+## Backend environment variables
+
+Set these only in the Render backend service. Never put a GitHub token, session signing secret or AI provider API key in a frontend file.
+
+| Variable | Purpose |
+|---|---|
+| GITHUB_DATA_OWNER | Private data repository owner (normally agroscan-lumitech) |
+| GITHUB_DATA_REPO | Private data repository name (normally secure-json-database) |
+| GITHUB_DATA_BRANCH | Data branch (normally main) |
+| GITHUB_DATA_TOKEN | Fine-grained token with Contents read/write access to the private data repository only |
+| USER_SESSION_SECRET | Independent random signing secret for user sessions |
+| ALLOWED_ORIGINS | Comma-separated exact frontend origins allowed by CORS |
+| JSON_CACHE_TTL_MS | Optional JSON cache duration in milliseconds (default 60000) |
+| AI_PROVIDER and provider keys | Configure only the AI provider used by the backend |
+
+Generate a session secret with: openssl rand -hex 32. Keep it separate from the GitHub token. Use backend/.env.example as the variable template; do not commit a real .env file.
+
+## Frontend backend configuration
+
+The farmer-facing app reads its API origin from frontend/config/backend-connection.json. The current backend origin is https://backend.v1.agroscan.dpdns.org. Frontend pages should use the shared AGRO helper or this JSON-backed connection bootstrap rather than duplicating hostnames.
+
+The developer dashboard reads its backend origin from devend/config.js and uses a shared bearer-token session helper. Developer sign-in by email/password and UIC/password both store the returned bearer token; private dashboard API calls attach it automatically.
+
+## GitHub JSON persistence model and limits
+
+Mutations are written to a durable journal in the private data repository. The backend periodically consolidates journal events into collection JSON documents. A startup recovery pass and forced refresh replay pending journal events before cache replacement. Journal updates retry GitHub Contents API SHA conflicts with a stable event identifier to avoid duplicate replay after an uncertain response.
+
+GitHub JSON is a lightweight, low-volume persistence option, **not a transactional database**. Writes still depend on GitHub API availability and repository limits; retries reduce but do not eliminate multi-instance contention. Keep the Render service at one instance unless the storage strategy is deliberately upgraded and concurrency-tested. Back up the private data repository. Do not use this store for high-volume payment processing.
+
+## Local quality checks
+
+Run from the repository root:
+
+    node --check backend/server.js
+    node --check backend/json-db.js
+    node --check backend/github-json-store.js
+    node --check backend/security-utils.js
+    npm --prefix backend test
+    node tools/validate-static.mjs
+
+The GitHub Actions quality gate runs backend syntax checks, built-in Node tests and static deployment/PWA validation on the implementation branch, main and pull requests to main.
+
+## Deployment
+
+### Render API
+1. Connect this repository and deploy the backend/ service using Node.
+2. Set the variables above in the Render service environment.
+3. Ensure GITHUB_DATA_TOKEN can access only the private data repository with Contents read/write permissions.
+4. Set ALLOWED_ORIGINS to the exact deployed frontend origins.
+5. Verify the root health text and then test signup, login, session restoration, lands, soil recommendations, feedback and developer authentication.
+
+### Netlify sites
+Create separate Netlify sites from this repository with these base directories and publish directories:
+
+| Site | Base directory | Publish directory |
 |---|---|---|
-| `frontend/` | Farmer-facing Org Portal — soil test, chat, AgroPedia, AgroShop | Netlify (`agroscan-org`) |
-| `backend/` | Node.js/Express + MySQL API, AgroAI, rule engine | Render |
-| `devend/` | Internal developer/admin panel — dashboards, logs, DB tools | Netlify (`agroscan-dev`) |
-| `repoend/` | Public updates/release site — app download, contributors, stats | Netlify (`agroscan-lumitech`) |
-| `dataend/` | **New.** The database schema, separated from the backend code | Aiven (MySQL) |
+| Farmer-facing app | frontend | . |
+| Developer dashboard | devend | . |
+| Project updates | repoend | . |
 
-`dataend` is the one genuinely new piece — previously the schema lived mixed
-in with a local MySQL data directory and TLS private keys. It's now its own
-folder holding just the portable schema file, with nothing secret in it.
+Use the included netlify.toml file in each folder. Confirm the custom domains above are attached to the appropriate site. The media.v1 canonical host is for repoend/; it must not canonicalize to the farmer-facing v1 site.
 
-## What was actually changed vs. your original project
+### PWA and caching
+The farmer app and developer dashboard have independent manifests, icons, service workers and offline pages. Service workers cache only selected public assets. API responses, account/profile data and developer dashboard pages are deliberately not cached. Service workers and manifests should be served over HTTPS; the service worker script is configured for revalidation.
 
-Everything below is a fix or a deployment-readiness change — no renaming, no
-restructuring, no rewritten logic beyond what's listed:
+### Security notes
+- Developer routes require a bearer token. Developer account read/update/password routes are restricted to the account represented by that token.
+- UIC developer authentication also requires the developer account password.
+- Image uploads are checked against file signatures, not only the request MIME header.
+- User-specific API routes enforce token ownership; recommendations can only save to the authenticated user and an owned land record.
+- Feedback input is bounded and rate-limited.
+- Passwords are stored with bcrypt. Legacy plain-text accounts can still authenticate once so the server can migrate them to bcrypt at successful login; migrate remaining accounts and remove the fallback when that migration is complete.
+- Client-side page guards and noindex are not a substitute for server-side access control. Do not publish secrets in any static dashboard file.
+- Checkout order input is validated, but production payments require server-side product pricing and a payment-provider verification/webhook flow. Do not treat client-supplied order prices as a trusted paid transaction.
 
-1. **`backend/server.js`** — added `port` and `ssl` options to the MySQL
-   pool (Aiven needs a non-default port and `ssl-mode=REQUIRED`; the
-   original pool config had neither, so it would only ever have worked
-   against a local unencrypted MySQL on port 3306). Added your real
-   deployment domains to `ALLOWED_ORIGINS`.
-2. **`backend/.env`** removed from the package entirely — replaced with
-   `backend/.env.example` (placeholders only). Your real `.env` had live
-   database and Perplexity credentials in it; it should never travel inside
-   a shared zip. Recreate it locally or paste the values into Render's
-   Environment tab directly.
-3. **`devend/private-desk/restricted-entry-only/`** — this was the most
-   serious issue found. `script.js` hardcoded a real owner login, a real
-   personal login, and **three live OpenAI API keys**, all gated only by a
-   client-side `prompt()` — visible to anyone who opened the file. Fixed to:
-   - Reuse the same Bearer-token session (`config.js` → `DEV_CONFIG`) that
-     the rest of DevEnd already implements properly, instead of its own
-     separate, weaker prompt-based check.
-   - Show provider **configuration status** only (which env var is set),
-     never the actual key value. Real keys now live only in the backend's
-     `.env` / Render environment — which the browser can never read.
-4. **`frontend/config.js`, `devend/config.js`**, and every page that
-   hardcoded `http://localhost:3000` directly — updated to point at
-   `https://agroscan-backend.onrender.com` as a placeholder. **Swap this for
-   your actual Render URL** once the backend is deployed (search-and-replace
-   that one string across the project, or better, edit only the two
-   `config.js` files and route every page through `AGRO.api(...)` /
-   `DEV_CONFIG.api(...)` over time instead of hardcoding it per-page).
+## Release policy
 
-5. **Case-sensitive path bugs (the "images not loading in production" issue)**
-   — found and fixed 3 real bugs: `frontend/index.html` referenced
-   `img/Sudhanshu.jpg` (capital S) while the actual file is `sudhanshu.jpg`;
-   `management.repostat/repo.html` had the same for `Abhiraj.jpg` and
-   `Sudhanshu.jpg`. **This is why it worked locally and broke on Netlify** —
-   Windows and macOS filesystems ignore case, but Netlify serves from a
-   case-sensitive Linux filesystem, so `Sudhanshu.jpg` simply doesn't match
-   a file named `sudhanshu.jpg` once deployed.
-6. **Broken relative paths** in `management.repostat/contributors.html` —
-   it referenced `img/...` and `./css.files/...` as if those folders were
-   inside `management.repostat/`, but they actually live one level up in
-   `frontend/img/` and `frontend/css.files/`. Fixed to `../img/...` and
-   `../css.files/...` (with `agro-home.jpg`, which genuinely does have a
-   local copy in that folder, fixed to reference it directly).
-7. **Renamed `img/dj sir.jpg` → `img/dj-sir.jpg`** (and updated every
-   reference). A literal space in a filename usually still works over HTTP
-   because browsers auto-encode it, but it's a common breakage point across
-   git/CI pipelines and worth removing rather than relying on that.
-8. **Added `netlify.toml`** to `frontend/`, `devend/` and `repoend/`, and a
-   root `.gitignore` — see the GitHub → Netlify section below.
-
-## Deploying via GitHub (recommended over drag-and-drop for ongoing changes)
-
-This repo is a **monorepo** — three separate static sites
-(`frontend`, `devend`, `repoend`) plus a Node backend, all in one repo.
-Netlify needs to be told which subfolder is which site's root, or it will
-try to publish the whole repo and every relative path will break.
-
-1. Push this whole `Luminary Agroscan/` folder to a GitHub repo (the
-   `.gitignore` already excludes `node_modules/`, real `.env` files, and
-   the local DB/TLS files that should never leave your machine).
-2. On Netlify, create **three separate sites** from the **same** GitHub repo:
-   - Site 1 → Base directory `frontend` (this becomes `agroscan-org`)
-   - Site 2 → Base directory `devend` (this becomes `agroscan-dev`)
-   - Site 3 → Base directory `repoend` (this becomes `agroscan-lumitech`)
-   Each folder already has its own `netlify.toml` setting `base` and
-   `publish` — when Netlify asks for a build command, leave it blank (these
-   are static, no build step needed).
-3. Every future `git push` to the connected branch auto-redeploys all three
-   sites independently — no more manual drag-and-drop.
-
-
-
-1. **`dataend/`** → Aiven. Import `agroscan_setup.sql`. See `dataend/README.md`.
-2. **`backend/`** → Render. Set env vars from `backend/.env.example` (with
-   your real Aiven host/port/password/CA cert and Perplexity key) in Render's
-   dashboard — don't upload a real `.env` file.
-3. Copy the live Render URL, e.g. `https://agroscan-backend-xyz.onrender.com`,
-   into `frontend/config.js` and `devend/config.js` (`BACKEND_URL`), and into
-   any page still using a hardcoded URL directly.
-4. **`frontend/`**, **`devend/`**, **`repoend/`** → three separate Netlify
-   sites (drag-and-drop each folder in Netlify's manual deploy, same as
-   before).
-
-## Still worth doing yourself
-
-- Rotate the Aiven database password and the three OpenAI keys that were
-  exposed — do this regardless of anything above, since they've already
-  been seen outside this project.
-- The other `devend/private-desk/*.html` pages don't yet call
-  `DEV_CONFIG.requireAuth()` on load either — `restricted-entry-only` was
-  fixed because it had exposed secrets, but the same one-line auth guard is
-  worth adding to `dashboard.html`, `database.html`, `logs.html`,
-  `control-panel.html`, `order.html`, and `settings.html` too, so the whole
-  panel is consistently gated, not just the page that had the leak.
+Keep related fixes together. The intended release is one consolidated commit and one pull request to main, after checks have completed. Do not deploy an incomplete branch.

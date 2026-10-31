@@ -1,92 +1,85 @@
-  // ============================
-  // Globals
-  // ============================
-  const user = JSON.parse(sessionStorage.getItem('user')) || null;
-  const userId = user?.userId || user?.user_id;
-  const defaultProfile = 'img/profile-logo.jpg'; // fallback image
+(() => {
+  "use strict";
+  const DEFAULT_PROFILE = "img/profile-logo.jpg";
 
-  // -----------------------------
-  // Side Panel Toggle
-  // -----------------------------
-  function toggleSidePanel() {
-    document.querySelector('.side-panel').classList.toggle('open');
+  function safeImageUrl(value) {
+    if (typeof value !== "string" || !value.trim()) return DEFAULT_PROFILE;
+    try {
+      const url = new URL(value, window.AGRO?.BACKEND_URL || window.location.origin);
+      return ["http:", "https:"].includes(url.protocol) ? url.href : DEFAULT_PROFILE;
+    } catch { return DEFAULT_PROFILE; }
   }
 
-  /* Accordion submenu for side panel */
-  document.addEventListener('DOMContentLoaded', () => {
-    const toggles = document.querySelectorAll('.side-toggle');
-    toggles.forEach(toggle => {
-      toggle.addEventListener('click', function(){
-        const submenu = this.nextElementSibling;
+  function renderUserInfo(user) {
+    const fullName = user?.name || "Guest User";
+    const username = user?.username ? "@" + user.username : "@guest";
+    const profileImg = safeImageUrl(user?.profileUrl || user?.profile);
+    const fullNameNode = document.getElementById("full-name");
+    const usernameNode = document.getElementById("username-display");
+    if (fullNameNode) fullNameNode.textContent = fullName;
+    if (usernameNode) usernameNode.textContent = username;
 
-        // Close other submenus
-        document.querySelectorAll('.side-submenu').forEach(sm => {
-          if(sm !== submenu){
-            sm.style.maxHeight = null;
-          }
-        });
-
-        // Toggle current submenu
-        if(submenu.style.maxHeight){
-          submenu.style.maxHeight = null;
-        } else {
-          submenu.style.maxHeight = submenu.scrollHeight + "px";
-        }
-      });
+    ["logoutLink", "logoutLinkMobile"].forEach(id => {
+      const link = document.getElementById(id);
+      if (link) link.style.display = user ? "block" : "none";
     });
-  });
 
-  // ============================
-  // Populate Header & Side Panel
-  // ============================
-  function populateHeaderSide(u) {
-    const fullName = u?.name || 'Guest User';
-    const username = u?.username ? `@${u.username}` : '@guest';
-    const profileImg = u?.profileUrl || defaultProfile;
+    const panel = document.querySelector(".panel-user-info");
+    if (panel) {
+      const image = document.createElement("img");
+      image.src = profileImg;
+      image.alt = "Profile";
+      image.className = "profile-logo-slide";
+      image.addEventListener("error", () => { image.src = DEFAULT_PROFILE; }, { once: true });
+      const name = document.createElement("p");
+      const nameLabel = document.createElement("strong");
+      nameLabel.textContent = "Name: ";
+      name.append(nameLabel, document.createTextNode(fullName));
+      const handle = document.createElement("p");
+      const handleLabel = document.createElement("strong");
+      handleLabel.textContent = "Username: ";
+      handle.append(handleLabel, document.createTextNode(username));
+      panel.replaceChildren(image, name, handle);
+    }
 
-    document.getElementById('full-name').innerText = fullName;
-    document.getElementById('username-display').innerText = username;
-    document.getElementById('logoutLink').style.display = u ? 'block' : 'none';
-    document.getElementById('logoutLinkMobile').style.display = u ? 'block' : 'none';
-
-    document.querySelector('.panel-user-info').innerHTML = `
-      <img src="${profileImg}" onerror="this.src='${defaultProfile}'" class="profile-logo-slide" alt="Profile">
-      <p><strong>Name:</strong> ${fullName}</p>
-      <p><strong>Username:</strong> ${username}</p>
-    `;
-
-    const profileDropdownImg = document.querySelector('.profile-area img');
-    if(profileDropdownImg){
-      profileDropdownImg.src = profileImg;
-      profileDropdownImg.onerror = function(){ this.src = defaultProfile; }
+    const dropdownImage = document.querySelector(".profile-area img");
+    if (dropdownImage) {
+      dropdownImage.src = profileImg;
+      dropdownImage.alt = "Profile";
+      dropdownImage.addEventListener("error", () => { dropdownImage.src = DEFAULT_PROFILE; }, { once: true });
     }
   }
 
-    
-// ============================
-// Logout
-// ============================
-function deleteCookie(name) {
-  document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-}
+  window.populateHeaderSide = renderUserInfo;
+  window.showUserInfo = renderUserInfo;
+  window.toggleSidePanel = function () {
+    document.querySelector(".side-panel")?.classList.toggle("open");
+  };
 
-document.querySelectorAll('#logoutLink, #logoutLinkMobile').forEach(link => {
-  link.addEventListener('click', function(e) {
-    e.preventDefault();
-    
-    // Clear sessionStorage
-    sessionStorage.removeItem('user');
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".side-toggle").forEach(toggle => {
+      toggle.addEventListener("click", () => {
+        const submenu = toggle.nextElementSibling;
+        if (!submenu) return;
+        document.querySelectorAll(".side-submenu").forEach(item => {
+          if (item !== submenu) item.style.maxHeight = "";
+        });
+        submenu.style.maxHeight = submenu.style.maxHeight ? "" : submenu.scrollHeight + "px";
+      });
+    });
 
-    // Clear cookie
-    deleteCookie('user');
-
-    // Optional: clear user info UI
-    showUserInfo(null);
-
-    alert("Logged out successfully");
-    window.location.href = "index.html"; // redirect to login page
+    document.querySelectorAll("#logoutLink, #logoutLinkMobile").forEach(link => {
+      link.addEventListener("click", async event => {
+        event.preventDefault();
+        const backend = window.AGRO?.BACKEND_URL;
+        sessionStorage.removeItem("user");
+        sessionStorage.removeItem("userId");
+        if (backend) {
+          try { await fetch(backend + "/api/logout", { method: "POST", credentials: "include" }); }
+          catch (error) { console.warn("AgroScan logout request failed:", error); }
+        }
+        window.location.href = "/index.html";
+      });
+    });
   });
-});
-
-
-
+})();

@@ -1,8 +1,10 @@
-# Netlify config for the REPOEND site (agroscan-lumitech)
-# When connecting this repo on Netlify: New site from Git -> set
-# "Base directory" to  repoend  (this matters in a monorepo -- without
-# it Netlify tries to publish the whole repo root, and every relative
-# path breaks).
+# Public AgroScan project / updates Netlify site
 [build]
   base = "repoend"
   publish = "."
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"

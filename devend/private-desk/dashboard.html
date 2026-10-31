@@ -245,6 +245,12 @@ header .header-text {
     background-color:#8b780d;
 }
 </style>
+<meta name="robots" content="noindex,nofollow">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#ffd700">
+<script src="../pwa-register.js" defer></script>
+<script src="../config.js"></script>
+<script>window.DEV_CONFIG?.requireAuth("../login-form.html");</script>
 </head>
 <body>
 
@@ -316,16 +322,15 @@ header .header-text {
 </div>
 
 <script>
+(() => {
 // ---------------- Session Check ----------------
-const devUser = JSON.parse(sessionStorage.getItem('devUser'));
-if(!devUser){
-  window.location.href = '../login-form.html';
-} else {
+const devUser = DEV_CONFIG.requireAuth("../login-form.html");
+if (!devUser) return;
   document.getElementById('dev-name').textContent = devUser.name || devUser.email;
   document.getElementById('dev-id').textContent = devUser.id;
   document.getElementById('profile-name').textContent = devUser.name || devUser.email;
   document.getElementById('profile-id').textContent = "ID: " + devUser.id;
-}
+
 
 // ---------------- Hamburger Toggle ----------------
 const hamburger = document.querySelector('.hamburger');
@@ -342,10 +347,10 @@ document.getElementById('profile-link').addEventListener('click', ()=>{
 // ---------------- Logout ----------------
 document.getElementById('logout-btn').addEventListener('click', e=>{
   e.preventDefault();
-  sessionStorage.clear();
-  window.location.href = '../login-form.html';
+  DEV_CONFIG.logout();
 });
 
+})();
 </script>
 
 </body>

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://v1.agroscan.dpdns.org/sitemap.xml

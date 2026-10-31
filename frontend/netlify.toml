@@ -1,8 +1,22 @@
-# Netlify config for the FRONTEND site (agroscan-org)
-# When connecting this repo on Netlify: New site from Git -> set
-# "Base directory" to  frontend  (this matters in a monorepo -- without
-# it Netlify tries to publish the whole repo root, and every relative
-# path breaks).
+# Farmer-facing AgroScan Netlify site
 [build]
   base = "frontend"
   publish = "."
+
+[[headers]]
+  for = "/service-worker.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+    Service-Worker-Allowed = "/"
+
+[[headers]]
+  for = "/manifest.webmanifest"
+  [headers.values]
+    Cache-Control = "no-cache"
+    Content-Type = "application/manifest+json"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
