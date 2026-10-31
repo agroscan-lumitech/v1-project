@@ -238,6 +238,7 @@ header .header-text {
 }
 
 </style>
+<meta name="robots" content="noindex,nofollow"><link rel="manifest" href="../manifest.webmanifest"><meta name="theme-color" content="#ffd700"><script src="../pwa-register.js" defer></script><script src="../config.js"></script><script>window.DEV_CONFIG?.requireAuth("../login-form.html");</script>
 </head>
 <body>
 
@@ -284,15 +285,12 @@ header .header-text {
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   // ---------------- Session Check ----------------
-  const devUser = JSON.parse(sessionStorage.getItem('devUser'));
-  if(!devUser){
-    window.location.href = '../login-form.html';
-  } else {
-    const profileNameElem = document.getElementById('profile-name');
-    const profileIdElem = document.getElementById('profile-id');
-    if(profileNameElem) profileNameElem.textContent = devUser.name || devUser.email;
-    if(profileIdElem) profileIdElem.textContent = "ID: " + devUser.id;
-  }
+  const devUser = DEV_CONFIG.requireAuth("../login-form.html");
+  if (!devUser) return;
+  const profileNameElem = document.getElementById("profile-name");
+  const profileIdElem = document.getElementById("profile-id");
+  if (profileNameElem) profileNameElem.textContent = devUser.name || devUser.email;
+  if (profileIdElem) profileIdElem.textContent = "ID: " + devUser.id;
 
   // ---------------- Hamburger Toggle ----------------
   const hamburger = document.querySelector('.hamburger');
@@ -307,8 +305,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const logoutBtn = document.getElementById('logout-btn');
   if(logoutBtn) logoutBtn.addEventListener('click', e=>{
     e.preventDefault();
-    sessionStorage.clear();
-    window.location.href = '../login-form.html';
+    DEV_CONFIG.logout();
   });
 
   // ---------------- SQL Execution ----------------
@@ -322,7 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
     sqlOutputElem.textContent = "Running query...";
 
     try {
-      const response = await fetch('https://agroscan-backend.onrender.com/api/sql-run', {
+      const response = await DEV_CONFIG.authFetch('/api/sql-run', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sql: sqlCommand })
@@ -347,8 +344,21 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ---------------- Event Listeners ----------------
-  const runBtn = document.getElementById('run-sql');
-  if(runBtn) runBtn.addEventListener('click', runSQL);
+  const runBtn = document.getElementById("run-sql");
+  const sqlInputElem = document.getElementById("sql-input");
+  const sqlOutputElem = document.getElementById("sql-output");
+  if (runBtn) {
+    runBtn.disabled = true;
+    runBtn.textContent = "SQL disabled for GitHub JSON";
+    runBtn.title = "The active GitHub JSON document store does not execute SQL.";
+  }
+  if (sqlInputElem) {
+    sqlInputElem.disabled = true;
+    sqlInputElem.placeholder = "SQL commands are not supported by the GitHub JSON store.";
+  }
+  if (sqlOutputElem) {
+    sqlOutputElem.textContent = "SQL execution is disabled because AgroScan uses GitHub JSON storage. Use the read-only Database page to inspect permitted data.";
+  }
 
   const sqlInput = document.getElementById('sql-input');
   if(sqlInput){

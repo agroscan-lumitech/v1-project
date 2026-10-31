@@ -77,6 +77,20 @@ export async function readCollection(name, { force = false } = {}) {
   const file = await readFile("data/" + name + ".json");
   const doc = file ? JSON.parse(file.text) : emptyCollection(name);
   if (!Array.isArray(doc.records)) throw new Error("Invalid collection document: " + name);
+
+  // Replay the durable journal before replacing cache state. Forced refreshes
+  // (including health checks and transaction reads) must not hide accepted
+  // writes that have not reached the periodic collection checkpoint yet.
+  const journal = await readFile(journalPath);
+  if (journal?.text.trim()) {
+    const journalDocument = JSON.parse(journal.text);
+    if (!Array.isArray(journalDocument.events)) throw new Error("Invalid mutation journal document");
+    for (const event of journalDocument.events) {
+      for (const operation of event.operations || []) {
+        if (operation.collection === name) applyOperation(doc, operation);
+      }
+    }
+  }
   cache.set(name, doc);
   cacheLoadedAt.set(name, Date.now());
   return doc;
@@ -110,9 +124,6 @@ export async function appendMutations(operations) {
     if (op.action === "upsert" && (!op.record || typeof op.record !== "object")) throw new Error("Record is required for upsert");
   }
   return serializeWrite(async () => {
-    const journal = await readFile(journalPath);
-    const document = journal?.text.trim() ? JSON.parse(journal.text) : { schemaVersion: 1, events: [] };
-    if (!Array.isArray(document.events)) throw new Error("Invalid mutation journal document");
     const event = {
       eventId: crypto.randomUUID(),
       operations: operations.map(op => ({
@@ -121,8 +132,33 @@ export async function appendMutations(operations) {
       })),
       createdAt: new Date().toISOString()
     };
-    document.events.push(event);
-    await writeFile(journalPath, JSON.stringify(document, null, 2) + "\n", "Journal AgroScan data mutation", journal?.sha);
+
+    // The local promise queue prevents same-process collisions. A short
+    // read/retry loop also handles Contents API SHA conflicts from another
+    // Render instance or an overlapping writer. The stable eventId prevents
+    // a retry from appending the same mutation twice after an uncertain reply.
+    let persisted = false;
+    for (let attempt = 0; attempt < 4 && !persisted; attempt++) {
+      const journal = await readFile(journalPath);
+      const document = journal?.text.trim() ? JSON.parse(journal.text) : { schemaVersion: 1, events: [] };
+      if (!Array.isArray(document.events)) throw new Error("Invalid mutation journal document");
+      if (document.events.some(item => item.eventId === event.eventId)) {
+        persisted = true;
+        break;
+      }
+      document.events.push(event);
+      try {
+        await writeFile(journalPath, JSON.stringify(document, null, 2) + "\n", "Journal AgroScan data mutation", journal?.sha);
+        persisted = true;
+      } catch (error) {
+        const status = error.response?.status;
+        const retryable = status === 409 || status === 422 || !error.response;
+        if (!retryable || attempt === 3) throw error;
+        await new Promise(resolve => setTimeout(resolve, 150 * (attempt + 1)));
+      }
+    }
+    if (!persisted) throw new Error("Mutation journal write could not be confirmed");
+
     for (const op of event.operations) {
       const doc = await readCollection(op.collection);
       applyOperation(doc, op);

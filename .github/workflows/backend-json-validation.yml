@@ -1,21 +1,48 @@
-name: Backend syntax validation
+name: AgroScan quality gate
+
 on:
   push:
     branches:
-      - feature/github-json-storage
+      - main
+      - fix/agroscan-platform-hardening
     paths:
       - "backend/**"
-      - ".github/workflows/backend-json-validation.yml"
+      - "frontend/**"
+      - "devend/**"
+      - "repoend/**"
+      - "tools/**"
+      - ".github/workflows/**"
+      - "README.md"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "backend/**"
+      - "frontend/**"
+      - "devend/**"
+      - "repoend/**"
+      - "tools/**"
+      - ".github/workflows/**"
+      - "README.md"
+
+permissions:
+  contents: read
+
 jobs:
-  syntax:
+  quality:
+    name: Syntax, unit and static checks
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: "24"
       - name: Check backend JavaScript syntax
         run: |
-          node --check backend/server.js
-          node --check backend/json-db.js
-          node --check backend/github-json-store.js
+          find backend -type f -name "*.js" -print0 | xargs -0 -n1 node --check
+      - name: Run backend unit tests
+        run: npm --prefix backend test
+      - name: Validate application metadata and configuration
+        run: node tools/validate-static.mjs

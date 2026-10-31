@@ -287,6 +287,14 @@ footer {
 </style>
 
   <script src="/config.js"></script>
+<meta name="description" content="Use AgroScan AI soil tools and recommendations.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#2e7d32">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/img/agroscan-icon.png">
+<link rel="stylesheet" href="/css.files/index.css">
+<script src="/pwa-register.js" defer></script>
+</head>
 <body>
 <!-- ================= Header ================= -->
 <header>
@@ -534,7 +542,7 @@ document.querySelectorAll('.top-btn').forEach(btn => {
 
 
 /* User info display */
-const user = JSON.parse(sessionStorage.getItem('user')) || null;
+const user = AGRO.getUser();
 // Extract userId correctly
 const userId = user?.userId;
 
@@ -542,44 +550,43 @@ if (!userId) {
   alert("No user found. Please login again.");
   window.location.href = "login-form.html";
 }
-function showUserInfo(user){
-  const fullName = user?.fullName || `${user?.name || 'Guest User'}`;
-  const username = user?.username ? `@${user.username}` : "@guest";
-  document.getElementById('full-name').innerText = fullName;
-  document.getElementById('username-display').innerText = username;
-  document.getElementById('logoutLink').style.display = user ? 'block' : 'none';
-  document.getElementById('logoutLinkMobile').style.display = user ? 'block' : 'none';
-  const panelInfo = document.querySelector('.panel-user-info');
-  panelInfo.innerHTML = `
-    <img src="img/profile-logo.jpg" class="profile-logo-slide" alt="Profile">
-    <p><strong>Name:</strong> ${fullName}</p>
-    <p><strong>Username:</strong> ${username}</p>
-  `;
-  document.getElementById('user-name-welcome').innerText = fullName;
+function showUserInfo(user) {
+  const fullName = String(user?.fullName || user?.name || "Guest User");
+  const username = user?.username ? "@" + String(user.username) : "@guest";
+  const fullNameEl = document.getElementById("full-name");
+  const usernameEl = document.getElementById("username-display");
+  const welcomeEl = document.getElementById("user-name-welcome");
+  const logoutLinks = document.querySelectorAll("#logoutLink, #logoutLinkMobile");
+  if (fullNameEl) fullNameEl.textContent = fullName;
+  if (usernameEl) usernameEl.textContent = username;
+  if (welcomeEl) welcomeEl.textContent = fullName;
+  logoutLinks.forEach(link => { link.style.display = user ? "block" : "none"; });
+  const panelInfo = document.querySelector(".panel-user-info");
+  if (panelInfo) {
+    const image = document.createElement("img");
+    image.src = "img/profile-logo.jpg";
+    image.alt = "Profile";
+    image.className = "profile-logo-slide";
+    const name = document.createElement("p");
+    const nameLabel = document.createElement("strong");
+    nameLabel.textContent = "Name: ";
+    name.append(nameLabel, document.createTextNode(fullName));
+    const handle = document.createElement("p");
+    const handleLabel = document.createElement("strong");
+    handleLabel.textContent = "Username: ";
+    handle.append(handleLabel, document.createTextNode(username));
+    panelInfo.replaceChildren(image, name, handle);
+  }
 }
 showUserInfo(user);
 
 /* Logout functionality */
 /* Logout functionality */
-function deleteCookie(name) {
-  document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-}
-
-document.querySelectorAll('#logoutLink, #logoutLinkMobile').forEach(link => {
-  link.addEventListener('click', function(e) {
-    e.preventDefault();
-    
-    // Clear sessionStorage
-    sessionStorage.removeItem('user');
-
-    // Clear cookie
-    deleteCookie('user');
-
-    // Optional: clear user info UI
-    showUserInfo(null);
-
-    alert("Logged out successfully");
-    window.location.href = "index.html"; // redirect to login page
+document.querySelectorAll("#logoutLink, #logoutLinkMobile").forEach(link => {
+  link.addEventListener("click", async event => {
+    event.preventDefault();
+    await AGRO.clearUser();
+    window.location.href = "index.html";
   });
 });
 

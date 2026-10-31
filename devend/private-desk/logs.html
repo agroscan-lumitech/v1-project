@@ -83,6 +83,12 @@ header {
   .profile-card h2{font-size:1.3rem;}
 }
 </style>
+<meta name="robots" content="noindex,nofollow">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#ffd700">
+<script src="../pwa-register.js" defer></script>
+<script src="../config.js"></script>
+<script>window.DEV_CONFIG?.requireAuth("../login-form.html");</script>
 </head>
 <body>
 
@@ -127,13 +133,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   async function fetchStats() {
     try {
-      const res = await fetch("https://agroscan-backend.onrender.com/api/server/stats");
+      const res = await DEV_CONFIG.authFetch("/api/server/stats");
       const data = await res.json();
 
       if (data.success) {
         const s = data.stats;
         statsContainer.textContent = `
-Uptime: ${Math.floor(s.uptimeSeconds)} sec
+Uptime: ${Math.floor(s.uptime)} sec
 Platform: ${s.platform} | Arch: ${s.arch} | Node: ${s.nodeVersion}
 
 Memory:
@@ -167,13 +173,11 @@ CPU:
 
 
 document.addEventListener("DOMContentLoaded", () => {
-  const devUser = JSON.parse(sessionStorage.getItem("devUser"));
-  if(!devUser){
-    window.location.href = "../login-form.html";
-  } else {
-    document.getElementById("profile-name").textContent = devUser.name || devUser.email;
+  const devUser = DEV_CONFIG.requireAuth("../login-form.html");
+  if (!devUser) return;
+  document.getElementById("profile-name").textContent = devUser.name || devUser.email;
     document.getElementById("profile-id").textContent = "ID: " + (devUser.id || "N/A");
-  }
+  
 
   // ✅ Sidebar toggle for mobile
   document.querySelector(".hamburger").addEventListener("click", ()=>{
@@ -183,8 +187,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Logout
   document.getElementById("logout-btn").addEventListener("click", e=>{
     e.preventDefault();
-    sessionStorage.clear();
-    window.location.href = "../login-form.html";
+    DEV_CONFIG.logout();
   });
 });
 </script>
