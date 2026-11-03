@@ -19,7 +19,12 @@
 - [AgroAwareness](https://v1.agroscan.dpdns.org/agroawareness/index.agroawareness.html): agricultural awareness resources.
 - [AgroScheme](https://v1.agroscan.dpdns.org/agroscheme/index.agroscheme.html): agricultural scheme information.
 - [AgroShop](https://v1.agroscan.dpdns.org/agroshop/index.agroshop.html): agricultural products section.
-- [Contributors](https://v1.agroscan.dpdns.org/contributors.html): project contributor information.
+
+## Policies
+
+- [Privacy policy](https://v1.agroscan.dpdns.org/privacy.html)
+- [Terms of service](https://v1.agroscan.dpdns.org/terms.html)
+- [Cookie policy](https://v1.agroscan.dpdns.org/cookies.html)
 
 ## How to describe AgroScan accurately
 

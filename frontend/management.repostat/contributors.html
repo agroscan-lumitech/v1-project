@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🌱 AgroScan — Contributors</title>
+<meta name="robots" content="noindex,nofollow">
 <link rel="icon" href="agro-home.jpg" type="image/png">
 <link rel="stylesheet" href="../css.files/header-footer.css">
 <style>
@@ -127,8 +128,6 @@
     <span class="modal-close" id="closeModal">&times;</span>
     <h3 id="modalName">Name</h3>
     <p><strong>Role:</strong> <span id="modalRole"></span></p>
-    <p><strong>Email:</strong> <span id="modalEmail"></span></p>
-    <p><strong>Phone:</strong> <span id="modalPhone"></span></p>
     <p><strong>Contributions:</strong> <span id="modalContributions"></span></p>
   </div>
 </div>
@@ -136,26 +135,26 @@
 <script>
 const contributors = {
   developers: [
-    { name:"Abhinav Ranjan", role:"Full stack developer", email:"abhinav@agroscan.dev", phone:"8294721929", contributions:"UI, Dashboard, AgroPedia,Database" },
-    { name:"Abhiraj Singh", role:"Full stack developer", email:"abhiraj@agroscan.dev", phone:"9939374795", contributions:"Devend, Backend" },
-     { name:"Sudhanshu Kumar", role:"Full stack Developer", email:"sudhanshu@agroscan.dev", phone:"9631777955", contributions:"Frontend , Web structure" }
+    { name:"Abhinav Ranjan", role:"Full stack developer", contributions:"UI, Dashboard, AgroPedia,Database" },
+    { name:"Abhiraj Singh", role:"Full stack developer", contributions:"Devend, Backend" },
+     { name:"Sudhanshu Kumar", role:"Full stack Developer", contributions:"Frontend , Web structure" }
       
     
 ],
   projectManagement: [
-    { name:"Julfekar Alam ", role:"Project Manager", email:"Julfekar@agroscan.dev", phone:"9661447747", contributions:"Planning, Coordination" },
-     { name:"Agastya Jha ", role:"Debuging", email:"Agastya@agroscan.dev", phone:"7808802145", contributions:"Planning, Coordination" },
-     { name:"Sarika Sharma ", role:"Debuging", email:"sarika@agroscan.dev", phone:"9955029533", contributions:"Planning, Coordination" }
+    { name:"Julfekar Alam ", role:"Project Manager", contributions:"Planning, Coordination" },
+     { name:"Agastya Jha ", role:"Debuging", contributions:"Planning, Coordination" },
+     { name:"Sarika Sharma ", role:"Debuging", contributions:"Planning, Coordination" }
   ],
   hardware: [
-    { name:"Julfekar Alam ", role:"Project Manager", email:"Julfekar@agroscan.dev", phone:"9661447747", contributions:"Planning, Coordination" },
-    { name:"Dipika prabha ", role:"Project Manager", email:"dipika@agroscan.dev", phone:"9661447747", contributions:"Planning, Coordination" },
-    { name:"Anshu priya ", role:"Project Manager", email:"anshupriya@agroscan.dev", phone:"9661447747", contributions:"Decoration" },
-     { name:"Abhinav ranjan ", role:"Project Manager", email:"anshupriya@agroscan.dev", phone:"9661447747", contributions:"Planing ,coordination" }
+    { name:"Julfekar Alam ", role:"Project Manager", contributions:"Planning, Coordination" },
+    { name:"Dipika prabha ", role:"Project Manager", contributions:"Planning, Coordination" },
+    { name:"Anshu priya ", role:"Project Manager", contributions:"Decoration" },
+     { name:"Abhinav ranjan ", role:"Project Manager", contributions:"Planing ,coordination" }
   ],
   data: [
-    { name:"Dhananjay sir", role:"project cordinator", email:"dhananjay@agro-scan.org", phone:"555666777", contributions:"cordination" },
-    { name:"Anand sir", role:"project cordinator", email:"anand@agro-scan.org", phone:"555666777", contributions:"cordination" }
+    { name:"Dhananjay sir", role:"project cordinator", contributions:"cordination" },
+    { name:"Anand sir", role:"project cordinator", contributions:"cordination" }
   ],
   others: [
    
@@ -165,11 +164,14 @@ const contributors = {
 function createCard(person){
   const card = document.createElement('div');
   card.className = 'contributor-card';
-  card.innerHTML = `
-    <img src="../img/profile-logo.jpg" alt="${person.name}">
-    <h3>${person.name}</h3>
-    <p>${person.role}</p>
-  `;
+  const image = document.createElement("img");
+  image.src = "../img/profile-logo.jpg";
+  image.alt = person.name;
+  const heading = document.createElement("h3");
+  heading.textContent = person.name;
+  const role = document.createElement("p");
+  role.textContent = person.role;
+  card.append(image, heading, role);
   card.addEventListener('click', () => showModal(person));
   return card;
 }
@@ -182,8 +184,6 @@ function renderSection(containerId, people){
 function showModal(person){
   document.getElementById('modalName').innerText = person.name;
   document.getElementById('modalRole').innerText = person.role;
-  document.getElementById('modalEmail').innerText = person.email;
-  document.getElementById('modalPhone').innerText = person.phone;
   document.getElementById('modalContributions').innerText = person.contributions;
   document.getElementById('contributorModal').style.display = 'flex';
 }

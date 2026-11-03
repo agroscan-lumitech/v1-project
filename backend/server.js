@@ -23,6 +23,7 @@ import bodyParser  from "body-parser";
 import cors        from "cors";
 import multer      from "multer";
 import { isAllowedImageUpload, parseBoundedNumber, validateOrderItems, sanitizeTextField } from "./security-utils.js";
+import { requireDevRole } from "./dev-auth.js";
 import { createJsonDb } from "./json-db.js";
 import bcrypt      from "bcrypt";
 import os          from "os";
@@ -69,6 +70,8 @@ app.use(cors({
 app.use(bodyParser.json({ limit: "1mb" }));
 app.use((req, res, next) => {
   res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
   res.setHeader("Permissions-Policy", "camera=(self), microphone=(self), geolocation=(self)");
   res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
@@ -205,13 +208,20 @@ async function requireDevToken(req, res, next) {
       [token]
     );
     if (!rows.length) return res.status(401).json({ error: "Invalid or expired dev token." });
+    const [accounts] = await db.query("SELECT id,role,is_active FROM devusers WHERE id=?", [rows[0].dev_id]);
+    if (!accounts.length || Number(accounts[0].is_active ?? 1) !== 1) {
+      return res.status(401).json({ error: "Developer account is inactive or unavailable." });
+    }
     req.devId = rows[0].dev_id;
+    req.devRole = String(accounts[0].role || "viewer").toLowerCase();
     next();
   } catch (err) {
     console.error("❌ Token verify error:", err);
     res.status(500).json({ error: "Auth check failed" });
   }
 }
+
+const requireDevAdmin = requireDevRole("superadmin", "admin");
 
 // ── DEV LOGIN LOGGER ────────────────────────────────────────
 async function logDevLogin({ devId, devEmail, devName, method, req, success, failReason=null }) {
@@ -254,13 +264,13 @@ app.get("/health/db", async (_, res) => {
 });
 
 // ── Server time (synced, dev-only) ──────────────────────────
-app.get("/api/server/time", requireDevToken, (_, res) => {
+app.get("/api/server/time", requireDevToken, requireDevAdmin, (_, res) => {
   const now = new Date();
   res.json({ success:true, iso:now.toISOString(), utc:now.toUTCString(), timestamp:now.getTime() });
 });
 
 // ── Server stats (dev-only) ─────────────────────────────────
-app.get("/api/server/stats", requireDevToken, (_, res) => {
+app.get("/api/server/stats", requireDevToken, requireDevAdmin, (_, res) => {
   const mem = process.memoryUsage();
   res.json({ success:true, stats:{
     memory:{ rss:mem.rss, heapUsed:mem.heapUsed, heapTotal:mem.heapTotal, totalMem:os.totalmem(), freeMem:os.freemem() },
@@ -587,7 +597,7 @@ app.post("/api/users/:userId/orders", async (req,res) => {
   finally { conn.release(); }
 });
 
-app.put("/api/orders/:orderId/status", requireDevToken, async (req,res) => {
+app.put("/api/orders/:orderId/status", requireDevToken, requireDevAdmin, async (req,res) => {
   const { status } = req.body;
   const valid = ["pending","processing","shipped","delivered","cancelled"];
   if (!valid.includes(status)) return res.status(400).json({ error:"Invalid status" });
@@ -598,7 +608,7 @@ app.put("/api/orders/:orderId/status", requireDevToken, async (req,res) => {
   } catch(e) { res.status(500).json({ error:"Failed to update order" }); }
 });
 
-app.get("/api/orders", requireDevToken, async (req,res) => {
+app.get("/api/orders", requireDevToken, requireDevAdmin, async (req,res) => {
   const limit  = Math.min(100, Math.max(1, Number.parseInt(req.query.limit, 10) || 50));
   const offset = Math.min(1000000, Math.max(0, Number.parseInt(req.query.offset, 10) || 0));
   try {
@@ -758,7 +768,7 @@ app.get("/api/controls/:function_name", async (req,res) => {
   } catch(e) { res.status(500).json({ error:"Failed" }); }
 });
 
-app.post("/api/controls", requireDevToken, async (req,res) => {
+app.post("/api/controls", requireDevToken, requireDevAdmin, async (req,res) => {
   const { function_name, value, description } = req.body;
   if (!function_name||value===undefined) return res.status(400).json({ error:"function_name and value required" });
   try {
@@ -770,7 +780,7 @@ app.post("/api/controls", requireDevToken, async (req,res) => {
   }
 });
 
-app.put("/api/controls/:function_name", requireDevToken, async (req,res) => {
+app.put("/api/controls/:function_name", requireDevToken, requireDevAdmin, async (req,res) => {
   const { value } = req.body;
   if (value===undefined) return res.status(400).json({ error:"Value required" });
   try {
@@ -780,7 +790,7 @@ app.put("/api/controls/:function_name", requireDevToken, async (req,res) => {
   } catch(e) { res.status(500).json({ error:"Failed" }); }
 });
 
-app.delete("/api/controls/:function_name", requireDevToken, async (req,res) => {
+app.delete("/api/controls/:function_name", requireDevToken, requireDevAdmin, async (req,res) => {
   try {
     const [r] = await db.query("DELETE FROM controls WHERE function_name=?", [req.params.function_name]);
     if (!r.affectedRows) return res.status(404).json({ error:"Control not found" });
@@ -900,7 +910,7 @@ app.put("/api/devusers/:id/change-password", requireDevToken, requireDevAccount,
 // DEV LOGIN LOGS
 // ══════════════════════════════════════════════════════════════
 
-app.get("/api/dev/login-logs", requireDevToken, async (req,res) => {
+app.get("/api/dev/login-logs", requireDevToken, requireDevAdmin, async (req,res) => {
   const limit  = Math.min(100, Math.max(1, Number.parseInt(req.query.limit, 10) || 50));
   const offset = Math.min(1000000, Math.max(0, Number.parseInt(req.query.offset, 10) || 0));
   try {
@@ -918,7 +928,7 @@ app.get("/api/dev/login-logs", requireDevToken, async (req,res) => {
 // ══════════════════════════════════════════════════════════════
 
 // GET all tables + preview (strips sensitive columns)
-app.get("/api/dev/tables", requireDevToken, async (_,res) => {
+app.get("/api/dev/tables", requireDevToken, requireDevAdmin, async (_,res) => {
   const HIDDEN = ["password","uic","token","profile","profile_type","email","phone","street","city","state","zip","country"];
   try {
     const [tables] = await db.query("SHOW TABLES");
@@ -968,7 +978,7 @@ app.post("/api/feedback", rateLimit(3, 60000), optionalUserToken, async (req,res
   } catch(e) { res.status(500).json({ error:"Failed to submit feedback" }); }
 });
 
-app.get("/api/feedback", requireDevToken, async (req,res) => {
+app.get("/api/feedback", requireDevToken, requireDevAdmin, async (req,res) => {
   try {
     const [rows] = await db.query("SELECT * FROM feedback ORDER BY created_at DESC LIMIT 100");
     res.json({ success:true, feedback:rows });

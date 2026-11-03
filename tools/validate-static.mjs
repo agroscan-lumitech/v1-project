@@ -14,6 +14,8 @@ const requiredFiles = [
   "frontend/manifest.webmanifest", "frontend/service-worker.js", "frontend/pwa-register.js",
   "frontend/offline.html", "frontend/agroscan-pwa.svg", "frontend/robots.txt", "frontend/sitemap.xml",
   "frontend/llms.txt", "frontend/about.html", "frontend/faq.html",
+  "frontend/privacy.html", "frontend/terms.html", "frontend/cookies.html",
+  "backend/dev-auth.js", "backend/test/dev-auth.test.js",
   "devend/manifest.webmanifest", "devend/service-worker.js", "devend/pwa-register.js",
   "devend/offline.html", "devend/agrodev-pwa.svg", "devend/robots.txt",
   "repoend/robots.txt", "repoend/sitemap.xml", "repoend/llms.txt",
@@ -27,6 +29,9 @@ check(read("devend/config.js").includes('BACKEND_URL: "https://backend.v1.agrosc
 check(!read("devend/login-form.html").includes("agroscan-backend.onrender.com"), "Developer login still uses the retired Render hostname.");
 check(read("devend/login-form.html").includes("DEV_CONFIG.setSession(data.user, data.token)"), "Developer login must persist its bearer token.");
 check(read("backend/server.js").includes("requireDevAccount"), "Developer account ownership middleware is missing.");
+check(read("backend/server.js").includes("requireDevRole"), "Developer role authorization middleware is missing.");
+check(read("backend/server.js").includes("INNER JOIN devusers") && read("backend/server.js").includes("d.is_active=1"), "Developer tokens must be rejected for inactive accounts.");
+check(read("backend/dev-auth.js").includes("Insufficient developer permissions"), "Developer role guard must deny insufficient roles.");
 check(read("backend/server.js").includes("validateUploadedImage"), "Image signature validation is not wired into uploads.");
 check(read("backend/github-json-store.js").includes("Replay the durable journal"), "Forced GitHub JSON reads must replay journal events.");
 check(read("backend/github-json-store.js").includes("eventId prevents"), "GitHub JSON journal conflict retry is missing.");
@@ -53,7 +58,8 @@ const publicFrontend = [
   "frontend/agropedia/factors-crop-production.html", "frontend/agropedia/fertilisers.html",
   "frontend/agropedia/index.agropedia.html", "frontend/agropedia/soilhealth.html",
   "frontend/agropedia/soiltypes.html", "frontend/agroscheme/index.agroscheme.html",
-  "frontend/agroshop/index.agroshop.html"
+  "frontend/agroshop/index.agroshop.html",
+  "frontend/privacy.html", "frontend/terms.html", "frontend/cookies.html"
 ];
 for (const file of publicFrontend) {
   if (!exists(file)) { errors.push("Missing public page: " + file); continue; }
@@ -66,7 +72,8 @@ for (const file of publicFrontend) {
 const privateFrontend = [
   "frontend/login-form.html", "frontend/signup-form.html", "frontend/profile.html",
   "frontend/home.html", "frontend/chat.html", "frontend/analytics.html", "frontend/soil-test.html",
-  "frontend/other.html", "frontend/donate.html", "frontend/contributors.html"
+  "frontend/other.html", "frontend/donate.html", "frontend/contributors.html",
+  "frontend/management.repostat/contributors.html"
 ];
 for (const file of privateFrontend) {
   check(read(file).includes('name="robots" content="noindex,nofollow"'), "Private or unreviewed page should be noindex: " + file);
@@ -118,9 +125,17 @@ for (const [sitemapFile, rootUrl, pageFiles] of sitemapChecks) {
 }
 check(!read("frontend/sitemap.xml").includes("donate.html"), "Incomplete donation page must not be in the frontend sitemap.");
 check(!read("frontend/sitemap.xml").includes("contributors.html"), "Unreviewed contributor page must not be in the frontend sitemap.");
+check(!read("frontend/management.repostat/contributors.html").includes("@agroscan.dev"), "Contributor page must not expose personal email addresses.");
+check(!read("frontend/management.repostat/contributors.html").includes("phone:"), "Contributor page must not embed personal phone numbers.");
+check(!read("frontend/management.repostat/contributors.html").includes("panelInfo.innerHTML"), "Contributor cards must use safe DOM construction.");
+check(!read("frontend/llms.txt").includes("contributors.html"), "LLM discovery must not list non-indexable contributor pages.");
+check(!read("repoend/llms.txt").includes("contributors.html"), "Project LLM discovery must not list non-indexable contributor pages.");
 check(!read("repoend/sitemap.xml").includes("stat.html"), "Legacy launch countdown must not be in the project sitemap.");
 check(!read("repoend/sitemap.xml").includes("contributors.html"), "Unreviewed contributor page must not be in the project sitemap.");
 
+for (const file of ["frontend/agroshop/script.js", "frontend/agroscheme/index.agroscheme.html", "frontend/agroawareness/index.agroawareness.html", "frontend/agropedia/index.agropedia.html"]) {
+  check(!read(file).includes("panelInfo.innerHTML"), "User profile values must be rendered with safe DOM APIs: " + file);
+}
 for (const file of [...publicFrontend, "repoend/index.html", "repoend/app.html"]) {
   const html = read(file);
   const marker = '<script type="application/ld+json">';
