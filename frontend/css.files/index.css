@@ -1,0 +1,16 @@
+/* Shared, additive responsive/accessibility baseline. Page-specific visual systems remain intact. */
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+*, *::before, *::after { min-width: 0; }
+img, video, canvas, svg { max-width: 100%; }
+input, select, textarea, button { font: inherit; max-width: 100%; }
+button, a, input, select, textarea { touch-action: manipulation; }
+:focus-visible { outline: 3px solid #ffb74d !important; outline-offset: 3px; }
+a { overflow-wrap: anywhere; }
+table { max-width: 100%; }
+@media (max-width: 600px) {
+  body { overflow-wrap: break-word; }
+  img { height: auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}

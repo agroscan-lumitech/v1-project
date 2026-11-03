@@ -22,6 +22,7 @@ import dotenv      from "dotenv";
 import bodyParser  from "body-parser";
 import cors        from "cors";
 import multer      from "multer";
+import { isAllowedImageUpload, parseBoundedNumber, validateOrderItems, sanitizeTextField } from "./security-utils.js";
 import { createJsonDb } from "./json-db.js";
 import bcrypt      from "bcrypt";
 import os          from "os";
@@ -36,11 +37,13 @@ import { askPerplexityChat }      from "./perplexity-chat-handler.js";
 dotenv.config();
 
 const app           = express();
+app.disable("x-powered-by");
+app.set("trust proxy", 1);
 const PORT          = process.env.PORT || 3000;
 const BCRYPT_ROUNDS = 10;
 
 // ── ALLOWED ORIGINS — add your frontend domain ─────────────
-const ALLOWED_ORIGINS = [
+const ALLOWED_ORIGINS = new Set([
   "https://agroscan-production.up.railway.app",
   "https://agroscan-org.netlify.app",
   "https://agroscan-dev.netlify.app",
@@ -51,18 +54,27 @@ const ALLOWED_ORIGINS = [
   "http://localhost:3000",
   "http://localhost:5500",
   "http://127.0.0.1:5500",
-  "http://127.0.0.1:3000"
-];
+  "http://127.0.0.1:3000",
+  ...(process.env.ALLOWED_ORIGINS || "").split(",").map(origin => origin.trim()).filter(Boolean)
+]);
 
 // ── MIDDLEWARE ──────────────────────────────────────────────
 app.use(cors({
   origin: (origin, cb) => {
-    if (!origin || ALLOWED_ORIGINS.includes(origin)) cb(null, true);
+    if (!origin || ALLOWED_ORIGINS.has(origin)) cb(null, true);
     else cb(new Error(`CORS blocked: ${origin}`));
   },
   credentials: true
 }));
-app.use(bodyParser.json({ limit: "2mb" }));
+app.use(bodyParser.json({ limit: "1mb" }));
+app.use((req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.setHeader("Permissions-Policy", "camera=(self), microphone=(self), geolocation=(self)");
+  res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+  if (req.path.startsWith("/api/")) res.setHeader("Cache-Control", "no-store");
+  next();
+});
 
 // Multer — 5 MB limit, images only
 const upload = multer({
@@ -75,6 +87,12 @@ const upload = multer({
   }
 });
 
+function validateUploadedImage(req, res, next) {
+  if (!req.file) return res.status(400).json({ error: "No image file uploaded" });
+  if (!isAllowedImageUpload(req.file)) return res.status(415).json({ error: "Image content does not match an allowed file type." });
+  next();
+}
+
 // ── RATE LIMITER (no extra package) ────────────────────────
 const rlStore = new Map();
 function rateLimit(max, windowMs) {
@@ -82,7 +100,10 @@ function rateLimit(max, windowMs) {
     const ip  = req.ip || "unknown";
     const now = Date.now();
     const rec = rlStore.get(ip);
-    if (!rec || now > rec.resetAt) { rlStore.set(ip, { count: 1, resetAt: now + windowMs }); return next(); }
+    if (!rec || now > rec.resetAt) {
+      if (rlStore.size > 10000) rlStore.clear();
+      rlStore.set(ip, { count: 1, resetAt: now + windowMs }); return next();
+    }
     rec.count++;
     if (rec.count > max) {
       return res.status(429).json({ error: `Too many requests. Retry in ${Math.ceil((rec.resetAt-now)/1000)}s` });
@@ -168,6 +189,11 @@ function requireUserOwnership(req, res, next) {
   next();
 }
 
+function requireDevAccount(req, res, next) {
+  if (String(req.params.id) !== String(req.devId)) return res.status(403).json({ error: "You can only access your own developer account." });
+  next();
+}
+
 async function requireDevToken(req, res, next) {
   const auth = req.headers["authorization"];
   if (!auth?.startsWith("Bearer "))
@@ -204,7 +230,7 @@ async function logDevLogin({ devId, devEmail, devName, method, req, success, fai
 async function verifyPassword(plain, stored) {
   if (stored.startsWith("$2b$") || stored.startsWith("$2a$"))
     return bcrypt.compare(plain, stored);
-  return plain === stored; // legacy plain-text fallback
+  return plain === stored; // Temporary legacy verification; successful login immediately migrates to bcrypt.
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -219,10 +245,7 @@ app.get("/health/db", async (_, res) => {
     const doc = await readCollection("users", { force: true });
     res.json({
       status: "ok",
-      database: "github-json",
-      repository: process.env.GITHUB_DATA_REPO || "secure-json-database",
-      cachedCollections: 11,
-      users: doc.records.length
+      database: "github-json"
     });
   } catch (e) {
     console.error("❌ JSON store health check failed:", e.response?.status || e.message);
@@ -358,14 +381,25 @@ app.post("/api/logout", (req,res) => {
 // ── SIGNUP — ✅ bcrypt ───────────────────────────────────────
 app.post("/api/signup", rateLimit(5,60000), async (req,res) => {
   const { name, username, email, phone, password } = req.body;
-  if (!name||!username||!email||!phone||!password)
-    return res.status(400).json({ error:"All fields required" });
-  if (password.length<8) return res.status(400).json({ error:"Password must be at least 8 characters" });
+  const safeName = sanitizeTextField(name, 80);
+  const safeUsername = sanitizeTextField(username, 32);
+  const safeEmail = sanitizeTextField(email, 254);
+  const safePhone = sanitizeTextField(phone, 20);
+  if (!safeName || !safeUsername || !safeEmail || !safePhone || typeof password !== "string")
+    return res.status(400).json({ error:"All fields are required." });
+  if (!/^[A-Za-z0-9_.-]{3,32}$/.test(safeUsername))
+    return res.status(400).json({ error:"Username must be 3–32 characters using letters, numbers, dots, underscores or hyphens." });
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(safeEmail))
+    return res.status(400).json({ error:"Enter a valid email address." });
+  if (!/^[+0-9() .-]{7,20}$/.test(safePhone))
+    return res.status(400).json({ error:"Enter a valid phone number." });
+  if (password.length < 8 || password.length > 128)
+    return res.status(400).json({ error:"Password must be 8–128 characters." });
   try {
     const hashed = await bcrypt.hash(password, BCRYPT_ROUNDS);
     const [result] = await db.query(
       "INSERT INTO users (name,username,email,phone,password) VALUES (?,?,?,?,?)",
-      [name,username,email,phone,hashed]
+      [safeName,safeUsername,safeEmail.toLowerCase(),safePhone,hashed]
     );
     res.status(201).json({ message:"Account created", userId:result.insertId });
   } catch(e) {
@@ -383,16 +417,16 @@ app.get("/api/users/:userId/profile", async (req,res) => {
   try {
     const [rows] = await db.query("SELECT profile, profile_type FROM users WHERE user_id=?", [req.params.userId]);
     if (!rows.length || !rows[0].profile) return res.status(404).json({ error:"No profile picture" });
-    const mimeType = rows[0].profile_type || "image/jpeg";
+    const allowedTypes = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
+    const mimeType = allowedTypes.has(rows[0].profile_type) ? rows[0].profile_type : "image/jpeg";
     res.setHeader("Content-Type", mimeType);
-    res.setHeader("Cache-Control", "public, max-age=3600");
+    res.setHeader("Cache-Control", "private, no-store");
     res.end(Buffer.from(rows[0].profile, "base64"));
   } catch(e) { res.status(500).json({ error:"Server error" }); }
 });
 
 // POST upload profile picture
-app.post("/api/users/:userId/profile", upload.single("profile"), async (req,res) => {
-  if (!req.file) return res.status(400).json({ error:"No image file uploaded" });
+app.post("/api/users/:userId/profile", upload.single("profile"), validateUploadedImage, async (req,res) => {
   try {
     const [result] = await db.query(
       "UPDATE users SET profile=?, profile_type=? WHERE user_id=?",
@@ -412,18 +446,17 @@ app.delete("/api/users/:userId/profile", async (req,res) => {
 });
 
 // Developer profile picture (devend)
-app.get("/api/devusers/:id/profile", requireDevToken, async (req,res) => {
+app.get("/api/devusers/:id/profile", requireDevToken, requireDevAccount, async (req,res) => {
   try {
     const [rows] = await db.query("SELECT profile FROM devusers WHERE id=?", [req.params.id]);
     if (!rows.length || !rows[0].profile) return res.status(404).json({ error:"No profile picture" });
     res.setHeader("Content-Type", "image/jpeg");
-    res.setHeader("Cache-Control", "public, max-age=3600");
+    res.setHeader("Cache-Control", "private, no-store");
     res.end(Buffer.from(rows[0].profile, "base64"));
   } catch(e) { res.status(500).json({ error:"Server error" }); }
 });
 
-app.post("/api/devusers/:id/profile", requireDevToken, upload.single("profile"), async (req,res) => {
-  if (!req.file) return res.status(400).json({ error:"No image uploaded" });
+app.post("/api/devusers/:id/profile", requireDevToken, requireDevAccount, upload.single("profile"), validateUploadedImage, async (req,res) => {
   try {
     await db.query("UPDATE devusers SET profile=? WHERE id=?", [req.file.buffer, req.params.id]);
     res.json({ success:true, profileUrl:`/api/devusers/${req.params.id}/profile` });
@@ -452,20 +485,25 @@ app.get("/api/users/:userId/lands/:landId", async (req,res) => {
 app.post("/api/users/:userId/lands", async (req,res) => {
   const { land_name,size,crop,soil_type,ph,moisture,temperature,light,other_info,street,city,state,zip,country } = req.body;
   
-  const parseNum = (val) => {
-    if (val === undefined || val === null || val === '') return null;
-    const n = parseFloat(val);
-    return isNaN(n) ? null : n;
+  const parseNum = (value, min = -1000000, max = 1000000) => {
+    if (value === undefined || value === null || value === "") return null;
+    const number = Number(value);
+    return Number.isFinite(number) && number >= min && number <= max ? number : null;
   };
   
-  const pSize = parseNum(size);
-  if (!land_name || pSize === null) return res.status(400).json({ error:"land_name and a valid numeric size are required" });
+  const safeLandName = sanitizeTextField(land_name, 100);
+  const pSize = parseNum(size, 0.0001, 1000000);
+  const pH = parseNum(ph, 0, 14);
+  const pMoisture = parseNum(moisture, 0, 100);
+  const pTemperature = parseNum(temperature, -50, 80);
+  if (!safeLandName || pSize === null || (ph != null && ph !== "" && pH === null) || (moisture != null && moisture !== "" && pMoisture === null) || (temperature != null && temperature !== "" && pTemperature === null))
+    return res.status(400).json({ error:"Provide a land name, positive size, pH from 0–14, moisture from 0–100 and a valid temperature." });
 
   try {
     const [r] = await db.query(
       `INSERT INTO lands (user_id,land_name,size,crop,soil_type,ph,moisture,temperature,light,other_info,street,city,state,zip,country)
        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-      [req.params.userId,land_name,pSize,crop||null,soil_type||null,parseNum(ph),parseNum(moisture),parseNum(temperature),light||null,other_info||null,street||null,city||null,state||null,zip||null,country||null]
+      [req.params.userId,safeLandName,pSize,sanitizeTextField(crop, 80),sanitizeTextField(soil_type, 80),pH,pMoisture,pTemperature,sanitizeTextField(light, 40),sanitizeTextField(other_info, 1000),sanitizeTextField(street, 150),sanitizeTextField(city, 80),sanitizeTextField(state, 80),sanitizeTextField(zip, 20),sanitizeTextField(country, 80)]
     );
     res.status(201).json({ id:r.insertId, message:"Land added" });
   } catch(e) {
@@ -477,21 +515,26 @@ app.post("/api/users/:userId/lands", async (req,res) => {
 app.put("/api/users/:userId/lands/:landId", async (req,res) => {
   const { land_name,size,crop,soil_type,ph,moisture,temperature,light,other_info,street,city,state,zip,country } = req.body;
   
-  const parseNum = (val) => {
-    if (val === undefined || val === null || val === '') return null;
-    const n = parseFloat(val);
-    return isNaN(n) ? null : n;
+  const parseNum = (value, min = -1000000, max = 1000000) => {
+    if (value === undefined || value === null || value === "") return null;
+    const number = Number(value);
+    return Number.isFinite(number) && number >= min && number <= max ? number : null;
   };
   
-  const pSize = parseNum(size);
-  if (!land_name || pSize === null) return res.status(400).json({ error:"land_name and a valid numeric size are required" });
+  const safeLandName = sanitizeTextField(land_name, 100);
+  const pSize = parseNum(size, 0.0001, 1000000);
+  const pH = parseNum(ph, 0, 14);
+  const pMoisture = parseNum(moisture, 0, 100);
+  const pTemperature = parseNum(temperature, -50, 80);
+  if (!safeLandName || pSize === null || (ph != null && ph !== "" && pH === null) || (moisture != null && moisture !== "" && pMoisture === null) || (temperature != null && temperature !== "" && pTemperature === null))
+    return res.status(400).json({ error:"Provide a land name, positive size, pH from 0–14, moisture from 0–100 and a valid temperature." });
 
   try {
     const [r] = await db.query(
       `UPDATE lands SET land_name=?,size=?,crop=?,soil_type=?,ph=?,moisture=?,temperature=?,light=?,
        other_info=?,street=?,city=?,state=?,zip=?,country=? WHERE user_id=? AND id=?`,
-      [land_name,pSize,crop||null,soil_type||null,parseNum(ph),parseNum(moisture),parseNum(temperature),light||null,
-       other_info||null,street||null,city||null,state||null,zip||null,country||null,req.params.userId,req.params.landId]
+      [safeLandName,pSize,sanitizeTextField(crop, 80),sanitizeTextField(soil_type, 80),pH,pMoisture,pTemperature,sanitizeTextField(light, 40),
+       sanitizeTextField(other_info, 1000),sanitizeTextField(street, 150),sanitizeTextField(city, 80),sanitizeTextField(state, 80),sanitizeTextField(zip, 20),sanitizeTextField(country, 80),req.params.userId,req.params.landId]
     );
     if (!r.affectedRows) return res.status(404).json({ error:"Land not found" });
     res.json({ message:"Land updated" });
@@ -522,20 +565,25 @@ app.get("/api/users/:userId/orders", async (req,res) => {
 
 app.post("/api/users/:userId/orders", async (req,res) => {
   const { items, address, payment_method, coupon_code, name, phone } = req.body;
-  if (!items?.length) return res.status(400).json({ error:"Order items required" });
+  const safeItems = validateOrderItems(items);
+  if (!safeItems) return res.status(400).json({ error:"Provide 1–20 valid items with a name, positive whole-number quantity, and non-negative price." });
+  const safeName = sanitizeTextField(name, 80);
+  const safePhone = sanitizeTextField(phone, 20);
+  const safeAddress = sanitizeTextField(address, 500);
+  if (!safeName || !safePhone) return res.status(400).json({ error:"Customer name and phone are required." });
   const conn = await db.getConnection();
   try {
     await conn.beginTransaction();
-    for (const item of items) {
+    for (const item of safeItems) {
       await conn.query(
         `INSERT INTO orders (user_id,customer_name,customer_phone,product_name,quantity,unit_price,item_total,address,payment_method,coupon_code)
          VALUES (?,?,?,?,?,?,?,?,?,?)`,
-        [req.params.userId,name,phone,item.name,item.qty,item.price,item.qty*item.price,address||null,payment_method||null,coupon_code||null]
+        [req.params.userId,safeName,safePhone,item.name,item.qty,item.price,item.qty*item.price,safeAddress,sanitizeTextField(payment_method, 40),sanitizeTextField(coupon_code, 40)]
       );
     }
     await conn.commit();
     res.status(201).json({ message:"Order placed successfully!" });
-  } catch(e) { await conn.rollback(); res.status(500).json({ error:"Failed to place order" }); }
+  } catch(e) { await conn.rollback(); console.error("Order creation failed:", e.message); res.status(500).json({ error:"Failed to place order" }); }
   finally { conn.release(); }
 });
 
@@ -551,8 +599,8 @@ app.put("/api/orders/:orderId/status", requireDevToken, async (req,res) => {
 });
 
 app.get("/api/orders", requireDevToken, async (req,res) => {
-  const limit  = parseInt(req.query.limit)  || 50;
-  const offset = parseInt(req.query.offset) || 0;
+  const limit  = Math.min(100, Math.max(1, Number.parseInt(req.query.limit, 10) || 50));
+  const offset = Math.min(1000000, Math.max(0, Number.parseInt(req.query.offset, 10) || 0));
   try {
     const [rows]  = await db.query("SELECT * FROM orders ORDER BY created_at DESC LIMIT ? OFFSET ?", [limit,offset]);
     const [total] = await db.query("SELECT COUNT(*) AS total FROM orders");
@@ -565,20 +613,27 @@ app.get("/api/orders", requireDevToken, async (req,res) => {
 // ══════════════════════════════════════════════════════════════
 
 // POST soil test — runs rule engine + AI, saves to history
-app.post("/recommend", async (req,res) => {
+app.post("/recommend", rateLimit(12, 60000), optionalUserToken, async (req,res) => {
   const { ph, moisture, temperature, location, desiredCrop, userId, landId } = req.body;
-  if (ph==null||moisture==null) return res.status(400).json({ error:"pH and moisture required" });
+  const checkedPh = parseBoundedNumber(ph, 0, 14);
+  const checkedMoisture = parseBoundedNumber(moisture, 0, 100);
+  const checkedTemperature = parseBoundedNumber(temperature, -50, 80, { optional: true });
+  if (checkedPh === null || checkedMoisture === null || (temperature !== undefined && temperature !== null && temperature !== "" && checkedTemperature === null)) return res.status(400).json({ error:"pH must be 0–14, moisture 0–100, and temperature a valid value." });
   try {
-    const ruleResult = ruleEngine(ph, moisture, temperature);
-    const aiResult   = await askPerplexityRecommend({ ph, moisture, temperature, location, desiredCrop });
+    if (userId && landId) {
+      const [ownedLand] = await db.query("SELECT id FROM lands WHERE user_id=? AND id=?", [req.userId, landId]);
+      if (!ownedLand.length) return res.status(403).json({ error: "The selected land does not belong to this account." });
+    }
+    const ruleResult = ruleEngine(checkedPh, checkedMoisture, checkedTemperature);
+    const aiResult   = await askPerplexityRecommend({ ph: checkedPh, moisture: checkedMoisture, temperature: checkedTemperature, location: sanitizeTextField(location, 120), desiredCrop: sanitizeTextField(desiredCrop, 80) });
 
     // Save to soil_tests history if user is logged in
-    if (userId) {
+    if (userId && req.userId) {
       try {
         await db.query(
           `INSERT INTO soil_tests (user_id,land_id,ph,moisture,temperature,desired_crop,rule_result,ai_result)
            VALUES (?,?,?,?,?,?,?,?)`,
-          [userId, landId||null, ph, moisture, temperature||null, desiredCrop||null, JSON.stringify(ruleResult), aiResult]
+          [req.userId, landId||null, checkedPh, checkedMoisture, checkedTemperature, sanitizeTextField(desiredCrop, 80), JSON.stringify(ruleResult), aiResult]
         );
       } catch {}
     }
@@ -588,7 +643,7 @@ app.post("/recommend", async (req,res) => {
 
 // GET soil test history for a user
 app.get("/api/users/:userId/soil-tests", async (req,res) => {
-  const limit = parseInt(req.query.limit) || 10;
+  const limit = Math.min(100, Math.max(1, Number.parseInt(req.query.limit, 10) || 10));
   try {
     const [rows] = await db.query(
       "SELECT id,land_id,ph,moisture,temperature,desired_crop,rule_result,ai_result,tested_at FROM soil_tests WHERE user_id=? ORDER BY tested_at DESC LIMIT ?",
@@ -602,7 +657,7 @@ app.get("/api/users/:userId/soil-tests", async (req,res) => {
 // AI CHAT — Improved context management
 // ══════════════════════════════════════════════════════════════
 
-app.post("/chat", requireUserToken, async (req,res) => {
+app.post("/chat", rateLimit(20, 60000), requireUserToken, async (req,res) => {
   const { message, userId } = req.body;
   if (String(userId) !== String(req.userId)) return res.status(403).json({ error:"Access denied" });
   if (!message||!userId) return res.status(400).json({ error:"Message and userId required" });
@@ -779,6 +834,15 @@ app.post("/api/dev-login-udc", rateLimit(5,60000), async (req,res) => {
       return res.status(401).json({ success:false, message:"Invalid or inactive UIC" });
     }
     const dev   = rows[0];
+    const suppliedPassword = typeof req.body.password === "string" ? req.body.password : "";
+    if (!suppliedPassword || !(await verifyPassword(suppliedPassword, dev.password))) {
+      await logDevLogin({ devId:dev.id, devEmail:dev.email, devName:dev.name, method:"uic", req, success:false, failReason:"Second factor failed" });
+      return res.status(401).json({ success:false, message:"UIC and account password are both required." });
+    }
+    if (!dev.password.startsWith("$2b$") && !dev.password.startsWith("$2a$")) {
+      const hashed = await bcrypt.hash(suppliedPassword, BCRYPT_ROUNDS);
+      await db.query("UPDATE devusers SET password=? WHERE id=?", [hashed, dev.id]);
+    }
     const token = crypto.randomBytes(64).toString("hex");
     await db.query("INSERT INTO dev_tokens (dev_id,token,expires_at) VALUES (?,?,?)", [dev.id, hashBearerToken(token), new Date(Date.now()+24*3600*1000)]);
     await logDevLogin({ devId:dev.id, devEmail:dev.email, devName:dev.name, method:"uic", req, success:true });
@@ -800,7 +864,7 @@ app.post("/api/dev-logout", requireDevToken, async (req,res) => {
 // DEVUSERS MANAGEMENT (no duplicate routes)
 // ══════════════════════════════════════════════════════════════
 
-app.get("/api/devusers/:id", requireDevToken, async (req,res) => {
+app.get("/api/devusers/:id", requireDevToken, requireDevAccount, async (req,res) => {
   try {
     const [rows] = await db.query("SELECT id,name,email,phone,role,created_at FROM devusers WHERE id=?", [req.params.id]);
     if (!rows.length) return res.status(404).json({ error:"Dev user not found" });
@@ -808,7 +872,7 @@ app.get("/api/devusers/:id", requireDevToken, async (req,res) => {
   } catch(e) { res.status(500).json({ error:"Server error" }); }
 });
 
-app.put("/api/devusers/:id", requireDevToken, async (req,res) => {
+app.put("/api/devusers/:id", requireDevToken, requireDevAccount, async (req,res) => {
   const { name, email, phone } = req.body;
   try {
     const [r] = await db.query("UPDATE devusers SET name=?,email=?,phone=? WHERE id=?", [name,email,phone,req.params.id]);
@@ -817,7 +881,7 @@ app.put("/api/devusers/:id", requireDevToken, async (req,res) => {
   } catch(e) { res.status(500).json({ error:"Server error" }); }
 });
 
-app.put("/api/devusers/:id/change-password", requireDevToken, async (req,res) => {
+app.put("/api/devusers/:id/change-password", requireDevToken, requireDevAccount, async (req,res) => {
   const { oldPassword, newPassword } = req.body;
   if (!oldPassword||!newPassword) return res.status(400).json({ error:"Both passwords required" });
   if (newPassword.length<8) return res.status(400).json({ error:"Min 8 characters" });
@@ -837,8 +901,8 @@ app.put("/api/devusers/:id/change-password", requireDevToken, async (req,res) =>
 // ══════════════════════════════════════════════════════════════
 
 app.get("/api/dev/login-logs", requireDevToken, async (req,res) => {
-  const limit  = parseInt(req.query.limit)  || 50;
-  const offset = parseInt(req.query.offset) || 0;
+  const limit  = Math.min(100, Math.max(1, Number.parseInt(req.query.limit, 10) || 50));
+  const offset = Math.min(1000000, Math.max(0, Number.parseInt(req.query.offset, 10) || 0));
   try {
     const [rows]  = await db.query(
       "SELECT * FROM dev_login_logs ORDER BY login_time DESC LIMIT ? OFFSET ?",
@@ -855,9 +919,10 @@ app.get("/api/dev/login-logs", requireDevToken, async (req,res) => {
 
 // GET all tables + preview (strips sensitive columns)
 app.get("/api/dev/tables", requireDevToken, async (_,res) => {
-  const HIDDEN = ["password","uic","token"];
+  const HIDDEN = ["password","uic","token","profile","profile_type","email","phone","street","city","state","zip","country"];
   try {
     const [tables] = await db.query("SHOW TABLES");
+    if (!tables.length) return res.json({ success:true, tables:{} });
     const key    = Object.keys(tables[0])[0];
     const result = {};
     for (const row of tables) {
@@ -885,13 +950,19 @@ app.post("/api/sql-run", requireDevToken, async (_req,res) => {
 // FEEDBACK
 // ══════════════════════════════════════════════════════════════
 
-app.post("/api/feedback", async (req,res) => {
-  const { user_id, name, email, message, rating, category } = req.body;
-  if (!message) return res.status(400).json({ error:"Message required" });
+app.post("/api/feedback", rateLimit(3, 60000), optionalUserToken, async (req,res) => {
+  const { name, email, message, rating, category } = req.body;
+  const safeMessage = sanitizeTextField(message, 3000);
+  const safeName = sanitizeTextField(name, 80);
+  const safeEmail = sanitizeTextField(email, 254);
+  const safeRating = rating === undefined || rating === null || rating === "" ? null : parseBoundedNumber(rating, 1, 5);
+  if (!safeMessage) return res.status(400).json({ error:"A message of up to 3000 characters is required." });
+  if (safeEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(safeEmail)) return res.status(400).json({ error:"Enter a valid email address." });
+  if (rating !== undefined && rating !== null && rating !== "" && (!Number.isInteger(safeRating))) return res.status(400).json({ error:"Rating must be an integer from 1 to 5." });
   try {
     await db.query(
       "INSERT INTO feedback (user_id,name,email,message,rating,category) VALUES (?,?,?,?,?,?)",
-      [user_id||null, name||null, email||null, message, rating||null, category||null]
+      [req.userId || null, safeName, safeEmail, safeMessage, safeRating, sanitizeTextField(category, 60)]
     );
     res.status(201).json({ success:true, message:"Feedback submitted. Thank you!" });
   } catch(e) { res.status(500).json({ error:"Failed to submit feedback" }); }
@@ -914,7 +985,11 @@ app.use((req, res) => {
 
 // Global error handler
 app.use((err, req, res, next) => {
-  console.error("❌ Unhandled error:", err.message);
+  console.error("❌ Request failed:", err.message);
+  if (err?.code === "LIMIT_FILE_SIZE") return res.status(413).json({ error: "Image must be 5 MB or smaller." });
+  if (err?.message?.startsWith("Only image files")) return res.status(415).json({ error: err.message });
+  if (err?.message?.startsWith("CORS blocked:")) return res.status(403).json({ error: "Origin not allowed." });
+  if (err?.type === "entity.too.large") return res.status(413).json({ error: "Request body is too large." });
   res.status(500).json({ error:"Internal server error" });
 });
 

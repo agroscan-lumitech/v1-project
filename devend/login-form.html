@@ -3,6 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="theme-color" content="#ffd700">
+<script src="./pwa-register.js" defer></script>
+<script src="./config.js"></script>
 <title>AgroScan Developer Login</title>
 <!-- QR Scanner -->
 <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
@@ -187,7 +192,8 @@ input:focus{
     <h3 id="modal-title">Enter UIC</h3>
 
     <!-- Manual Input -->
-    <input type="text" id="uic-input" placeholder="Enter UIC code here">
+    <input type="text" id="uic-input" placeholder="Enter UIC code here" autocomplete="off">
+    <input type="password" id="uic-password" placeholder="Account password" autocomplete="current-password" required>
     <button class="btn btn-primary" onclick="submitUICManual()">Submit</button>
 
     <hr style="margin:15px 0; border-color:#444;">
@@ -270,33 +276,29 @@ function handleImageFile(e) {
 // -------- UIC Login (manual or QR) --------
 async function submitUICManual(uicValue = null) {
   const uic = uicValue || document.getElementById("uic-input").value.trim();
+  const password = document.getElementById("uic-password").value;
   message.innerHTML = "";
 
-  if (!uic) {
-    message.innerHTML = `<p class="error-msg">⚠️ Please enter UIC</p>`;
+  if (!uic || !password) {
+    message.innerHTML = `<p class="error-msg">⚠️ Please enter UIC and account password</p>`;
     return;
   }
 
   try {
-    const res = await fetch("https://agroscan-backend.onrender.com/api/dev-login-udc", {
+    const res = await fetch(DEV_CONFIG.api("/api/dev-login-udc"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ uic })
+      body: JSON.stringify({ uic, password })
     });
 
     const data = await res.json();
 
     if (data.success) {
-      sessionStorage.setItem("devUser", JSON.stringify({
-        id: data.user.id,
-        name: data.user.name,
-        email: data.user.email,
-        phone: data.user.phone
-      }));
+      DEV_CONFIG.setSession(data.user, data.token);
       message.innerHTML = `<p class="success-msg">✅ UIC valid! Redirecting...</p>`;
       setTimeout(() => window.location.href = "./private-desk/dashboard.html", 1200);
     } else {
-      message.innerHTML = `<p class="error-msg">❌ ${data.message}</p>`;
+      message.textContent = data.message || "Login failed.";
     }
   } catch (err) {
     console.error("UIC login error:", err);
@@ -313,88 +315,27 @@ async function submitUICManual(uicValue = null) {
 // -------- Email + Password Login --------
 async function devLogin() {
   const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
+  const password = document.getElementById("password").value;
   const msgBox = document.getElementById("login-msg");
-
-  msgBox.innerHTML = "";
-  
-  if (!email || !password) {
-    msgBox.innerHTML = `<p class="error-msg">⚠️ Please enter both email and password</p>`;
-    return;
-  }
-
+  msgBox.textContent = "";
+  if (!email || !password) { msgBox.textContent = "Please enter both email and password."; return; }
   try {
-    const res = await fetch("https://agroscan-backend.onrender.com/api/dev-login", {
+    const res = await fetch(DEV_CONFIG.api("/api/dev-login"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password })
     });
-
     const data = await res.json();
-
-    if (data.success) {
-      // Store full dev info in sessionStorage
-      sessionStorage.setItem("devUser", JSON.stringify({
-        id: data.user.id,
-        name: data.user.name,
-        email: data.user.email,
-        phone: data.user.phone
-      }));
-      message.innerHTML = `<p class="success-msg">✅ Login successful! Redirecting...</p>`;
-      setTimeout(() => window.location.href = "./private-desk/dashboard.html", 1500);
-    } else {
-      msgBox.innerHTML = `<p class="error-msg">❌ ${data.message}</p>`;
+    if (!res.ok || !data.success || !data.token || !data.user) {
+      msgBox.textContent = data.message || "Login failed.";
+      return;
     }
-  } catch (err) {
-    console.error("Login error:", err);
-    msgBox.innerHTML = `<p class="error-msg">🚨 Server unreachable</p>`;
-  }
-}
-
-// -------- Modal --------
-function openModal(){
-  modal.style.display = "flex";
-  message.textContent = "";
-}
-
-function closeModal(){
-  modal.style.display = "none";
-}
-
-// -------- UIC Login --------
-async function submitUIC(){
-  const uic = document.getElementById("uic-input").value.trim();
-  message.innerHTML = "";
-
-  if(!uic){
-    message.innerHTML = `<p class="error-msg">⚠️ Please enter UIC</p>`;
-    return;
-  }
-
-  try {
-    const res = await fetch("https://agroscan-backend.onrender.com/api/dev-login-udc", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ uic })
-    });
-
-    const data = await res.json();
-
-    if (data.success) {
-      sessionStorage.setItem("devUser", JSON.stringify({
-        id: data.user.id,
-        name: data.user.name,
-        email: data.user.email,
-        phone: data.user.phone
-      }));
-      message.innerHTML = `<p class="success-msg">✅ UIC valid! Redirecting...</p>`;
-      setTimeout(() => window.location.href = "./private-desk/dashboard.html", 1200);
-    } else {
-      message.innerHTML = `<p class="error-msg">❌ ${data.message}</p>`;
-    }
-  } catch (err) {
-    console.error("UIC login error:", err);
-    message.innerHTML = `<p class="error-msg">🚨 Server unreachable</p>`;
+    DEV_CONFIG.setSession(data.user, data.token);
+    msgBox.textContent = "Login successful. Redirecting…";
+    window.location.href = "./private-desk/dashboard.html";
+  } catch (error) {
+    console.error("Developer login failed:", error);
+    msgBox.textContent = "Server unreachable. Please try again.";
   }
 }
 </script>

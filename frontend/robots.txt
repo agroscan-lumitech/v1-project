@@ -1,0 +1,13 @@
+# Public farmer-facing website. Keep private account pages crawlable so crawlers can read their noindex directives.
+User-agent: *
+Allow: /
+
+# ChatGPT Search discovery is separate from model-training crawling.
+User-agent: OAI-SearchBot
+Allow: /
+
+# Do not grant model-training crawling by default.
+User-agent: GPTBot
+Disallow: /
+
+Sitemap: https://v1.agroscan.dpdns.org/sitemap.xml

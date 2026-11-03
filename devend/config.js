@@ -11,9 +11,8 @@
 const DEV_CONFIG = {
 
   // ── 🔗 CHANGE ONLY THIS LINE ──────────────────────────────
-  // Replace with your actual Render service URL after deploying
-  // the backend, e.g. "https://agroscan-backend.onrender.com"
-  BACKEND_URL: "https://agroscan-backend.onrender.com",
+  // The single configured API origin used by all developer pages.
+  BACKEND_URL: "https://backend.v1.agroscan.dpdns.org",
   // ──────────────────────────────────────────────────────────
 
   APP_NAME:       "AgroScan Dev Panel",
@@ -33,8 +32,9 @@ const DEV_CONFIG = {
   },
   getToken()  { return sessionStorage.getItem(this.TOKEN_KEY); },
   setSession(user, token) {
+    if (!user || !token) throw new Error("Developer login response did not include a user and bearer token.");
     sessionStorage.setItem(this.SESSION_KEY, JSON.stringify(user));
-    if (token) sessionStorage.setItem(this.TOKEN_KEY, token);
+    sessionStorage.setItem(this.TOKEN_KEY, token);
   },
   clearSession() {
     sessionStorage.removeItem(this.SESSION_KEY);
@@ -45,7 +45,7 @@ const DEV_CONFIG = {
   requireAuth(loginPath = "../login-form.html") {
     const user = this.getDevUser();
     const token = this.getToken();
-    if (!user || !token) { window.location.href = loginPath; return null; }
+    if (!user || !token) { this.clearSession(); window.location.href = loginPath; return null; }
     return user;
   },
 
@@ -64,12 +64,41 @@ const DEV_CONFIG = {
 
   // ── Logout helper ─────────────────────────────────────────
   async logout() {
-    try {
-      await this.authFetch("/api/dev-logout", { method: "POST" });
-    } catch {}
-    this.clearSession();
-    window.location.href = "../login-form.html";
+    try { await this.authFetch("/api/dev-logout", { method: "POST" }); }
+    catch (error) { console.warn("Developer logout request failed:", error); }
+    finally {
+      this.clearSession();
+      window.location.href = "../login-form.html";
+    }
   }
 };
 
 window.DEV_CONFIG = DEV_CONFIG;
+
+// Attach the developer bearer token to every request sent to the configured API.
+(() => {
+  const nativeFetch = window.fetch.bind(window);
+  window.fetch = function (input, options = {}) {
+    let target;
+    try {
+      const inputUrl = typeof input === "string" ? input : input?.url;
+      target = new URL(inputUrl, window.location.href);
+    } catch { return nativeFetch(input, options); }
+    let backendOrigin;
+    try { backendOrigin = new URL(DEV_CONFIG.BACKEND_URL).origin; }
+    catch { return nativeFetch(input, options); }
+    if (target.origin !== backendOrigin) return nativeFetch(input, options);
+    const headers = new Headers(input instanceof Request ? input.headers : undefined);
+    new Headers(options.headers || {}).forEach((value, key) => headers.set(key, value));
+    const token = DEV_CONFIG.getToken();
+    if (token) headers.set("Authorization", `Bearer ${token}`);
+    return nativeFetch(input, { ...options, headers }).then(response => {
+      const isLogin = target.pathname === "/api/dev-login" || target.pathname === "/api/dev-login-udc";
+      if (response.status === 401 && token && !isLogin) {
+        DEV_CONFIG.clearSession();
+        window.location.href = "/login-form.html";
+      }
+      return response;
+    });
+  };
+})();

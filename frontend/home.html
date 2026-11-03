@@ -300,6 +300,19 @@ header .dropbtn {
 
 </style>
   <script src="/config.js"></script>
+
+<meta name="description" content="Your AgroScan account dashboard.">
+<meta name="robots" content="noindex,nofollow">
+<meta property="og:type" content="website">
+<meta property="og:title" content="AgroScan AI Farmer Dashboard">
+<meta property="og:description" content="Your AgroScan account dashboard.">
+<meta property="og:image" content="https://v1.agroscan.dpdns.org/img/agroscan-logo.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#2e7d32">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/img/agroscan-icon.png">
+<link rel="stylesheet" href="/css.files/index.css">
+<script src="/pwa-register.js" defer></script>
 </head>
 <body>
 
@@ -551,7 +564,7 @@ document.querySelectorAll('.top-btn').forEach(btn => {
 
 
 /* User info display */
-const user = JSON.parse(sessionStorage.getItem('user')) || null;
+const user = AGRO.getUser();
 // Extract userId correctly
 const userId = user?.userId;
 
@@ -559,44 +572,42 @@ if (!userId) {
   alert("No user found. Please login again.");
   window.location.href = "login-form.html";
 }
-function showUserInfo(user){
-  const fullName = user?.fullName || `${user?.name || 'Guest User'}`;
-  const username = user?.username ? `@${user.username}` : "@guest";
-  document.getElementById('full-name').innerText = fullName;
-  document.getElementById('username-display').innerText = username;
-  document.getElementById('logoutLink').style.display = user ? 'block' : 'none';
-  document.getElementById('logoutLinkMobile').style.display = user ? 'block' : 'none';
-  const panelInfo = document.querySelector('.panel-user-info');
-  panelInfo.innerHTML = `
-    <img src="img/profile-logo.jpg" class="profile-logo-slide" alt="Profile">
-    <p><strong>Name:</strong> ${fullName}</p>
-    <p><strong>Username:</strong> ${username}</p>
-  `;
-  document.getElementById('user-name-welcome').innerText = fullName;
+function showUserInfo(user) {
+  const fullName = String(user?.fullName || user?.name || "Guest User");
+  const username = user?.username ? "@" + String(user.username) : "@guest";
+  const fullNameEl = document.getElementById("full-name");
+  const usernameEl = document.getElementById("username-display");
+  const welcomeEl = document.getElementById("user-name-welcome");
+  if (fullNameEl) fullNameEl.textContent = fullName;
+  if (usernameEl) usernameEl.textContent = username;
+  if (welcomeEl) welcomeEl.textContent = fullName;
+  document.querySelectorAll("#logoutLink, #logoutLinkMobile").forEach(link => { link.style.display = user ? "block" : "none"; });
+  const panelInfo = document.querySelector(".panel-user-info");
+  if (panelInfo) {
+    const image = document.createElement("img");
+    image.src = "img/profile-logo.jpg";
+    image.alt = "Profile";
+    image.className = "profile-logo-slide";
+    const name = document.createElement("p");
+    const nameLabel = document.createElement("strong");
+    nameLabel.textContent = "Name: ";
+    name.append(nameLabel, document.createTextNode(fullName));
+    const handle = document.createElement("p");
+    const handleLabel = document.createElement("strong");
+    handleLabel.textContent = "Username: ";
+    handle.append(handleLabel, document.createTextNode(username));
+    panelInfo.replaceChildren(image, name, handle);
+  }
 }
 showUserInfo(user);
 
 /* Logout functionality */
 /* Logout functionality */
-function deleteCookie(name) {
-  document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-}
-
-document.querySelectorAll('#logoutLink, #logoutLinkMobile').forEach(link => {
-  link.addEventListener('click', function(e) {
-    e.preventDefault();
-    
-    // Clear sessionStorage
-    sessionStorage.removeItem('user');
-
-    // Clear cookie
-    deleteCookie('user');
-
-    // Optional: clear user info UI
-    showUserInfo(null);
-
-    alert("Logged out successfully");
-    window.location.href = "index.html"; // redirect to login page
+document.querySelectorAll("#logoutLink, #logoutLinkMobile").forEach(link => {
+  link.addEventListener("click", async event => {
+    event.preventDefault();
+    await AGRO.clearUser();
+    window.location.href = "index.html";
   });
 });
 
@@ -684,20 +695,30 @@ async function loadLands() {
     const data = await res.json();
 
     // clear and re-render
-    landsScroll.innerHTML = '';
+    landsScroll.replaceChildren();
     data.forEach(land => {
       const card = document.createElement('div');
       card.className = 'land-card';
       card.dataset.landId = land.id;
-      card.innerHTML = `
-        <h3>${land.land_name}</h3>
-        <p>ID: ${land.id}</p>
-        <p>Crop: ${land.crop || ''}</p>
-        <div style="display:flex;gap:5px;margin-top:8px;justify-content:center;">
-          <button class="btn btn-edit-card">Edit</button>
-          <button class="btn btn-delete-card">Delete</button>
-        </div>
-      `;
+      card.replaceChildren();
+      const heading = document.createElement("h3");
+      heading.textContent = String(land.land_name ?? "Unnamed land");
+      const idLabel = document.createElement("p");
+      idLabel.textContent = "ID: " + String(land.id ?? "");
+      const cropLabel = document.createElement("p");
+      cropLabel.textContent = "Crop: " + String(land.crop ?? "");
+      const actions = document.createElement("div");
+      actions.style.cssText = "display:flex;gap:5px;margin-top:8px;justify-content:center;";
+      const editButton = document.createElement("button");
+      editButton.type = "button";
+      editButton.className = "btn btn-edit-card";
+      editButton.textContent = "Edit";
+      const deleteButton = document.createElement("button");
+      deleteButton.type = "button";
+      deleteButton.className = "btn btn-delete-card";
+      deleteButton.textContent = "Delete";
+      actions.append(editButton, deleteButton);
+      card.append(heading, idLabel, cropLabel, actions);
 
       // Edit button on card (open edit modal)
       card.querySelector('.btn-edit-card').addEventListener('click', (e) => {
