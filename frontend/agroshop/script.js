@@ -405,12 +405,21 @@ function populateHeaderSide(){
   logoutLinks.forEach(link=> link.style.display = user ? "block" : "none");
 
   const panelInfo = document.querySelector(".panel-user-info");
-  if(panelInfo){
-    panelInfo.innerHTML=`
-      <img src="${profileImg}" onerror="this.src='${defaultProfile}'" class="profile-logo-slide" alt="Profile">
-      <p><strong>Name:</strong> ${fullName}</p>
-      <p><strong>Username:</strong> ${username}</p>
-    `;
+  if (panelInfo) {
+    const image = document.createElement("img");
+    image.src = profileImg;
+    image.alt = "Profile";
+    image.className = "profile-logo-slide";
+    image.addEventListener("error", () => { image.src = defaultProfile; }, { once: true });
+    const nameRow = document.createElement("p");
+    const nameLabel = document.createElement("strong");
+    nameLabel.textContent = "Name: ";
+    nameRow.append(nameLabel, document.createTextNode(fullName));
+    const usernameRow = document.createElement("p");
+    const usernameLabel = document.createElement("strong");
+    usernameLabel.textContent = "Username: ";
+    usernameRow.append(usernameLabel, document.createTextNode(username));
+    panelInfo.replaceChildren(image, nameRow, usernameRow);
   }
 
   const profileDropdownImg = document.querySelector(".profile-area img");
