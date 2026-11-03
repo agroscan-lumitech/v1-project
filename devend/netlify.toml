@@ -1,8 +1,24 @@
-# Netlify config for the DEVEND site (agroscan-dev)
-# When connecting this repo on Netlify: New site from Git -> set
-# "Base directory" to  devend  (this matters in a monorepo -- without
-# it Netlify tries to publish the whole repo root, and every relative
-# path breaks).
+# Private developer dashboard Netlify site
 [build]
   base = "devend"
   publish = "."
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow, noarchive"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Cache-Control = "no-store"
+
+[[headers]]
+  for = "/service-worker.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+    Service-Worker-Allowed = "/"
+
+[[headers]]
+  for = "/manifest.webmanifest"
+  [headers.values]
+    Cache-Control = "no-cache"
+    Content-Type = "application/manifest+json"

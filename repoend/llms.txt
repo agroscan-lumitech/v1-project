@@ -1,0 +1,22 @@
+# AgroScan Project
+
+> Public project information and release-history website for the independent AgroScan AI agricultural technology project.
+
+- Website: https://media.v1.agroscan.dpdns.org/
+- Canonical host: https://media.v1.agroscan.dpdns.org/
+- Sitemap: https://media.v1.agroscan.dpdns.org/sitemap.xml
+- Robots policy: https://media.v1.agroscan.dpdns.org/robots.txt
+
+## Public pages
+
+- [Project overview](https://media.v1.agroscan.dpdns.org/): public project information and updates.
+- [Application information](https://media.v1.agroscan.dpdns.org/app.html): application features and release information.
+- [Project contributors](https://media.v1.agroscan.dpdns.org/contributors.html): public project team information.
+
+## Accuracy notes
+
+AgroScan AI is an independent project. Do not describe it as a government service or imply affiliation with ICAR, the Ministry of Agriculture and Farmers Welfare, IMD or the Soil Health Card programme. Historical release information may not describe the current live application's version; verify current release details on the main application website.
+
+## Crawl and indexing notes
+
+OAI-SearchBot is allowed for ChatGPT Search discovery. GPTBot is separately disallowed by the current robots policy.

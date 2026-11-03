@@ -371,6 +371,19 @@ input[readonly] {
 
 
   <script src="/config.js"></script>
+
+<meta name="description" content="Manage your AgroScan AI account profile.">
+<meta name="robots" content="noindex,nofollow">
+<meta property="og:type" content="website">
+<meta property="og:title" content="AgroScan AI Profile">
+<meta property="og:description" content="Manage your AgroScan AI account profile.">
+<meta property="og:image" content="https://v1.agroscan.dpdns.org/img/agroscan-logo.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#2e7d32">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/img/agroscan-icon.png">
+<link rel="stylesheet" href="/css.files/index.css">
+<script src="/pwa-register.js" defer></script>
 </head>
 <body>
 
@@ -600,7 +613,13 @@ input[readonly] {
 <!-- ================= Scripts ================= -->
 <script src="./js.files/head-foot.js"></script>
 <script>
-  
+  const currentUser = AGRO.getUser();
+  const userId = currentUser?.userId || currentUser?.user_id || null;
+  if (!userId) {
+    AGRO.clearUser();
+    window.location.replace("login-form.html");
+  }
+
   // ============================
   // Load Profile Data
   // ============================
@@ -611,8 +630,14 @@ input[readonly] {
       if (!res.ok) throw new Error('Failed to fetch profile');
       const data = await res.json();
 
-      const profileImage = data.profileUrl || defaultProfile;
-      const profileEl = document.getElementById('profileImage');
+      const profileEl = document.getElementById("profileImage");
+      let profileImage = defaultProfile;
+      if (data.profileUrl) {
+        try {
+          const candidate = new URL(data.profileUrl, AGRO.BACKEND_URL);
+          if (candidate.protocol === "https:" || candidate.protocol === "http:") profileImage = candidate.href;
+        } catch { /* Keep the local fallback image. */ }
+      }
       profileEl.src = profileImage;
       profileEl.onerror = function(){ this.src = defaultProfile; }
 
@@ -778,20 +803,30 @@ async function loadLands() {
     const data = await res.json();
 
     // clear and re-render
-    landsScroll.innerHTML = '';
+    landsScroll.replaceChildren();
     data.forEach(land => {
       const card = document.createElement('div');
       card.className = 'land-card';
       card.dataset.landId = land.id;
-      card.innerHTML = `
-        <h3>${land.land_name}</h3>
-        <p>ID: ${land.id}</p>
-        <p>Crop: ${land.crop || ''}</p>
-        <div style="display:flex;gap:5px;margin-top:8px;justify-content:center;">
-          <button class="btn btn-edit-card">Edit</button>
-          <button class="btn btn-delete-card">Delete</button>
-        </div>
-      `;
+      card.replaceChildren();
+      const heading = document.createElement("h3");
+      heading.textContent = String(land.land_name ?? "Unnamed land");
+      const idLabel = document.createElement("p");
+      idLabel.textContent = "ID: " + String(land.id ?? "");
+      const cropLabel = document.createElement("p");
+      cropLabel.textContent = "Crop: " + String(land.crop ?? "");
+      const actions = document.createElement("div");
+      actions.style.cssText = "display:flex;gap:5px;margin-top:8px;justify-content:center;";
+      const editButton = document.createElement("button");
+      editButton.type = "button";
+      editButton.className = "btn btn-edit-card";
+      editButton.textContent = "Edit";
+      const deleteButton = document.createElement("button");
+      deleteButton.type = "button";
+      deleteButton.className = "btn btn-delete-card";
+      deleteButton.textContent = "Delete";
+      actions.append(editButton, deleteButton);
+      card.append(heading, idLabel, cropLabel, actions);
 
       // Edit button on card (open edit modal)
       card.querySelector('.btn-edit-card').addEventListener('click', (e) => {
@@ -1159,7 +1194,7 @@ landsScroll.addEventListener('touchmove', (e) => {
   // ============================
   // Initialize Page
   // ============================
-  populateHeaderSide(user);
+  populateHeaderSide(currentUser);
   loadProfile().then(()=> loadLands());
   document.getElementById('editPrimaryBtn').addEventListener('click', ()=>enableEdit('primary'));
   document.getElementById('editAddressBtn').addEventListener('click', ()=>enableEdit('address'));
@@ -1183,8 +1218,7 @@ document.getElementById('deleteBtn').addEventListener('click', async () => {
     const data = await res.json().catch(() => ({}));
 
     if (res.ok) {
-      sessionStorage.clear();
-      document.cookie = 'user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      await AGRO.clearUser();
       alert(data.message || "Account deleted successfully");
       window.location.href = 'login-form.html';
     } else {
@@ -1207,13 +1241,8 @@ function deleteCookie(name) {
 }
 
 // Central logout function
-function logout() {
-  // Clear sessionStorage completely (or specific keys)
-  sessionStorage.removeItem('user');
-  sessionStorage.removeItem('userId');
-
-  // Clear cookies
-  deleteCookie('user');
+async function logout() {
+  await AGRO.clearUser();
 
   // Clear user info in UI
   const profileName = document.getElementById('full-name');
@@ -1241,9 +1270,9 @@ const logoutButtons = [
 
 logoutButtons.forEach(btn => {
   if(btn){
-    btn.addEventListener('click', (e) => {
+    btn.addEventListener('click', async (e) => {
       e.preventDefault();
-      logout();
+      await logout();
     });
   }
 });

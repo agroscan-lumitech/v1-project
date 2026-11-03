@@ -83,6 +83,12 @@ header {
   .profile-card h2{font-size:1.3rem;}
 }
 </style>
+<meta name="robots" content="noindex,nofollow">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#ffd700">
+<script src="../pwa-register.js" defer></script>
+<script src="../config.js"></script>
+<script>window.DEV_CONFIG?.requireAuth("../login-form.html");</script>
 </head>
 <body>
 
@@ -138,7 +144,7 @@ let controlsData = [];
 // Fetch controls from server
 async function fetchControls() {
   try {
-    const res = await fetch("https://agroscan-backend.onrender.com/api/controls");
+    const res = await DEV_CONFIG.authFetch("/api/controls");
     controlsData = await res.json();
     renderTable();
   } catch (err) {
@@ -148,15 +154,23 @@ async function fetchControls() {
 
 // Render table rows
 function renderTable() {
-  tableBody.innerHTML = "";
+  tableBody.replaceChildren();
   controlsData.forEach(ctrl => {
     const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td style="padding:12px;">${ctrl.function_name}</td>
-      <td style="padding:12px;">
-        ${isEditing ? `<input type="text" value="${ctrl.value}" data-func="${ctrl.function_name}" style="width:100%; padding:6px; border-radius:4px; border:1px solid #666;">` : ctrl.value}
-      </td>
-    `;
+    const nameCell = document.createElement("td");
+    nameCell.style.padding = "12px";
+    nameCell.textContent = String(ctrl.function_name ?? "");
+    const valueCell = document.createElement("td");
+    valueCell.style.padding = "12px";
+    if (isEditing) {
+      const input = document.createElement("input");
+      input.type = "text";
+      input.value = String(ctrl.value ?? "");
+      input.dataset.func = String(ctrl.function_name ?? "");
+      input.style.cssText = "width:100%;padding:6px;border-radius:4px;border:1px solid #666;";
+      valueCell.appendChild(input);
+    } else valueCell.textContent = String(ctrl.value ?? "");
+    tr.append(nameCell, valueCell);
     tableBody.appendChild(tr);
   });
 }
@@ -175,7 +189,7 @@ editBtn.addEventListener("click", async () => {
       const value = input.value;
 
       try {
-        await fetch(`https://agroscan-backend.onrender.com/api/controls/${encodeURIComponent(func)}`, {
+        await DEV_CONFIG.authFetch(`/api/controls/${encodeURIComponent(func)}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ value })
@@ -198,13 +212,11 @@ fetchControls();
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  const devUser = JSON.parse(sessionStorage.getItem("devUser"));
-  if(!devUser){
-    window.location.href = "../login-form.html";
-  } else {
-    document.getElementById("profile-name").textContent = devUser.name || devUser.email;
+  const devUser = DEV_CONFIG.requireAuth("../login-form.html");
+  if (!devUser) return;
+  document.getElementById("profile-name").textContent = devUser.name || devUser.email;
     document.getElementById("profile-id").textContent = "ID: " + (devUser.id || "N/A");
-  }
+  
 
   // ✅ Sidebar toggle for mobile
   document.querySelector(".hamburger").addEventListener("click", ()=>{
@@ -214,8 +226,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Logout
   document.getElementById("logout-btn").addEventListener("click", e=>{
     e.preventDefault();
-    sessionStorage.clear();
-    window.location.href = "../login-form.html";
+    DEV_CONFIG.logout();
   });
 });
 </script>

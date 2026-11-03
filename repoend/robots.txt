@@ -1,0 +1,12 @@
+# Public project information site.
+User-agent: *
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+# Model-training crawling is not enabled by default.
+User-agent: GPTBot
+Disallow: /
+
+Sitemap: https://media.v1.agroscan.dpdns.org/sitemap.xml

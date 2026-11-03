@@ -106,6 +106,12 @@ header {
   .profile-card h2{font-size:1.3rem;}
 }
 </style>
+<meta name="robots" content="noindex,nofollow">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#ffd700">
+<script src="../pwa-register.js" defer></script>
+<script src="../config.js"></script>
+<script>window.DEV_CONFIG?.requireAuth("../login-form.html");</script>
 </head>
 <body>
 
@@ -139,181 +145,101 @@ header {
 </main>
 
 <script>
-async function fetchTablesGUI() {
-  const container = document.getElementById("tables-container");
-  container.innerHTML = "Loading orders...";
-
-  try {
-    // Fetch orders table
-    const res = await fetch("https://agroscan-backend.onrender.com/api/dev/tables/orders");
-    const data = await res.json();
-
-    if (!data.success) throw new Error(data.error || "Failed to fetch orders");
-
-    container.innerHTML = ""; // clear loading text
-    const tableRows = data.table || [];
-
-    // Table container
-    const tblContainer = document.createElement("div");
-    tblContainer.style.marginBottom = "20px";
-
-    // Table content
-    const tableDiv = document.createElement("div");
-    tableDiv.style.overflowX = "auto";
-
-    if (tableRows.length === 0) {
-      tableDiv.textContent = "No orders found";
-    } else {
-      const tbl = document.createElement("table");
-      tbl.style.width = "100%";
-      tbl.style.borderCollapse = "collapse";
-      tbl.style.background = "#1b1b1b";
-
-      // Header
-      const thead = document.createElement("thead");
-      const headerRow = document.createElement("tr");
-      Object.keys(tableRows[0]).forEach(col => {
-        const th = document.createElement("th");
-        th.textContent = col;
-        th.style.border = "1px solid #444";
-        th.style.padding = "8px";
-        th.style.background = "#000";
-        th.style.color = "#ffd700";
-        headerRow.appendChild(th);
-      });
-      const editTh = document.createElement("th");
-      editTh.textContent = "Edit";
-      editTh.style.border = "1px solid #444";
-      editTh.style.padding = "8px";
-      editTh.style.background = "#000";
-      editTh.style.color = "#ffd700";
-      headerRow.appendChild(editTh);
-      thead.appendChild(headerRow);
-      tbl.appendChild(thead);
-
-      // Body
-      const tbody = document.createElement("tbody");
-      tableRows.forEach((row, index) => {
-        const tr = document.createElement("tr");
-        Object.values(row).forEach(val => {
-          const td = document.createElement("td");
-          td.textContent = val ?? "";
-          td.style.border = "1px solid #444";
-          td.style.padding = "6px";
-          td.style.color = "#f4f7f4";
-          tr.appendChild(td);
-        });
-
-        // Edit button
-        const editTd = document.createElement("td");
-        editTd.style.border = "1px solid #444";
-        editTd.style.padding = "6px";
-        const editBtn = document.createElement("button");
-        editBtn.textContent = "Edit";
-        editBtn.style.background = "#ffd700";
-        editBtn.style.color = "#000";
-        editBtn.style.border = "none";
-        editBtn.style.borderRadius = "6px";
-        editBtn.style.padding = "5px 10px";
-        editBtn.style.cursor = "pointer";
-        editBtn.addEventListener("click", () => editRow(index));
-        editTd.appendChild(editBtn);
-        tr.appendChild(editTd);
-
-        tbody.appendChild(tr);
-      });
-      tbl.appendChild(tbody);
-      tableDiv.appendChild(tbl);
-    }
-
-    tblContainer.appendChild(tableDiv);
-    container.appendChild(tblContainer);
-
-  } catch (err) {
-    console.error(err);
-    container.innerHTML = "Failed to load orders";
-  }
-}
-
-// Edit row function
-function editRow(rowIndex) {
-  alert("Edit functionality for row " + (rowIndex + 1) + " triggered. Implement your editing logic here.");
-}
-
-fetchTablesGUI();
-</script>
-
-
-<script>
 document.addEventListener("DOMContentLoaded", () => {
-  const devUser = JSON.parse(sessionStorage.getItem("devUser"));
-  if(!devUser){
-    window.location.href = "../login-form.html";
-  } else {
-    document.getElementById("profile-name").textContent = devUser.name || devUser.email;
-    document.getElementById("profile-id").textContent = "ID: " + (devUser.id || "N/A");
+  const container = document.getElementById("tables-container");
+  if (!container) return;
+  const statusOptions = ["pending", "processing", "shipped", "delivered", "cancelled"];
+
+  async function loadOrders() {
+    container.textContent = "Loading orders…";
+    try {
+      const response = await DEV_CONFIG.authFetch("/api/orders?limit=100&offset=0");
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Unable to load orders");
+      const orders = Array.isArray(data.orders) ? data.orders : [];
+      container.replaceChildren();
+      if (!orders.length) { container.textContent = "No orders found."; return; }
+
+      const wrapper = document.createElement("div");
+      wrapper.style.overflowX = "auto";
+      const table = document.createElement("table");
+      table.style.cssText = "width:100%;border-collapse:collapse;background:#1b1b1b;";
+      const columns = ["Order", "Customer", "Phone", "Product", "Qty", "Unit price", "Total", "Status", "Save"];
+      const thead = document.createElement("thead");
+      const header = document.createElement("tr");
+      columns.forEach(label => {
+        const th = document.createElement("th");
+        th.textContent = label;
+        th.style.cssText = "padding:9px;border:1px solid #444;background:#000;color:#ffd700;";
+        header.appendChild(th);
+      });
+      thead.appendChild(header);
+      table.appendChild(thead);
+
+      const tbody = document.createElement("tbody");
+      orders.forEach(order => {
+        const row = document.createElement("tr");
+        const values = [order.id, order.customer_name, order.customer_phone, order.product_name, order.quantity, order.unit_price, order.item_total];
+        values.forEach(value => {
+          const cell = document.createElement("td");
+          cell.textContent = value == null ? "" : String(value);
+          cell.style.cssText = "padding:7px;border:1px solid #444;color:#f4f7f4;";
+          row.appendChild(cell);
+        });
+        const statusCell = document.createElement("td");
+        statusCell.style.cssText = "padding:7px;border:1px solid #444;";
+        const select = document.createElement("select");
+        statusOptions.forEach(status => {
+          const option = document.createElement("option");
+          option.value = status;
+          option.textContent = status[0].toUpperCase() + status.slice(1);
+          option.selected = String(order.status || "pending").toLowerCase() === status;
+          select.appendChild(option);
+        });
+        statusCell.appendChild(select);
+        row.appendChild(statusCell);
+
+        const actionCell = document.createElement("td");
+        actionCell.style.cssText = "padding:7px;border:1px solid #444;";
+        const save = document.createElement("button");
+        save.type = "button";
+        save.textContent = "Save";
+        save.addEventListener("click", async () => {
+          save.disabled = true;
+          try {
+            const response = await DEV_CONFIG.authFetch("/api/orders/" + encodeURIComponent(String(order.id)) + "/status", {
+              method: "PUT",
+              body: JSON.stringify({ status: select.value })
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.error || "Order update failed");
+            save.textContent = "Saved";
+          } catch (error) {
+            alert(error.message || "Order update failed");
+            save.disabled = false;
+          }
+        });
+        actionCell.appendChild(save);
+        row.appendChild(actionCell);
+        tbody.appendChild(row);
+      });
+      table.appendChild(tbody);
+      wrapper.appendChild(table);
+      container.appendChild(wrapper);
+      const total = document.createElement("p");
+      total.textContent = "Total order line items: " + String(data.total ?? orders.length);
+      container.appendChild(total);
+    } catch (error) {
+      console.error(error);
+      container.textContent = error.message || "Failed to load orders.";
+    }
   }
-
-  // ✅ Sidebar toggle for mobile
-  document.querySelector(".hamburger").addEventListener("click", ()=>{
-    document.getElementById("sidebar").classList.toggle("show");
-  });
-
-  // Logout
-  document.getElementById("logout-btn").addEventListener("click", e=>{
-    e.preventDefault();
-    sessionStorage.clear();
-    window.location.href = "../login-form.html";
+  loadOrders();
+  document.getElementById("logout-btn")?.addEventListener("click", event => {
+    event.preventDefault();
+    DEV_CONFIG.logout();
   });
 });
-
-// Fetch orders from backend
-async function loadOrders() {
-  const res = await fetch('https://agroscan-backend.onrender.com/api/orders');
-  const orders = await res.json();
-  const tbody = document.querySelector('#orders-table tbody');
-  tbody.innerHTML = '';
-
-  orders.forEach(order => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${order.id}</td>
-      <td contenteditable="true">${order.customer}</td>
-      <td contenteditable="true">${order.product}</td>
-      <td contenteditable="true">${order.quantity}</td>
-      <td>
-        <select>
-          <option ${order.status === 'Pending' ? 'selected' : ''}>Pending</option>
-          <option ${order.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
-          <option ${order.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
-        </select>
-      </td>
-      <td><button class="edit-btn" onclick="updateOrder(${order.id}, this)">Save</button></td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
-
-// Update order
-async function updateOrder(id, btn) {
-  const row = btn.parentElement.parentElement;
-  const customer = row.cells[1].innerText.trim();
-  const product = row.cells[2].innerText.trim();
-  const quantity = row.cells[3].innerText.trim();
-  const status = row.cells[4].querySelector('select').value;
-
-  const res = await fetch(`https://agroscan-backend.onrender.com/api/orders/${id}`, {
-    method: 'PUT',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ customer, product, quantity, status })
-  });
-  const data = await res.json();
-  alert(data.message);
-}
-
-// Initial load
-loadOrders();
 </script>
-
 </body>
 </html>

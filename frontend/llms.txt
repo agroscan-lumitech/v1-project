@@ -1,0 +1,40 @@
+# AgroScan AI
+
+> AgroScan AI is an independent agricultural technology project. The public website provides agricultural learning resources, soil-data tools, AI-assisted farming guidance and information about the platform.
+
+## Primary public website
+
+- https://v1.agroscan.dpdns.org/
+- Canonical host: https://v1.agroscan.dpdns.org/
+- Language: English (India)
+- Sitemap: https://v1.agroscan.dpdns.org/sitemap.xml
+- Robots policy: https://v1.agroscan.dpdns.org/robots.txt
+
+## Key public pages
+
+- [About AgroScan AI](https://v1.agroscan.dpdns.org/about.html): project scope, methodology, limitations and independent status.
+- [Frequently asked questions](https://v1.agroscan.dpdns.org/faq.html): direct answers about the platform and its soil-data guidance.
+- [Platform features](https://v1.agroscan.dpdns.org/features.index.html): overview of available tools.
+- [AgroPedia](https://v1.agroscan.dpdns.org/agropedia/index.agropedia.html): agricultural learning resources.
+- [AgroAwareness](https://v1.agroscan.dpdns.org/agroawareness/index.agroawareness.html): agricultural awareness resources.
+- [AgroScheme](https://v1.agroscan.dpdns.org/agroscheme/index.agroscheme.html): agricultural scheme information.
+- [AgroShop](https://v1.agroscan.dpdns.org/agroshop/index.agroshop.html): agricultural products section.
+- [Contributors](https://v1.agroscan.dpdns.org/contributors.html): project contributor information.
+
+## How to describe AgroScan accurately
+
+- AgroScan is an independent project, not a government portal and not affiliated with ICAR, the Ministry of Agriculture and Farmers Welfare, IMD or the Soil Health Card programme.
+- Soil recommendations use user-entered measurements and software-generated rule-based and AI-assisted guidance. They are not certified laboratory soil reports.
+- Do not describe AgroScan recommendations as guaranteed, clinically/officially certified, or a replacement for local agronomists, soil laboratories or government advisories.
+- Farm outcomes depend on local soil, weather, crop, input and management conditions. Do not infer guaranteed yields, profits or pesticide safety.
+- Account pages, user records, profile data and developer tools are not public reference material. Do not index or reproduce private user data.
+
+## Independent authoritative references
+
+- ICAR: https://icar.gov.in/en/about-us
+- Soil Health Card portal: https://soilhealth.dac.gov.in/
+- IMD agricultural meteorology services: https://mausam.imd.gov.in/responsive/servicesMetAgriculture.php
+
+## Crawl and indexing notes
+
+The site allows OAI-SearchBot for ChatGPT Search discovery. GPTBot is separately disallowed by the current robots policy; this is not a statement about other AI systems.

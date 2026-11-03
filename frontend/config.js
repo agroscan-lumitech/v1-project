@@ -35,10 +35,17 @@
       catch { return null; }
     },
     setUser(user) { sessionStorage.setItem(this.SESSION_USER_KEY, JSON.stringify(user)); },
-    clearUser() {
+    async clearUser() {
       sessionStorage.removeItem(this.SESSION_USER_KEY);
       document.cookie = "user=; Max-Age=0; Path=/; SameSite=Lax";
-      fetch(this.BACKEND_URL + "/api/logout", { method: "POST" }).catch(() => {});
+      try {
+        await fetch(this.BACKEND_URL + "/api/logout", {
+          method: "POST",
+          credentials: "include"
+        });
+      } catch (error) {
+        console.warn("AgroScan server logout could not be confirmed:", error);
+      }
     },
     getUserId() { const user = this.getUser(); return user?.userId || user?.user_id || null; },
     isLoggedIn() { return !!this.getUser(); },
@@ -54,13 +61,28 @@
     }
   };
   const nativeFetch = window.fetch.bind(window);
-  window.fetch = function (input, init = {}) {
-    const requestUrl = typeof input === "string" ? input : input && input.url;
-    const isBackendRequest = typeof requestUrl === "string" && requestUrl.startsWith(AGRO.BACKEND_URL);
-    return nativeFetch(input, {
+  window.fetch = async function (input, init = {}) {
+    let target;
+    try {
+      const requestUrl = typeof input === "string" ? input : input && input.url;
+      target = new URL(requestUrl, window.location.href);
+    } catch {
+      return nativeFetch(input, init);
+    }
+    let isBackendRequest = false;
+    try { isBackendRequest = target.origin === new URL(AGRO.BACKEND_URL).origin; }
+    catch { /* Invalid backend configuration is surfaced by API calls. */ }
+
+    const response = await nativeFetch(input, {
       ...init,
       ...(isBackendRequest ? { credentials: "include" } : {})
     });
+    const isLoginRequest = target.pathname === "/api/login" || target.pathname === "/api/signup" || target.pathname === "/api/logout";
+    if (isBackendRequest && response.status === 401 && !isLoginRequest && AGRO.getUser()) {
+      AGRO.clearUser();
+      window.location.href = "/login-form.html";
+    }
+    return response;
   };
 
   window.AGRO = AGRO;
